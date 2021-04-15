@@ -15,22 +15,22 @@ class TestLogin(flask_unittest.ClientTestCase):
         self.assertEqual(dict(result='success'), response.json)
     
     def test_agent_login(self, client):
-        response = client.post('/login/agent', json=dict(booking_agent_id='2312', email='book3083@booking.com', password='best123'))
+        response = client.post('/login/agent', json=dict(booking_agent_id=1, email='book3083@booking.com', password='best123'))
         self.assertEqual(dict(result='success'), response.json)
 
     def test_login_missing_key(self, client):
-        response = client.post('/login/agent', json=dict(booking_agent_id='2312', password='best123'))
-        self.assertEqual(dict(result='error', message='Missing required key "email" for login!'), response.json)
+        response = client.post('/login/agent', json=dict(booking_agent_id='1', password='best123'))
+        self.assertEqual(dict(result='error', message='Missing required key "email"!', key='email'), response.json)
 
         response = client.post('/login/staff', json=dict(password='wendy'))
-        self.assertEqual(dict(result='error', message='Missing required key "username" for login!'), response.json)
+        self.assertEqual(dict(result='error', message='Missing required key "username"!', key='username'), response.json)
 
         response = client.post('/login/cust', json=dict(password='wendy'))
-        self.assertEqual(dict(result='error', message='Missing required key "email" for login!'), response.json)
+        self.assertEqual(dict(result='error', message='Missing required key "email"!', key='email'), response.json)
 
     def test_login_missing_password(self, client):
-        response = client.post('/login/agent', json=dict(booking_agent_id='2312'))
-        self.assertEqual(dict(result='error', message='Missing required key "password" for login!'), response.json)
+        response = client.post('/login/agent', json=dict(booking_agent_id='1'))
+        self.assertEqual(dict(result='error', message='Missing required key "password"!', key='password'), response.json)
 
     def test_login_wrong_password(self, client):
         response = client.post('/login/staff', json=dict(username='staffnumberone', password='wendy2'))

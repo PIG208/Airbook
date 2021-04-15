@@ -1,6 +1,9 @@
 from flask import jsonify
 from functools import wraps
 
+class AirbookError(Exception):
+    pass
+
 class JsonError(AirbookError):
     def __init__(self, message: str, result: str="error", **kwargs):
         self.json_data = jsonify(message=message, result="error", **kwargs)
@@ -12,6 +15,8 @@ class MissingKeyError(JsonError):
     def __init__(self, key: str):
         super().__init__('Missing required key "{}"!'.format(key), key=key)
 
+class QueryError(AirbookError):
+    pass
 
 def raise_error(func):
     @wraps(func)

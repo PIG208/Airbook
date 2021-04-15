@@ -57,11 +57,11 @@ CREATE TABLE Customer(
 );
 
 CREATE TABLE BookingAgent(
-    email VARCHAR(320),
+    booking_agent_ID INT AUTO_INCREMENT,
+    email VARCHAR(320) NOT NULL UNIQUE,
     password CHAR(60) NOT NULL,
     salt CHAR(32) NOT NULL,
-    booking_agent_ID VARCHAR(20) UNIQUE NOT NULL,
-    PRIMARY KEY(email)
+    PRIMARY KEY(booking_agent_ID)
 );
 
 CREATE TABLE Ticket(
@@ -78,7 +78,7 @@ CREATE TABLE Ticket(
     flight_number INT(5) NOT NULL,
     dep_date DATE NOT NULL,
     dep_time TIME NOT NULL,
-    booking_agent_ID VARCHAR(20),
+    booking_agent_ID INT,
     PRIMARY KEY(ticket_ID),
     FOREIGN KEY (email) REFERENCES Customer(email),
     FOREIGN KEY (airline_name) REFERENCES Airline(airline_name),
@@ -88,11 +88,11 @@ CREATE TABLE Ticket(
 
 CREATE TABLE Book(
     ticket_ID INT NOT NULL,
-    email VARCHAR(320) NOT NULL,
+    booking_agent_ID INT NOT NULL,
     commission DECIMAL(15,2),
-    PRIMARY KEY(ticket_ID, email),
+    PRIMARY KEY(ticket_ID, booking_agent_ID),
     FOREIGN KEY (ticket_ID) REFERENCES Ticket(ticket_ID),
-    FOREIGN KEY (email) REFERENCES BookingAgent(email)
+    FOREIGN KEY (booking_agent_ID) REFERENCES BookingAgent(booking_agent_ID)
 );
 
 CREATE TABLE Feedback(

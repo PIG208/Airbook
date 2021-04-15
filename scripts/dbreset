@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+PARENT_PATH=$(cd "$(dirname "{BASH_SOURCE[0]}")"; pwd -P)
+cd $PARENT_PATH
+
+sudo service mysql start
+sudo mysql < scripts/sql/init.sql
+sudo mysql < scripts/sql/tables.sql
+sudo mysql < scripts/sql/data.sql

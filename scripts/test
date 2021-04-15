@@ -6,4 +6,5 @@ if [[ "$VIRTUAL_ENV" == "" ]]; then
     source airbook/bin/activate
 fi
 
+scripts/dbreset
 python -m unittest discover -v

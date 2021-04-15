@@ -32,7 +32,7 @@ def check_login(conn: Connection, login_type: DATA_TYPE, **kwargs: str) -> None:
             'The input information doesn\'t match any existing users!'
         )
     
-    if login_type == DATA_TYPE.CUST:
+    if login_type == DATA_TYPE.CUST or login_type == DATA_TYPE.AGENT:
         hashed_password, salt = result[2], result[3]
     else:
         hashed_password, salt = result[1], result[2]

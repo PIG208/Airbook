@@ -117,11 +117,10 @@ INSERT INTO Customer VALUES (
 );
 
 -- The password is best123 
-INSERT INTO BookingAgent VALUES (
+INSERT INTO BookingAgent (email, password, salt) VALUES (
     'book3083@booking.com',
     'b96de32e0432443b6f4964db3670358cc79bcd707ea4e1518825af236ac9',
-    '30447aaf20877f45f941c66366fa1425',
-    2312
+    '30447aaf20877f45f941c66366fa1425'
 );
 
 INSERT INTO Ticket (email,sold_price,card_type,card_number, name_on_card,exp_date,purchase_date,purchase_time,airline_name,flight_number,dep_date,dep_time,booking_agent_ID) VALUES (
@@ -165,12 +164,12 @@ INSERT INTO Ticket (email,sold_price,card_type,card_number, name_on_card,exp_dat
     12345,
     '2021-3-28',
     '13:33:44',
-    2312
+    1
 );
 
 INSERT INTO Book VALUES (
     3,
-    'book3083@booking.com',
+    1,
     4.5
 );
 

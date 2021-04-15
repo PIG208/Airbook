@@ -2,8 +2,12 @@ from pymysql import Connection, IntegrityError, ProgrammingError
 from typing import Dict, Any, Optional
 from enum import Enum, auto
 
-INSERT_INTO = 'INSERT INTO {} ({}) VALUES ({})'
-BASIC_SELECT = 'SELECT * FROM {table}'
+from backend.utils.error import QueryError
+
+INSERT_INTO = 'INSERT INTO {} ({}) VALUES ({});'
+SELECT_IDENTITY = 'SELECT @@IDENTITY;'
+BASIC_SELECT = 'SELECT * FROM {table} {predicates}'
+BASIC_DELETE = 'DELETE FROM {table} WHERE {}'
 FUTURE_FLIGHTS = 'SELECT * FROM Flight\
     WHERE dep_date > CURDATE()\
     OR (dep_date = CURDATE() AND dep_time > CURTIME());'
@@ -17,7 +21,7 @@ CUSTOMER_WHO_BOUGHT_TICKETS = 'SELECT * FROM Customer\
 CHECK_CUST_LOGIN = 'SELECT * FROM Customer\
     WHERE email=%(email)s;'
 CHECK_AGENT_LOGIN = 'SELECT * FROM BookingAgent\
-    WHERE (email, booking_agent_ID) = (%(email)s, %(booking_agent_id)s);'
+    WHERE (booking_agent_ID, email) = (%(booking_agent_id)s, %(email)s);'
 CHECK_STAFF_LOGIN = 'SELECT * FROM AirlineStaff\
     WHERE username=%(username)s;'
 
@@ -42,6 +46,12 @@ class DATA_TYPE(Enum):
     def get_table(self):
         return ENTITY_TO_TABLE_MAP[self]
 
+USER_TYPES = {
+    DATA_TYPE.CUST,
+    DATA_TYPE.STAFF,
+    DATA_TYPE.AGENT,
+}
+
 ENTITY_TO_TABLE_MAP = {
     DATA_TYPE.CUST:'Customer',
     DATA_TYPE.STAFF:'AirlineStaff',
@@ -62,22 +72,25 @@ def form_args_list(args, backticks=False):
         if isinstance(arg, str):
             res.append('`{}`'.format(arg) if backticks else arg)
         else:
-            res.append(str(arg))
+            res.append(arg)
     return res
 
 
-def insert_into(conn: Connection, table_name: str, **kwargs: Dict[str, Any]):
+def insert_into(conn: Connection, table_name: str, **kwargs: Dict[str, Any]) -> Optional[int]:
     make_str = ','.join(['%s' for i in range(len(kwargs))])
     keys = form_args_list(kwargs.keys())
     values = form_args_list(kwargs.values())
+    result = None
     try:
         with conn.cursor() as cursor:
             cursor.execute(INSERT_INTO.format(table_name, ','.join(keys), make_str), (*values,))
+            result = cursor.lastrowid
     except IntegrityError as err:
-        print(err.args)
+        raise QueryError(*err.args)
     except ProgrammingError as err:
-        print(err)
-    conn.commit()
+        raise QueryError(*err.args)
+    if result is not None:
+        return result
 
 
 def query(conn: Connection, sql: str, fetch_mode: FETCH_MODE = FETCH_MODE.ALL, size: int = 1, **kwargs):
