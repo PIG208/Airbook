@@ -7,9 +7,10 @@ from backend.utils.query import (
     FUTURE_FLIGHTS, 
     DELAYED_FLIGHTS, 
     DATA_TYPE,
+    USER_TYPES,
 )
 from backend.utils.encryption import check_hash, generate_hash
-from backend.utils.error import raise_error, JsonError
+from backend.utils.error import raise_error, JsonError, MissingKeyError
 
 import pymysql.cursors
 
@@ -38,29 +39,68 @@ def asd():
     )
     return response
 
-@app.route('/register', methods=['GET','POST'])
+@app.route('/register/<register_type>', methods=['GET','POST'])
 @raise_error
-def register():
+def register(register_type: str):
     data = request.get_json()
+    try:
+        register_type = DATA_TYPE(register_type)
+        if register_type not in USER_TYPES:
+            raise ValueError()
+    except ValueError:
+        raise JsonError('Invalid registration method!')
+
     if data is None:
         raise JsonError('Empty data fields!')
 
-    hashed_password, salt = generate_hash(data['password'])
-    insert_into(
-        conn, 
-        "Customer", 
-        email=data['email'],
-        name=data['name'],
-        password=hashed_password,
-        phone_number=data['phone_number'],
-        date_of_birth=data.get('date_of_birth', ''),
-        passport_number=data.get(''),
-        passport_expiration='2025-4-4',
-        passport_country='China',
-        street='Jay Street',
-        city='New York',
-        state='NY'
-    )
+    try:
+        hashed_password, salt = generate_hash(data['password'])
+
+        if register_type == DATA_TYPE.CUST:
+            insert_into(
+                conn, 
+                register_type.get_table(), 
+                email=data['email'],
+                name=data['name'],
+                password=hashed_password,
+                salt=salt,
+                phone_number=data['phone_number'],
+                date_of_birth=data.get('date_of_birth', ''),
+                passport_number=data.get('passport_number', ''),
+                passport_expiration=data.get('passport_expiration', ''),
+                passport_country=data.get('passport_country', 'China'),
+                street=data.get('street', ''),
+                city=data.get('city', ''),
+                state=data.get('state', ''),
+            )
+            identifier = data['email']
+        elif register_type == DATA_TYPE.STAFF:
+            insert_into(
+                conn,
+                register_type.get_table(),
+                username=data['username'],
+                password=hashed_password,
+                salt=salt,
+                first_name=data['first_name'],
+                last_name=data['last_name'],
+                date_of_birth=data['date_of_birth'],
+                airline_name=data['airline_name'],
+            )
+            identifier = data['username']
+        elif register_type == DATA_TYPE.AGENT:
+            insert_into(
+                conn,
+                register_type.get_table(),
+                email=data['email'],
+                password=hashed_password,
+                salt=salt,
+            )
+    except KeyError as err:
+        raise MissingKeyError(err.args[0])
+
+    session['user_type'] = login_type.value
+    session['identifier'] = user_data[0]
+
     return jsonify(
         result="success"
     )
@@ -80,7 +120,7 @@ def login(login_type: str):
     # If no error is thrown in check_login, our user is OK
     user_data = check_login(conn, login_type, **data)
     
-    session['DATA_TYPE'] = login_type.value
+    session['user_type'] = login_type.value
     session['identifier'] = user_data[0]
 
     return jsonify(
