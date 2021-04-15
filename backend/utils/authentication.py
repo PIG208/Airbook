@@ -1,6 +1,6 @@
 from pymysql import Connection
 from functools import wraps
-from backend.utils.error import JsonError
+from backend.utils.error import JsonError, MissingKeyError
 from backend.utils.encryption import check_hash
 from backend.utils.query import (
     DATA_TYPE, 
@@ -25,9 +25,7 @@ def check_login(conn: Connection, login_type: DATA_TYPE, **kwargs: str) -> None:
         else:
             raise JsonError('Invalid login method!')
     except KeyError as err:
-        raise JsonError(
-            'Missing required key "{required_key}" for login!'.format(required_key=err.args[0])
-        )
+        raise MissingKeyError(err.args[0])
 
     if result is None:
         raise JsonError(
