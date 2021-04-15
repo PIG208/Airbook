@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+PARENT_PATH=$(cd "$(dirname "{BASH_SOURCE[0]}")"; pwd -P)
+cd $PARENT_PATH
+
+echo "Installing the dependencies..."
+sudo apt update
+sudo apt install virtualenv mysql-server
+
+echo "Setting up MySQL..."
+sudo service mysql start
+sudo mysql < scripts/sql/init.sql
+sudo mysql < scripts/sql/tables.sql
+sudo mysql < scripts/sql/data.sql
+echo "Setting up virtual environment..."
+source airbook/bin/activate
+if [[ "$VIRTUAL_ENV" != "" ]]; then
+    echo "Virtual environment found, checking updates..."
+else
+    virtualenv airbook -q
+    source airbook/bin/activate
+fi
+pip install -r requirements.txt
+echo "Done! Use \"source airbook/bin/activate\" to activate the virtual environment."
