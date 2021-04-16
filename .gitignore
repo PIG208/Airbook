@@ -1,2 +1,4 @@
 airbook/
 __pycache__/
+*.pdf
+progress.md
