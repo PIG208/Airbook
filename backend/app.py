@@ -1,14 +1,9 @@
 from os import urandom
 from flask import Flask, request, jsonify, make_response, session
 from backend.utils.authentication import check_login, require_session
-from backend.utils.query import (
-    insert_into, 
-    query, 
-    FUTURE_FLIGHTS, 
-    DELAYED_FLIGHTS, 
-    DATA_TYPE,
-    USER_TYPES,
+from backend.utils.query import insert_into, query
 )
+from backend.utils.authentication import PUBLIC_FILTERS, DATA_TYPE, is_user
 from backend.utils.encryption import check_hash, generate_hash
 from backend.utils.error import raise_error, JsonError, MissingKeyError
 
@@ -45,7 +40,7 @@ def register(register_type: str):
     data = request.get_json()
     try:
         register_type = DATA_TYPE(register_type)
-        if register_type not in USER_TYPES:
+        if not is_user(register_type):
             raise ValueError()
     except ValueError:
         raise JsonError('Invalid registration method!')
@@ -73,7 +68,7 @@ def register(register_type: str):
                 city=data.get('city', ''),
                 state=data.get('state', ''),
             )
-            identifier = data['email']
+            session['email'] = data['email']
         elif register_type == DATA_TYPE.STAFF:
             insert_into(
                 conn,
@@ -121,16 +116,22 @@ def login(login_type: str):
     user_data = check_login(conn, login_type, **data)
     
     session['user_type'] = login_type.value
-    session['identifier'] = user_data[0]
+    if login_type == DATA_TYPE.CUST:
+        session['email'] = user_data[0]
+    elif login_type == DATA_TYPE.AGENT:
+        session['agent_id'] = user_data[0]
+        session['agent_email'] = user_data[1]
+    elif login_type == DATA_TYPE.STAFF:
+        session['username'] = user_data[0]
 
     return jsonify(
         result="success"
     )
     
 
-@app.errorhandler(403)
+@app.errorhandler(401)
 def forbidden(error):
     return jsonify(
         result="error",
-        message="Looks like you are trying to access something forbidden.",
+        message="Looks like you are trying to access something that requires login.",
     )
