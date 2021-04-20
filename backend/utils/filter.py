@@ -33,6 +33,7 @@ class FilterGroup(Enum):
 
 class FilterSet(Generic[V]):
     def __init__(self, filter_set: Iterable[V]):
+        # Note that the order doesn't matter here as the order of an iterable can be non-deterministic
         self._filter_set = {item for item in filter_set}
     
     @property

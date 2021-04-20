@@ -15,8 +15,9 @@ class TestFilter(unittest.TestCase):
     
     def test_filter_spendings_many(self):
         result = get_filter_spendings(FilterSet(['asd','ddd']))
-        expected = ('SELECT purchase_date, actual_price FROM spendings WHERE email IN (%s,%s)', ['ddd', 'asd'])
-        self.assertEqual(expected, result)
+        expected = ('SELECT purchase_date, actual_price FROM spendings WHERE email IN (%s,%s)', ['asd', 'ddd'])
+        self.assertEqual(expected[0], result[0])
+        self.assertCountEqual(expected[1], result[1])
     
     def test_filter_flight_empty(self):
         result = get_filter_flight()
@@ -30,7 +31,8 @@ class TestFilter(unittest.TestCase):
         
         result = get_filter_flight(customer_emails=FilterSet(["ny233@nyu.edu", "ny123@nyu.edu"]))
         expected = ('SELECT * FROM Flight WHERE email IN (%s,%s)', ["ny123@nyu.edu", "ny233@nyu.edu"])
-        self.assertEqual(expected, result)
+        self.assertEqual(expected[0], result[0])
+        self.assertCountEqual(expected[1], result[1])
     
     def test_filter_flight_airport_city(self):
         result = get_filter_flight(
