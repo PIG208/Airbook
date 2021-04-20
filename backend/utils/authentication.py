@@ -3,18 +3,18 @@ from functools import wraps
 from backend.utils.error import JsonError, MissingKeyError
 from backend.utils.encryption import check_hash
 from backend.utils.query import (
-    DATA_TYPE,
-    FILTER_TYPE,
+    DataType,
+    FilterType,
     query, 
     CHECK_AGENT_LOGIN, 
     CHECK_CUST_LOGIN, 
     CHECK_STAFF_LOGIN, 
-    FETCH_MODE
+    FetchMode
 )
 from flask import request, abort, session
 
-PUBLIC_FILTERS = {
-    FILTER_TYPE.ALL_FUTURE_FLIGHTS
+PublicFilters = {
+    FilterType.ALL_FUTURE_FLIGHTS
 }
 
 STAFF_FILTERS = {
@@ -26,41 +26,41 @@ AGENT_FILTERS = {
 }
 
 CUST_FILTERS = {
-    FILTER_TYPE.CUST_FUTURE_FLIGHTS,
-    FILTER_TYPE.CUST_TICKETS,
+    FilterType.CUST_FUTURE_FLIGHTS,
+    FilterType.CUST_TICKETS,
 }
 
 USER_TYPES = {
-    DATA_TYPE.CUST,
-    DATA_TYPE.STAFF,
-    DATA_TYPE.AGENT,
+    DataType.CUST,
+    DataType.STAFF,
+    DataType.AGENT,
 }
 
 USER_TYPE_TO_FILTERS_MAP = {
-    DATA_TYPE.CUST: CUST_FILTERS,
-    DATA_TYPE.STAFF: STAFF_FILTERS,
-    DATA_TYPE.AGENT: AGENT_FILTERS,
+    DataType.CUST: CUST_FILTERS,
+    DataType.STAFF: STAFF_FILTERS,
+    DataType.AGENT: AGENT_FILTERS,
 }
 
-def is_user(data_type: DATA_TYPE):
+def is_user(data_type: DataType):
     return data_type in USER_TYPES
 
-def have_access_to_filter(data_type: DATA_TYPE, filter: FILTER_TYPE):
+def have_access_to_filter(data_type: DataType, filter: FilterType):
     if is_user(data_type):
-        return filter in PUBLIC_FILTERS or filter in USER_TYPE_TO_FILTERS_MAP.get(data_type, {})
+        return filter in PublicFilters or filter in USER_TYPE_TO_FILTERS_MAP.get(data_type, {})
     else:
         return False
 
-def check_login(conn: Connection, login_type: DATA_TYPE, **kwargs: str) -> None:
+def check_login(conn: Connection, login_type: DataType, **kwargs: str) -> None:
     try:
         if "password" not in kwargs:
             raise KeyError('password')
-        if login_type == DATA_TYPE.CUST:
-            result = query(conn, CHECK_CUST_LOGIN, FETCH_MODE.ONE, 1, **kwargs)
-        elif login_type == DATA_TYPE.STAFF:
-            result = query(conn, CHECK_STAFF_LOGIN, FETCH_MODE.ONE, 1, **kwargs)
-        elif login_type == DATA_TYPE.AGENT:
-            result = query(conn, CHECK_AGENT_LOGIN, FETCH_MODE.ONE, 1, **kwargs)
+        if login_type == DataType.CUST:
+            result = query(conn, CHECK_CUST_LOGIN, FetchMode.ONE, 1, **kwargs)
+        elif login_type == DataType.STAFF:
+            result = query(conn, CHECK_STAFF_LOGIN, FetchMode.ONE, 1, **kwargs)
+        elif login_type == DataType.AGENT:
+            result = query(conn, CHECK_AGENT_LOGIN, FetchMode.ONE, 1, **kwargs)
         else:
             raise JsonError('Invalid login method!')
     except KeyError as err:
@@ -71,7 +71,7 @@ def check_login(conn: Connection, login_type: DATA_TYPE, **kwargs: str) -> None:
             'The input information doesn\'t match any existing users!'
         )
     
-    if login_type == DATA_TYPE.CUST or login_type == DATA_TYPE.AGENT:
+    if login_type == DataType.CUST or login_type == DataType.AGENT:
         hashed_password, salt = result[2], result[3]
     else:
         hashed_password, salt = result[1], result[2]

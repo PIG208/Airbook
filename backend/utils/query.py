@@ -29,17 +29,17 @@ CHECK_AGENT_LOGIN = 'SELECT * FROM BookingAgent\
 CHECK_STAFF_LOGIN = 'SELECT * FROM AirlineStaff\
     WHERE username=%(username)s;'
 
-class FETCH_MODE(Enum):
+class FetchMode(Enum):
     ONE = auto()
     MANY = auto()
     ALL = auto()
 
-class FILTER_TYPE(Enum):
+class FilterType(Enum):
     ALL_FUTURE_FLIGHTS = 'all_future'
     CUST_FUTURE_FLIGHTS = 'customer_future'
     CUST_TICKETS = 'customer_tickets'
 
-class DATA_TYPE(Enum):
+class DataType(Enum):
     """
     Provide aliases for the tables in the database, which can be referred to via the url.
     """
@@ -59,23 +59,23 @@ class DATA_TYPE(Enum):
         return ENTITY_TO_TABLE_MAP[self]
 
 FILTER_TO_QUERY_MAP = {
-    FILTER_TYPE.ALL_FUTURE_FLIGHTS: SELECT_ALL_FUTURE_FLIGHTS,
-    FILTER_TYPE.CUST_FUTURE_FLIGHTS: SELECT_CUSTOMER_FLIGHTS,
-    FILTER_TYPE.CUST_TICKETS: SELECT_CUSTOMER_TICKETS,
+    FilterType.ALL_FUTURE_FLIGHTS: SELECT_ALL_FUTURE_FLIGHTS,
+    FilterType.CUST_FUTURE_FLIGHTS: SELECT_CUSTOMER_FLIGHTS,
+    FilterType.CUST_TICKETS: SELECT_CUSTOMER_TICKETS,
 }
 
 ENTITY_TO_TABLE_MAP = {
-    DATA_TYPE.CUST:'Customer',
-    DATA_TYPE.STAFF:'AirlineStaff',
-    DATA_TYPE.AGENT:'BookingAgent',
-    DATA_TYPE.AIRPORT:'Airport',
-    DATA_TYPE.AIRLINE:'Airline',
-    DATA_TYPE.AIRPLANE:'Airplane',
-    DATA_TYPE.FLIGHT:'Flight',
-    DATA_TYPE.TICKET:'Ticket',
-    DATA_TYPE.BOOK:'Book',
-    DATA_TYPE.FEEDBACK:'Feedback',
-    DATA_TYPE.PHONENUM:'PhoneNumber',
+    DataType.CUST:'Customer',
+    DataType.STAFF:'AirlineStaff',
+    DataType.AGENT:'BookingAgent',
+    DataType.AIRPORT:'Airport',
+    DataType.AIRLINE:'Airline',
+    DataType.AIRPLANE:'Airplane',
+    DataType.FLIGHT:'Flight',
+    DataType.TICKET:'Ticket',
+    DataType.BOOK:'Book',
+    DataType.FEEDBACK:'Feedback',
+    DataType.PHONENUM:'PhoneNumber',
 }
 
 def form_args_list(args, backticks=False):
@@ -109,22 +109,22 @@ def insert_into(conn: Connection, table_name: str, **kwargs: Dict[str, Any]) -> 
         return result
 
 
-def query(conn: Connection, sql: str, fetch_mode: FETCH_MODE = FETCH_MODE.ALL, size: int = 1, **kwargs):
+def query(conn: Connection, sql: str, fetch_mode: FetchMode = FetchMode.ALL, size: int = 1, **kwargs):
     with conn.cursor() as cursor:
         cursor.execute(sql, kwargs)
 
-        if fetch_mode is FETCH_MODE.ONE:
+        if fetch_mode is FetchMode.ONE:
             return cursor.fetchone()
-        elif fetch_mode is FETCH_MODE.MANY:
+        elif fetch_mode is FetchMode.MANY:
             return cursor.fetchmany(size)
-        elif fetch_mode is FETCH_MODE.ALL:
+        elif fetch_mode is FetchMode.ALL:
             return cursor.fetchall()
 
-def query_filter(conn: Connection, filter: FILTER_TYPE, **kwargs):
+def query_filter(conn: Connection, filter: FilterType, **kwargs):
     if filter not in FILTER_TO_QUERY_MAP:
         raise NotImplementedError('The sql query for {filter} is not implemented. Please check FILTER_TO_QUERY_MAP'.format(filter=filter))
     else:
         try:
-            return query(conn, FILTER_TO_QUERY_MAP[filter], fetch_mode=FETCH_MODE.ALL, size=1, **kwargs)
+            return query(conn, FILTER_TO_QUERY_MAP[filter], fetch_mode=FetchMode.ALL, size=1, **kwargs)
         except KeyError as err:
             raise QueryKeyError(err.args[0])

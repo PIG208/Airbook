@@ -1,7 +1,7 @@
 from typing import Dict, Any
-from backend.utils.query import DATA_TYPE, FILTER_TYPE, query_filter
+from backend.utils.query import DataType, FilterType, query_filter
 from backend.utils.error import JsonError, MissingKeyError, QueryKeyError
-from backend.utils.authentication import have_access_to_filter, PUBLIC_FILTERS
+from backend.utils.authentication import have_access_to_filter, PublicFilters
 from pymysql import Connection
 from traceback import print_exception
 
@@ -9,11 +9,11 @@ def do_search(conn: Connection, data: Dict[str, Any], session: Dict[str, Any], f
     if data is None:
         data = {}
     try:
-        filter = FILTER_TYPE(filter)
+        filter = FilterType(filter)
     except ValueError:
         raise JsonError('The requested filter \"{filter}\" does not exist!'.format(filter=filter))
 
-    if (use_public and filter not in PUBLIC_FILTERS) or (not use_public and not have_access_to_filter(DATA_TYPE(session['user_type']), filter)):
+    if (use_public and filter not in PublicFilters) or (not use_public and not have_access_to_filter(DataType(session['user_type']), filter)):
         raise JsonError('You don\'t have the permission to use this filter!')
 
     try:

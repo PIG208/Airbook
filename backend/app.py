@@ -2,7 +2,7 @@ from os import urandom
 from flask import Flask, request, jsonify, make_response, session
 from backend.utils.authentication import check_login, require_session
 from backend.utils.query import insert_into, query
-from backend.utils.authentication import PUBLIC_FILTERS, DATA_TYPE, is_user
+from backend.utils.authentication import PublicFilters, DataType, is_user
 from backend.utils.encryption import check_hash, generate_hash
 from backend.utils.error import raise_error, JsonError, MissingKeyError
 from backend.search import do_search
@@ -40,7 +40,7 @@ def asd():
 def register(register_type: str):
     data = request.get_json()
     try:
-        register_type = DATA_TYPE(register_type)
+        register_type = DataType(register_type)
         if not is_user(register_type):
             raise ValueError()
     except ValueError:
@@ -52,7 +52,7 @@ def register(register_type: str):
     try:
         hashed_password, salt = generate_hash(data['password'])
 
-        if register_type == DATA_TYPE.CUST:
+        if register_type == DataType.CUST:
             insert_into(
                 conn, 
                 register_type.get_table(), 
@@ -70,7 +70,7 @@ def register(register_type: str):
                 state=data.get('state', ''),
             )
             session['email'] = data['email']
-        elif register_type == DATA_TYPE.STAFF:
+        elif register_type == DataType.STAFF:
             insert_into(
                 conn,
                 register_type.get_table(),
@@ -83,7 +83,7 @@ def register(register_type: str):
                 airline_name=data['airline_name'],
             )
             session['username'] = data['username']
-        elif register_type == DATA_TYPE.AGENT:
+        elif register_type == DataType.AGENT:
             agent_id = insert_into(
                 conn,
                 register_type.get_table(),
@@ -127,17 +127,17 @@ def search(filter: str):
 @raise_error
 def login(login_type: str):
     data = request.get_json()
-    login_type = DATA_TYPE(login_type)
+    login_type = DataType(login_type)
     # If no error is thrown in check_login, our user is OK
     user_data = check_login(conn, login_type, **data)
     
     session['user_type'] = login_type.value
-    if login_type == DATA_TYPE.CUST:
+    if login_type == DataType.CUST:
         session['email'] = user_data[0]
-    elif login_type == DATA_TYPE.AGENT:
+    elif login_type == DataType.AGENT:
         session['agent_id'] = user_data[0]
         session['agent_email'] = user_data[1]
-    elif login_type == DATA_TYPE.STAFF:
+    elif login_type == DataType.STAFF:
         session['username'] = user_data[0]
 
     return jsonify(
