@@ -81,20 +81,21 @@ def register(register_type: str):
                 date_of_birth=data['date_of_birth'],
                 airline_name=data['airline_name'],
             )
-            identifier = data['username']
+            session['username'] = data['username']
         elif register_type == DATA_TYPE.AGENT:
-            insert_into(
+            agent_id = insert_into(
                 conn,
                 register_type.get_table(),
                 email=data['email'],
                 password=hashed_password,
                 salt=salt,
             )
+            session['agent_id'] = agent_id
+            session['agent_email'] = data['email']
     except KeyError as err:
         raise MissingKeyError(err.args[0])
 
     session['user_type'] = login_type.value
-    session['identifier'] = user_data[0]
 
     return jsonify(
         result="success"
