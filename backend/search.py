@@ -4,7 +4,6 @@ from backend.utils.query import DataType, query_filter
 from backend.utils.error import JsonError, MissingKeyError, QueryKeyError
 from backend.utils.authentication import have_access_to_filter, PublicFilters
 from pymysql import Connection
-from traceback import print_exception
 
 def do_search(conn: Connection, data: Dict[str, Any], session: Dict[str, Any], filter: str, use_public: bool):
     if data is None:
