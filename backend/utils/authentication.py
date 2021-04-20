@@ -1,5 +1,6 @@
 from pymysql import Connection
 from functools import wraps
+from typing import Optional
 from backend.utils.error import JsonError, MissingKeyError, QueryKeyError
 from backend.utils.encryption import check_hash
 from backend.utils.query import (
@@ -15,6 +16,12 @@ from flask import request, abort, session
 
 PublicFilters = {
     FilterType.ALL_FUTURE_FLIGHTS
+}
+
+# These are the filters that can be accessed by any logged in users.
+ProtectedFilters = {
+    FilterType.ADVANCED_FLIGHT,
+    FilterType.ADVANCED_SPENDINGS,
 }
 
 STAFF_FILTERS = {
@@ -42,14 +49,14 @@ USER_TYPE_TO_FILTERS_MAP = {
     DataType.AGENT: AGENT_FILTERS,
 }
 
-def is_user(data_type: DataType):
+def is_user(data_type: Optional[DataType]):
     return data_type in USER_TYPES
 
-def have_access_to_filter(data_type: DataType, filter: FilterType):
+def have_access_to_filter(data_type: Optional[DataType], filter: FilterType):
     if is_user(data_type):
-        return filter in PublicFilters or filter in USER_TYPE_TO_FILTERS_MAP.get(data_type, {})
+        return filter in PublicFilters or filter in ProtectedFilters or filter in USER_TYPE_TO_FILTERS_MAP.get(data_type, {})
     else:
-        return False
+        return filter in PublicFilters
 
 def check_login(conn: Connection, login_type: DataType, **kwargs: str) -> None:
     try:

@@ -13,7 +13,12 @@ def do_search(conn: Connection, data: Dict[str, Any], session: Dict[str, Any], f
     except ValueError:
         raise JsonError('The requested filter \"{filter}\" does not exist!'.format(filter=filter))
 
-    if (use_public and filter not in PublicFilters) or (not use_public and not have_access_to_filter(DataType(session['user_type']), filter)):
+    if 'user_type' in session:
+        user_type = DataType(session['user_type'])
+    else:
+        user_type = None
+
+    if not have_access_to_filter(user_type, filter):
         raise JsonError('You don\'t have the permission to use this filter!')
 
     try:
