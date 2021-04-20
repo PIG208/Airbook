@@ -2,7 +2,6 @@ from os import urandom
 from flask import Flask, request, jsonify, make_response, session
 from backend.utils.authentication import check_login, require_session
 from backend.utils.query import insert_into, query
-)
 from backend.utils.authentication import PUBLIC_FILTERS, DATA_TYPE, is_user
 from backend.utils.encryption import check_hash, generate_hash
 from backend.utils.error import raise_error, JsonError, MissingKeyError
