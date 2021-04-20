@@ -18,6 +18,13 @@ class MissingKeyError(JsonError):
 class QueryError(AirbookError):
     pass
 
+class QueryKeyError(QueryError):
+    def __init__(self, key: str):
+        self.key=key
+    
+    def get_key(self):
+        return self.key
+
 def raise_error(func):
     @wraps(func)
     def wrapper(*args, **kwargs):

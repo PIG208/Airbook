@@ -2,15 +2,18 @@ from pymysql import Connection, IntegrityError, ProgrammingError
 from typing import Dict, Any, Optional
 from enum import Enum, auto
 
-from backend.utils.error import QueryError
+from backend.utils.error import QueryError, QueryKeyError
 
 INSERT_INTO = 'INSERT INTO {} ({}) VALUES ({});'
 SELECT_IDENTITY = 'SELECT @@IDENTITY;'
 BASIC_SELECT = 'SELECT * FROM {table} {predicates}'
 BASIC_DELETE = 'DELETE FROM {table} WHERE {}'
-FUTURE_FLIGHTS = 'SELECT * FROM Flight\
-    WHERE dep_date > CURDATE()\
-    OR (dep_date = CURDATE() AND dep_time > CURTIME());'
+
+SELECT_ALL_FUTURE_FLIGHTS = 'SELECT * FROM future_flights;'
+SELECT_CUSTOMER_TICKETS = 'call customer_tickets(%(email)s);' # "email" must matches the key name for session
+SELECT_CUSTOMER_FLIGHTS = 'call customer_flights(%(email)s);'
+CITY_AIRPORT = 'call city_airport(%(city)s);'
+
 DELAYED_FLIGHTS = 'SELECT * FROM Flight\
     WHERE status=\'delayed\';'
 CUSTOMER_WHO_BOUGHT_TICKETS = 'SELECT * FROM Customer\
@@ -18,6 +21,7 @@ CUSTOMER_WHO_BOUGHT_TICKETS = 'SELECT * FROM Customer\
         SELECT * FROM Ticket\
         WHERE Customer.email=Ticket.email\
     );'
+
 CHECK_CUST_LOGIN = 'SELECT * FROM Customer\
     WHERE email=%(email)s;'
 CHECK_AGENT_LOGIN = 'SELECT * FROM BookingAgent\
@@ -30,7 +34,15 @@ class FETCH_MODE(Enum):
     MANY = auto()
     ALL = auto()
 
+class FILTER_TYPE(Enum):
+    ALL_FUTURE_FLIGHTS = 'all_future'
+    CUST_FUTURE_FLIGHTS = 'customer_future'
+    CUST_TICKETS = 'customer_tickets'
+
 class DATA_TYPE(Enum):
+    """
+    Provide aliases for the tables in the database, which can be referred to via the url.
+    """
     CUST = 'cust'
     STAFF = 'staff'
     AGENT = 'agent'
@@ -46,10 +58,10 @@ class DATA_TYPE(Enum):
     def get_table(self):
         return ENTITY_TO_TABLE_MAP[self]
 
-USER_TYPES = {
-    DATA_TYPE.CUST,
-    DATA_TYPE.STAFF,
-    DATA_TYPE.AGENT,
+FILTER_TO_QUERY_MAP = {
+    FILTER_TYPE.ALL_FUTURE_FLIGHTS: SELECT_ALL_FUTURE_FLIGHTS,
+    FILTER_TYPE.CUST_FUTURE_FLIGHTS: SELECT_CUSTOMER_FLIGHTS,
+    FILTER_TYPE.CUST_TICKETS: SELECT_CUSTOMER_TICKETS,
 }
 
 ENTITY_TO_TABLE_MAP = {
@@ -67,6 +79,10 @@ ENTITY_TO_TABLE_MAP = {
 }
 
 def form_args_list(args, backticks=False):
+    """
+    Never use the result from form_args_list to format the string directly!
+    It should be passed as a parameter in `cursor.execute` to ensure that the values are escaped.
+    """
     res = []
     for arg in args:
         if isinstance(arg, str):
@@ -103,3 +119,12 @@ def query(conn: Connection, sql: str, fetch_mode: FETCH_MODE = FETCH_MODE.ALL, s
             return cursor.fetchmany(size)
         elif fetch_mode is FETCH_MODE.ALL:
             return cursor.fetchall()
+
+def query_filter(conn: Connection, filter: FILTER_TYPE, **kwargs):
+    if filter not in FILTER_TO_QUERY_MAP:
+        raise NotImplementedError('The sql query for {filter} is not implemented. Please check FILTER_TO_QUERY_MAP'.format(filter=filter))
+    else:
+        try:
+            return query(conn, FILTER_TO_QUERY_MAP[filter], fetch_mode=FETCH_MODE.ALL, size=1, **kwargs)
+        except KeyError as err:
+            raise QueryKeyError(err.args[0])

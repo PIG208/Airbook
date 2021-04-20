@@ -3,7 +3,8 @@ from functools import wraps
 from backend.utils.error import JsonError, MissingKeyError
 from backend.utils.encryption import check_hash
 from backend.utils.query import (
-    DATA_TYPE, 
+    DATA_TYPE,
+    FILTER_TYPE,
     query, 
     CHECK_AGENT_LOGIN, 
     CHECK_CUST_LOGIN, 
@@ -11,6 +12,44 @@ from backend.utils.query import (
     FETCH_MODE
 )
 from flask import request, abort, session
+
+PUBLIC_FILTERS = {
+    FILTER_TYPE.ALL_FUTURE_FLIGHTS
+}
+
+STAFF_FILTERS = {
+
+}
+
+AGENT_FILTERS = {
+    
+}
+
+CUST_FILTERS = {
+    FILTER_TYPE.CUST_FUTURE_FLIGHTS,
+    FILTER_TYPE.CUST_TICKETS,
+}
+
+USER_TYPES = {
+    DATA_TYPE.CUST,
+    DATA_TYPE.STAFF,
+    DATA_TYPE.AGENT,
+}
+
+USER_TYPE_TO_FILTERS_MAP = {
+    DATA_TYPE.CUST: CUST_FILTERS,
+    DATA_TYPE.STAFF: STAFF_FILTERS,
+    DATA_TYPE.AGENT: AGENT_FILTERS,
+}
+
+def is_user(data_type: DATA_TYPE):
+    return data_type in USER_TYPES
+
+def have_access_to_filter(data_type: DATA_TYPE, filter: FILTER_TYPE):
+    if is_user(data_type):
+        return filter in PUBLIC_FILTERS or filter in USER_TYPE_TO_FILTERS_MAP.get(data_type, {})
+    else:
+        return False
 
 def check_login(conn: Connection, login_type: DATA_TYPE, **kwargs: str) -> None:
     try:
@@ -51,7 +90,7 @@ def require_session(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         if 'user_type' not in session:
-            abort(403)
+            abort(401)
         return func(*args, **kwargs)
 
     return wrapper
