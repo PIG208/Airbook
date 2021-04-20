@@ -6,7 +6,9 @@ from backend.utils.query import insert_into, query
 from backend.utils.authentication import PUBLIC_FILTERS, DATA_TYPE, is_user
 from backend.utils.encryption import check_hash, generate_hash
 from backend.utils.error import raise_error, JsonError, MissingKeyError
+from backend.search import do_search
 
+import json
 import pymysql.cursors
 
 app = Flask(__name__)
@@ -101,11 +103,25 @@ def register(register_type: str):
         result="success"
     )
 
-@app.route('/search/<category>')
-@require_session
-def serach():
+@app.route('/search-public/<filter>', methods=['POST'])
+@raise_error
+def search_public(filter: str):
+    data = request.get_json()
+    result = json.dumps(do_search(conn, data, session, filter, True), indent=4, sort_keys=True, default=str)
     return jsonify(
-        result="success"
+        result="success",
+        data=result,
+    )
+
+@app.route('/search/<filter>', methods=['POST'])
+@require_session
+@raise_error
+def search(filter: str):
+    data = request.get_json()
+    result = json.dumps(do_search(conn, data, session, filter, False), indent=4, sort_keys=True, default=str)
+    return jsonify(
+        result="success",
+        data=result,
     )
 
 @app.route('/login/<login_type>', methods=['GET','POST'])
