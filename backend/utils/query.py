@@ -97,8 +97,12 @@ def insert_into(conn: Connection, table_name: str, **kwargs: Dict[str, Any]) -> 
 
 
 def query(conn: Connection, sql: str, fetch_mode: FetchMode = FetchMode.ALL, size: int = 1, **kwargs):
+    # Throws QueryKeyError
     with conn.cursor() as cursor:
-        cursor.execute(sql, kwargs)
+        try:
+            cursor.execute(sql, args)
+        except KeyError as err:
+            raise QueryKeyError(key=err.args[0])
 
         if fetch_mode is FetchMode.ONE:
             return cursor.fetchone()

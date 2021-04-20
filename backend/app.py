@@ -4,7 +4,7 @@ from backend.utils.authentication import check_login, require_session
 from backend.utils.query import insert_into, query
 from backend.utils.authentication import PublicFilters, DataType, is_user
 from backend.utils.encryption import check_hash, generate_hash
-from backend.utils.error import raise_error, JsonError, MissingKeyError
+from backend.utils.error import raise_error, JsonError, MissingKeyError, QueryKeyError
 from backend.search import do_search
 
 import json
@@ -85,8 +85,8 @@ def register(register_type: str):
             )
             session['agent_id'] = agent_id
             session['agent_email'] = data['email']
-    except KeyError as err:
-        raise MissingKeyError(err.args[0])
+    except QueryKeyError as err:
+        raise MissingKeyError(err.get_key())
 
     session['user_type'] = login_type.value
 

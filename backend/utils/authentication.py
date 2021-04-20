@@ -1,6 +1,6 @@
 from pymysql import Connection
 from functools import wraps
-from backend.utils.error import JsonError, MissingKeyError
+from backend.utils.error import JsonError, MissingKeyError, QueryKeyError
 from backend.utils.encryption import check_hash
 from backend.utils.query import (
     DataType,
@@ -54,7 +54,7 @@ def have_access_to_filter(data_type: DataType, filter: FilterType):
 def check_login(conn: Connection, login_type: DataType, **kwargs: str) -> None:
     try:
         if "password" not in kwargs:
-            raise KeyError('password')
+            raise MissingKeyError('password')
         if login_type == DataType.CUST:
             result = query(conn, CHECK_CUST_LOGIN, FetchMode.ONE, 1, **kwargs)
         elif login_type == DataType.STAFF:
@@ -63,8 +63,8 @@ def check_login(conn: Connection, login_type: DataType, **kwargs: str) -> None:
             result = query(conn, CHECK_AGENT_LOGIN, FetchMode.ONE, 1, **kwargs)
         else:
             raise JsonError('Invalid login method!')
-    except KeyError as err:
-        raise MissingKeyError(err.args[0])
+    except QueryKeyError as err:
+        raise MissingKeyError(err.get_key())
 
     if result is None:
         raise JsonError(
