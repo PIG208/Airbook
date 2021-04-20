@@ -38,6 +38,10 @@ class FilterType(Enum):
     ALL_FUTURE_FLIGHTS = 'all_future'
     CUST_FUTURE_FLIGHTS = 'customer_future'
     CUST_TICKETS = 'customer_tickets'
+    # The following filters are advanced filters that require the filter generator.
+    # We need to keep track of the advanced filters in the set ADVANCED_FILTERS.
+    ADVANCED_FLIGHT = 'advanced_flight'
+    ADVANCED_SPENDINGS = 'advanced_spendings'
 
 class DataType(Enum):
     """
@@ -64,6 +68,11 @@ FILTER_TO_QUERY_MAP = {
     FilterType.CUST_TICKETS: SELECT_CUSTOMER_TICKETS,
 }
 
+ADVANCED_FILTERS = {
+    FilterType.ADVANCED_FLIGHT,
+    FilterType.ADVANCED_SPENDINGS,
+}
+
 ENTITY_TO_TABLE_MAP = {
     DataType.CUST:'Customer',
     DataType.STAFF:'AirlineStaff',
@@ -77,6 +86,9 @@ ENTITY_TO_TABLE_MAP = {
     DataType.FEEDBACK:'Feedback',
     DataType.PHONENUM:'PhoneNumber',
 }
+
+def is_advanced_filter(filter: FilterType):
+    return filter in ADVANCED_FILTERS
 
 def form_args_list(args, backticks=False):
     """
