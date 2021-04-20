@@ -24,7 +24,6 @@ class TestQuery(unittest.TestCase):
         )
 
     def test_select_all_tables(self):
-        print(query(self.conn, "SELECT * FROM BookingAgent"))
         for data_type in DATA_TYPE:
             query(self.conn, BASIC_SELECT.format(table=data_type.get_table(), predicates=''))
     
