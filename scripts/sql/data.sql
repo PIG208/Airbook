@@ -70,6 +70,18 @@ INSERT INTO Flight VALUES (
     'delayed',
     22,
     'China Eastern'
+), (
+    7777,
+    '2022-5-28',
+    '15:31:14',
+    'MSC',
+    '2022-5-29',
+    '12:40:14',
+    'JFK',
+    1000,
+    'ontime',
+    20,
+    'China Eastern'
 );
 -- The passwords are "wendy", "goodman", "best123"
 INSERT INTO Customer VALUES (
@@ -152,6 +164,34 @@ INSERT INTO Ticket (email,sold_price,card_type,card_number, name_on_card,exp_dat
     '13:33:44',
     NULL
 ), (
+    'ny2311@nyu.edu',
+    100,
+    'credit',
+    1234555500002220,
+    'Mark',
+    '2027-06-30',
+    '2021-04-24',
+    '12:20:15',
+    'Evergreen',
+    12345,
+    '2021-3-28',
+    '13:33:44',
+    1
+), (
+    'ny2311@nyu.edu',
+    2000,
+    'credit',
+    1234555500002220,
+    'Mark',
+    '2027-06-30',
+    '2021-12-24',
+    '05:20:15',
+    'Evergreen',
+    12345,
+    '2021-3-28',
+    '13:33:44',
+    1
+), (
     'goodman@gmail.com',
     45,
     'debt',
@@ -171,6 +211,14 @@ INSERT INTO Book VALUES (
     3,
     1,
     4.5
+), (
+    4,
+    1,
+    25
+), (
+    5,
+    1,
+    200
 );
 
 INSERT INTO Feedback VALUES (

@@ -11,6 +11,7 @@ sudo service mysql start
 sudo mysql < scripts/sql/init.sql
 sudo mysql < scripts/sql/tables.sql
 sudo mysql < scripts/sql/data.sql
+sudo mysql < scripts/sql/views.sql
 echo "Setting up virtual environment..."
 source airbook/bin/activate
 if [[ "$VIRTUAL_ENV" != "" ]]; then
