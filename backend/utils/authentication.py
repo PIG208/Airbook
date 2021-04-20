@@ -4,13 +4,13 @@ from backend.utils.error import JsonError, MissingKeyError
 from backend.utils.encryption import check_hash
 from backend.utils.query import (
     DataType,
-    FilterType,
     query, 
     CHECK_AGENT_LOGIN, 
     CHECK_CUST_LOGIN, 
     CHECK_STAFF_LOGIN, 
     FetchMode
 )
+from backend.utils.filter import FilterType
 from flask import request, abort, session
 
 PublicFilters = {

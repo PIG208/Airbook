@@ -3,15 +3,13 @@ from typing import Dict, Any, Optional
 from enum import Enum, auto
 
 from backend.utils.error import QueryError, QueryKeyError
+from backend.utils.filter import FilterType, FILTER_TO_QUERY_MAP
 
 INSERT_INTO = 'INSERT INTO {} ({}) VALUES ({});'
 SELECT_IDENTITY = 'SELECT @@IDENTITY;'
 BASIC_SELECT = 'SELECT * FROM {table} {predicates}'
 BASIC_DELETE = 'DELETE FROM {table} WHERE {}'
 
-SELECT_ALL_FUTURE_FLIGHTS = 'SELECT * FROM future_flights;'
-SELECT_CUSTOMER_TICKETS = 'call customer_tickets(%(email)s);' # "email" must matches the key name for session
-SELECT_CUSTOMER_FLIGHTS = 'call customer_flights(%(email)s);'
 CITY_AIRPORT = 'call city_airport(%(city)s);'
 
 DELAYED_FLIGHTS = 'SELECT * FROM Flight\
@@ -34,15 +32,6 @@ class FetchMode(Enum):
     MANY = auto()
     ALL = auto()
 
-class FilterType(Enum):
-    ALL_FUTURE_FLIGHTS = 'all_future'
-    CUST_FUTURE_FLIGHTS = 'customer_future'
-    CUST_TICKETS = 'customer_tickets'
-    # The following filters are advanced filters that require the filter generator.
-    # We need to keep track of the advanced filters in the set ADVANCED_FILTERS.
-    ADVANCED_FLIGHT = 'advanced_flight'
-    ADVANCED_SPENDINGS = 'advanced_spendings'
-
 class DataType(Enum):
     """
     Provide aliases for the tables in the database, which can be referred to via the url.
@@ -62,17 +51,6 @@ class DataType(Enum):
     def get_table(self):
         return ENTITY_TO_TABLE_MAP[self]
 
-FILTER_TO_QUERY_MAP = {
-    FilterType.ALL_FUTURE_FLIGHTS: SELECT_ALL_FUTURE_FLIGHTS,
-    FilterType.CUST_FUTURE_FLIGHTS: SELECT_CUSTOMER_FLIGHTS,
-    FilterType.CUST_TICKETS: SELECT_CUSTOMER_TICKETS,
-}
-
-ADVANCED_FILTERS = {
-    FilterType.ADVANCED_FLIGHT,
-    FilterType.ADVANCED_SPENDINGS,
-}
-
 ENTITY_TO_TABLE_MAP = {
     DataType.CUST:'Customer',
     DataType.STAFF:'AirlineStaff',
@@ -86,9 +64,6 @@ ENTITY_TO_TABLE_MAP = {
     DataType.FEEDBACK:'Feedback',
     DataType.PHONENUM:'PhoneNumber',
 }
-
-def is_advanced_filter(filter: FilterType):
-    return filter in ADVANCED_FILTERS
 
 def form_args_list(args, backticks=False):
     """

@@ -48,6 +48,33 @@ class FilterSet(Generic[V]):
         except TypeError:
             return None
 
+class FilterType(Enum):
+    ALL_FUTURE_FLIGHTS = 'all_future'
+    CUST_FUTURE_FLIGHTS = 'customer_future'
+    CUST_TICKETS = 'customer_tickets'
+    # The following filters are advanced filters that require the filter generator.
+    # We need to keep track of the advanced filters in the set ADVANCED_FILTERS.
+    ADVANCED_FLIGHT = 'advanced_flight'
+    ADVANCED_SPENDINGS = 'advanced_spendings'
+
+SELECT_ALL_FUTURE_FLIGHTS = 'SELECT * FROM future_flights;'
+SELECT_CUSTOMER_TICKETS = 'call customer_tickets(%(email)s);' # "email" must matches the key name for session
+SELECT_CUSTOMER_FLIGHTS = 'call customer_flights(%(email)s);'
+
+FILTER_TO_QUERY_MAP = {
+    FilterType.ALL_FUTURE_FLIGHTS: SELECT_ALL_FUTURE_FLIGHTS,
+    FilterType.CUST_FUTURE_FLIGHTS: SELECT_CUSTOMER_FLIGHTS,
+    FilterType.CUST_TICKETS: SELECT_CUSTOMER_TICKETS,
+}
+
+ADVANCED_FILTERS = {
+    FilterType.ADVANCED_FLIGHT,
+    FilterType.ADVANCED_SPENDINGS,
+}
+
+def is_advanced_filter(filter: FilterType):
+    return filter in ADVANCED_FILTERS
+
 class Filter:
     def __init__(self, base_query: str):
         self.base_query = base_query

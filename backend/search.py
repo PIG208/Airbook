@@ -1,5 +1,6 @@
 from typing import Dict, Any
-from backend.utils.query import DataType, FilterType, query_filter
+from backend.utils.filter import FilterType
+from backend.utils.query import DataType, query_filter
 from backend.utils.error import JsonError, MissingKeyError, QueryKeyError
 from backend.utils.authentication import have_access_to_filter, PublicFilters
 from pymysql import Connection
