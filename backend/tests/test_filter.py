@@ -29,7 +29,7 @@ class TestFilter(unittest.TestCase):
         self.assertEqual(expected, result)
         
         result = get_filter_flight(customer_emails=FilterSet(["ny233@nyu.edu", "ny123@nyu.edu"]))
-        expected = ('SELECT * FROM Flight WHERE email IN (%s,%s)', ["ny233@nyu.edu", "ny123@nyu.edu"])
+        expected = ('SELECT * FROM Flight WHERE email IN (%s,%s)', ["ny123@nyu.edu", "ny233@nyu.edu"])
         self.assertEqual(expected, result)
     
     def test_filter_flight_airport_city(self):
