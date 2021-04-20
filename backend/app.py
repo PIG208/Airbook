@@ -27,14 +27,6 @@ def home():
     )
     return response
 
-@app.route('/pre')
-@require_session
-def asd():
-    response = jsonify(
-        result="success"
-    )
-    return response
-
 @app.route('/register/<register_type>', methods=['GET','POST'])
 @raise_error
 def register(register_type: str):
