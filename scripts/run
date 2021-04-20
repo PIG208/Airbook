@@ -2,9 +2,7 @@
 PARENT_PATH=$(cd "$(dirname "{BASH_SOURCE[0]}")"; pwd -P)
 cd $PARENT_PATH
 
-if [[ "$VIRTUAL_ENV" == "" ]]; then
-    source airbook/bin/activate
-fi
+source airbook/bin/activate
 
 export FLASK_APP='backend/app.py'
 export FLASK_ENV='development'
