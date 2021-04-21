@@ -26,11 +26,11 @@ class TestFilter(unittest.TestCase):
     
     def test_filter_flight_email(self):
         result = get_filter_flight(customer_emails=FilterSet(["ny123@nyu.edu"]))
-        expected = ('SELECT * FROM Flight WHERE email=%s', ["ny123@nyu.edu"])
+        expected = ('SELECT * FROM Flight WHERE (EXISTS (SELECT * FROM Ticket WHERE email=%s))', ["ny123@nyu.edu"])
         self.assertEqual(expected, result)
         
         result = get_filter_flight(customer_emails=FilterSet(["ny233@nyu.edu", "ny123@nyu.edu"]))
-        expected = ('SELECT * FROM Flight WHERE email IN (%s,%s)', ["ny123@nyu.edu", "ny233@nyu.edu"])
+        expected = ('SELECT * FROM Flight WHERE (EXISTS (SELECT * FROM Ticket WHERE email IN (%s,%s)))', ["ny123@nyu.edu", "ny233@nyu.edu"])
         self.assertEqual(expected[0], result[0])
         self.assertCountEqual(expected[1], result[1])
     
@@ -41,7 +41,7 @@ class TestFilter(unittest.TestCase):
             arr_airport='ASD',
             arr_city='ASD City',
         )
-        expected = ('SELECT * FROM Flight WHERE dep_airport=%s AND arr_airport=%s AND dep_city=%s AND arr_city=%s', ['JFK', 'ASD', 'New York City', 'ASD City'])
+        expected = ('SELECT * FROM verbose_flights WHERE dep_airport=%s AND arr_airport=%s AND dep_city=%s AND arr_city=%s', ['JFK', 'ASD', 'New York City', 'ASD City'])
         self.assertEqual(expected, result)
     
     def test_filter_flight_all(self):
@@ -57,5 +57,27 @@ class TestFilter(unittest.TestCase):
             arr_airport='ASD',
             arr_city='ASD City',
         )
-        expected = ('SELECT * FROM Flight WHERE dep_date > "2020-11-22" AND dep_date < "2020-11-23" AND dep_time > "06:15:44" AND dep_time < "10:15:44" AND arr_date > "2020-11-22" AND arr_date < "2020-11-23" AND arr_time > "06:15:44" AND arr_time < "10:15:44" AND dep_airport=%s AND arr_airport=%s AND dep_city=%s AND arr_city=%s', ['JFK', 'ASD', 'New York City', 'ASD City'])
+        expected = (
+            'SELECT * FROM verbose_flights WHERE '
+            + 'dep_date > %s AND dep_date < %s '
+            + 'AND dep_time > %s AND dep_time < %s '
+            + 'AND arr_date > %s AND arr_date < %s '
+            + 'AND arr_time > %s AND arr_time < %s '
+            + 'AND dep_airport=%s AND arr_airport=%s '
+            + 'AND dep_city=%s AND arr_city=%s',
+            [
+                '2020-11-22',
+                '2020-11-23',
+                '06:15:44',
+                '10:15:44',
+                '2020-11-22',
+                '2020-11-23',
+                '06:15:44',
+                '10:15:44',
+                'JFK', 
+                'ASD', 
+                'New York City', 
+                'ASD City'
+            ]
+        )
         self.assertEqual(expected, result)

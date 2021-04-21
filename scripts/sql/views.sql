@@ -14,6 +14,13 @@ CREATE VIEW spendings AS
     NATURAL JOIN Ticket NATURAL LEFT OUTER JOIN Book
     ;
 
+DROP VIEW IF EXISTS verbose_flights;
+CREATE VIEW verbose_flights AS
+    SELECT * FROM Flight NATURAL JOIN Airplane 
+    NATURAL JOIN (SELECT airport_name AS dep_airport,city as dep_city FROM Airport) AS A1 
+    NATURAL JOIN (SELECT airport_name AS arr_airport,city as arr_city FROM Airport) AS A2
+    ;
+
 DELIMITER [[
 DROP PROCEDURE IF EXISTS customer_tickets [[
 CREATE PROCEDURE 

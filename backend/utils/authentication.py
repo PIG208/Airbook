@@ -63,11 +63,11 @@ def check_login(conn: Connection, login_type: DataType, **kwargs: str) -> None:
         if "password" not in kwargs:
             raise MissingKeyError('password')
         if login_type == DataType.CUST:
-            result = query(conn, CHECK_CUST_LOGIN, FetchMode.ONE, 1, **kwargs)
+            result = query(conn, CHECK_CUST_LOGIN, FetchMode.ONE, 1, kwargs)
         elif login_type == DataType.STAFF:
-            result = query(conn, CHECK_STAFF_LOGIN, FetchMode.ONE, 1, **kwargs)
+            result = query(conn, CHECK_STAFF_LOGIN, FetchMode.ONE, 1, kwargs)
         elif login_type == DataType.AGENT:
-            result = query(conn, CHECK_AGENT_LOGIN, FetchMode.ONE, 1, **kwargs)
+            result = query(conn, CHECK_AGENT_LOGIN, FetchMode.ONE, 1, kwargs)
         else:
             raise JsonError('Invalid login method!')
     except QueryKeyError as err:

@@ -1,9 +1,8 @@
 from pymysql import Connection, IntegrityError, ProgrammingError
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Union
 from enum import Enum, auto
 
 from backend.utils.error import QueryError, QueryKeyError
-from backend.utils.filter import FilterType, FILTER_TO_QUERY_MAP
 
 INSERT_INTO = 'INSERT INTO {} ({}) VALUES ({});'
 SELECT_IDENTITY = 'SELECT @@IDENTITY;'
@@ -96,13 +95,15 @@ def insert_into(conn: Connection, table_name: str, **kwargs: Dict[str, Any]) -> 
         return result
 
 
-def query(conn: Connection, sql: str, fetch_mode: FetchMode = FetchMode.ALL, size: int = 1, **kwargs):
+def query(conn: Connection, sql: str, fetch_mode: FetchMode = FetchMode.ALL, size: int = 1, args: Optional[Union[dict, tuple, list]]=None):
     # Throws QueryKeyError
     with conn.cursor() as cursor:
         try:
             cursor.execute(sql, args)
         except KeyError as err:
             raise QueryKeyError(key=err.args[0])
+        except ProgrammingError as err:
+            print(err, sql)
 
         if fetch_mode is FetchMode.ONE:
             return cursor.fetchone()
@@ -110,12 +111,3 @@ def query(conn: Connection, sql: str, fetch_mode: FetchMode = FetchMode.ALL, siz
             return cursor.fetchmany(size)
         elif fetch_mode is FetchMode.ALL:
             return cursor.fetchall()
-
-def query_filter(conn: Connection, filter: FilterType, **kwargs):
-    if filter not in FILTER_TO_QUERY_MAP:
-        raise NotImplementedError('The sql query for {filter} is not implemented. Please check FILTER_TO_QUERY_MAP'.format(filter=filter))
-    else:
-        try:
-            return query(conn, FILTER_TO_QUERY_MAP[filter], fetch_mode=FetchMode.ALL, size=1, **kwargs)
-        except KeyError as err:
-            raise QueryKeyError(err.args[0])
