@@ -1,4 +1,4 @@
-import flask_unittest
+import flask_unittest # type: ignore
 import json
 
 from flask import request, Flask, session
@@ -142,5 +142,25 @@ class TestSearch(flask_unittest.ClientTestCase):
         ]
         
         response = client.post('/search/advanced_flight', json=dict(filter_data=filter_data))
+        self.assertEqual('success', response.json['result'])
+        self.assertEqual(expected, json.loads(response.json['data']))
+
+    def test_search_advanced_spendings(self, client):
+        response = client.post('/login/cust', json=dict(email='ny2311@nyu.edu', password='best123'))
+        assert dict(result='success') == response.json
+
+        response = client.post('/search/advanced_spendings', json=dict(filter_data={}))
+        expected = [
+            ['2021-03-24', '40.00'], 
+            ['2021-04-24', '104.50'], 
+            ['2021-12-24', '2025.00']
+        ]
+        self.assertEqual('success', response.json['result'])
+        self.assertEqual(expected, json.loads(response.json['data']))
+        
+        response = client.post('/search/advanced_spendings', json=dict(filter_data=dict(group='YEAR')))
+        expected = [
+            [2021, '2169.50']
+        ]
         self.assertEqual('success', response.json['result'])
         self.assertEqual(expected, json.loads(response.json['data']))

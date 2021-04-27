@@ -1,5 +1,4 @@
-import flask_unittest
-
+import flask_unittest # type: ignore
 from flask import request, Flask
 from backend.app import app
 

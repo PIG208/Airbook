@@ -1,6 +1,6 @@
-from pymysql import Connection
+from pymysql.connections import Connection
 from functools import wraps
-from typing import Optional
+from typing import Optional, Tuple, Set
 from backend.utils.error import JsonError, MissingKeyError, QueryKeyError
 from backend.utils.encryption import check_hash
 from backend.utils.query import (
@@ -24,15 +24,15 @@ ProtectedFilters = {
     FilterType.ADVANCED_SPENDINGS,
 }
 
-STAFF_FILTERS = {
+STAFF_FILTERS: Set[FilterType] = { # type: ignore
 
 }
 
-AGENT_FILTERS = {
+AGENT_FILTERS: Set[FilterType] = { # type: ignore
     
 }
 
-CUST_FILTERS = {
+CUST_FILTERS: Set[FilterType] = {
     FilterType.CUST_FUTURE_FLIGHTS,
     FilterType.CUST_TICKETS,
 }
@@ -53,12 +53,12 @@ def is_user(data_type: Optional[DataType]):
     return data_type in USER_TYPES
 
 def have_access_to_filter(data_type: Optional[DataType], filter: FilterType):
-    if is_user(data_type):
+    if data_type is not None and is_user(data_type):
         return filter in PublicFilters or filter in ProtectedFilters or filter in USER_TYPE_TO_FILTERS_MAP.get(data_type, {})
     else:
         return filter in PublicFilters
 
-def check_login(conn: Connection, login_type: DataType, **kwargs: str) -> None:
+def check_login(conn: Connection, login_type: DataType, **kwargs: str):
     try:
         if "password" not in kwargs:
             raise MissingKeyError('password')

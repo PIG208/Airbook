@@ -1,8 +1,8 @@
-from typing import Optional, TypeVar, Generic, Iterable, Any, Union, Tuple
+from typing import Optional, TypeVar, Generic, Iterable, Any, Union, Tuple, List, Set
 from enum import Enum, auto
 from functools import partial
 from datetime import date, time, datetime
-from pymysql import Connection
+from pymysql.connections import Connection
 from backend.utils.error import QueryKeyError
 from backend.utils.query import query
 
@@ -18,19 +18,21 @@ T = TypeVar('T', int, str)
 V = TypeVar('V', int, str)
 class FilterRange(Generic[T]):
     def __init__(self, lower: Optional[T]=None, upper: Optional[T]=None):
-        self._lower = lower
+        self._lower: Optional[T] = lower
         
-        self._upper = upper
+        self._upper: Optional[T] = upper
     
     @property
     def lower(self) -> Optional[str]:
         if self._lower is not None:
-            return self._lower
+            return str(self._lower)
+        return None
     
     @property
     def upper(self) -> Optional[str]:
         if self._upper is not None:
-            return self._upper
+            return str(self._upper)
+        return None
     
 class FilterGroup(Enum):
     DAY = 'DAY'
@@ -47,14 +49,14 @@ class FilterGroup(Enum):
 class FilterSet(Generic[V]):
     def __init__(self, filter_set: Optional[Iterable[V]]):
         # Note that the order doesn't matter here as the order of an iterable can be non-deterministic
-        self._filter_set = {item for item in filter_set} if filter_set is not None else None
+        self._filter_set: Optional[Set[V]] = {item for item in filter_set} if filter_set is not None else None
     
     @property
     def filter_set(self):
         return self._filter_set
     
     def get_one(self):
-        if len(self._filter_set) == 0:
+        if self._filter_set is None or len(self._filter_set) == 0:
             return None
         try:
             return self._filter_set.pop()
@@ -91,8 +93,8 @@ def is_advanced_filter(filter: FilterType):
 class Filter:
     def __init__(self, base_query: str):
         self.base_query = base_query
-        self.where_clause = []
-        self.string_values = []
+        self.where_clause: List[str] = []
+        self.string_values: List[str] = []
         
     def add_filter_range(self, column_name: str, range: Optional[FilterRange[T]]):
         """
@@ -115,7 +117,7 @@ class Filter:
         
         return self
     
-    def add_filter_set(self, column_name: str, filter_set: Optional[FilterSet[Union[str, int]]]):
+    def add_filter_set(self, column_name: str, filter_set: Optional[Union[FilterSet[str], FilterSet[int]]]):
         if filter_set is None or filter_set.filter_set is None:
             return self 
         if len(filter_set.filter_set) <= 1:
@@ -170,10 +172,10 @@ class Filter:
         return self.base_query.format(where='WHERE ' + ' AND '.join(self.where_clause) if len(self.where_clause) > 0 else ''), self.string_values
 
 def get_filter_flight(
-    dep_date_range: Optional[FilterRange[date]] = None,
-    dep_time_range: Optional[FilterRange[time]] = None,
-    arr_date_range: Optional[FilterRange[date]] = None,
-    arr_time_range: Optional[FilterRange[time]] = None,
+    dep_date_range: Optional[FilterRange[str]] = None,
+    dep_time_range: Optional[FilterRange[str]] = None,
+    arr_date_range: Optional[FilterRange[str]] = None,
+    arr_time_range: Optional[FilterRange[str]] = None,
     dep_airport: Optional[str] = None,
     dep_city: Optional[str] = None,
     arr_airport: Optional[str] = None,
@@ -244,6 +246,8 @@ def get_filter_query(filter: FilterType, **kwargs) -> Tuple[str, Union[list, dic
                 arr_city=kwargs.get('arr_city'),
                 customer_emails=FilterSet(kwargs.get('customer_emails')),
             )
+        else:
+            raise ValueError('The filter {filter} is invalid.'.format(filter=filter))
     except KeyError as err:
         raise QueryKeyError(err.args[0])
 

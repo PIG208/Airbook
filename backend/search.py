@@ -4,22 +4,22 @@ from backend.utils.query import DataType, query, FetchMode
 from backend.utils.error import JsonError, MissingKeyError, QueryKeyError
 from backend.utils.authentication import have_access_to_filter, PublicFilters
 from backend.utils.filter import query_by_filter
-from pymysql import Connection
+from pymysql.connections import Connection
 
 def do_search(conn: Connection, data: Dict[str, Any], session: Dict[str, Any], filter: str, use_public: bool):
     if data is None:
         data = {}
     try:
-        filter = FilterType(filter)
+        filter_type = FilterType(filter)
     except ValueError:
         raise JsonError('The requested filter \"{filter}\" does not exist!'.format(filter=filter))
+    
+    user_type = None
 
     if 'user_type' in session:
         user_type = DataType(session['user_type'])
-    else:
-        user_type = None
 
-    if not have_access_to_filter(user_type, filter):
+    if not have_access_to_filter(user_type, filter_type):
         raise JsonError('You don\'t have the permission to use this filter!')
     
     filter_data = data.get('filter_data', {})
@@ -30,7 +30,7 @@ def do_search(conn: Connection, data: Dict[str, Any], session: Dict[str, Any], f
         filter_data['emails'] = [session['agent_email']]
 
     try:
-        result = query_by_filter(conn, filter, **data.get('filter_data', {}), **session)
+        result = query_by_filter(conn, filter_type, **data.get('filter_data', {}), **session)
     except TypeError as err:
         raise JsonError('Malformed request! Are you attempting to pass your email address?')
     except QueryKeyError as err:

@@ -32,8 +32,8 @@ def home():
 def register(register_type: str):
     data = request.get_json()
     try:
-        register_type = DataType(register_type)
-        if not is_user(register_type):
+        user_type = DataType(register_type)
+        if not is_user(user_type):
             raise ValueError()
     except ValueError:
         raise JsonError('Invalid registration method!')
@@ -44,10 +44,10 @@ def register(register_type: str):
     try:
         hashed_password, salt = generate_hash(data['password'])
 
-        if register_type == DataType.CUST:
+        if user_type == DataType.CUST:
             insert_into(
                 conn, 
-                register_type.get_table(), 
+                user_type.get_table(), 
                 email=data['email'],
                 name=data['name'],
                 password=hashed_password,
@@ -62,10 +62,10 @@ def register(register_type: str):
                 state=data.get('state', ''),
             )
             session['email'] = data['email']
-        elif register_type == DataType.STAFF:
+        elif user_type == DataType.STAFF:
             insert_into(
                 conn,
-                register_type.get_table(),
+                user_type.get_table(),
                 username=data['username'],
                 password=hashed_password,
                 salt=salt,
@@ -75,10 +75,10 @@ def register(register_type: str):
                 airline_name=data['airline_name'],
             )
             session['username'] = data['username']
-        elif register_type == DataType.AGENT:
+        elif user_type == DataType.AGENT:
             agent_id = insert_into(
                 conn,
-                register_type.get_table(),
+                user_type.get_table(),
                 email=data['email'],
                 password=hashed_password,
                 salt=salt,
@@ -88,7 +88,7 @@ def register(register_type: str):
     except QueryKeyError as err:
         raise MissingKeyError(err.get_key())
 
-    session['user_type'] = login_type.value
+    session['user_type'] = user_type.value
 
     return jsonify(
         result="success"
@@ -119,17 +119,22 @@ def search(filter: str):
 @raise_error
 def login(login_type: str):
     data = request.get_json()
-    login_type = DataType(login_type)
+    try:
+        user_type = DataType(login_type)
+        if not is_user(user_type):
+            raise ValueError()
+    except ValueError:
+        raise JsonError('Invalid login method!')
     # If no error is thrown in check_login, our user is OK
-    user_data = check_login(conn, login_type, **data)
+    user_data = check_login(conn, user_type, **data)
     
-    session['user_type'] = login_type.value
-    if login_type == DataType.CUST:
+    session['user_type'] = user_type.value
+    if user_type == DataType.CUST:
         session['email'] = user_data[0]
-    elif login_type == DataType.AGENT:
+    elif user_type == DataType.AGENT:
         session['agent_id'] = user_data[0]
         session['agent_email'] = user_data[1]
-    elif login_type == DataType.STAFF:
+    elif user_type == DataType.STAFF:
         session['username'] = user_data[0]
 
     return jsonify(

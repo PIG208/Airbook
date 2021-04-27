@@ -1,6 +1,7 @@
 import unittest
 
 from datetime import date, time, datetime
+from typing import Tuple, Any
 from backend.utils.filter import get_filter_flight, get_filter_spendings, FilterGroup, FilterRange, FilterSet, FilterRange
 
 class TestFilter(unittest.TestCase):
@@ -10,7 +11,7 @@ class TestFilter(unittest.TestCase):
         self.assertEqual(expected, result)
 
         result = get_filter_spendings(FilterSet({}))
-        expected = ('SELECT purchase_date, actual_price FROM spendings ', [])
+        expected: Tuple[Any, Any] = ('SELECT purchase_date, actual_price FROM spendings ', [])
         self.assertEqual(expected, result)
     
     def test_filter_spendings_many(self):
@@ -21,7 +22,7 @@ class TestFilter(unittest.TestCase):
     
     def test_filter_flight_empty(self):
         result = get_filter_flight()
-        expected = ('SELECT * FROM Flight ', [])
+        expected: Tuple[Any, Any] = ('SELECT * FROM Flight ', list())
         self.assertEqual(expected, result)
     
     def test_filter_flight_email(self):

@@ -1,4 +1,5 @@
-from pymysql import Connection, IntegrityError, ProgrammingError
+from pymysql import IntegrityError, ProgrammingError
+from pymysql.connections import Connection
 from typing import Dict, Any, Optional, Union
 from enum import Enum, auto
 
@@ -78,7 +79,7 @@ def form_args_list(args, backticks=False):
     return res
 
 
-def insert_into(conn: Connection, table_name: str, **kwargs: Dict[str, Any]) -> Optional[int]:
+def insert_into(conn: Connection, table_name: str, **kwargs: Any) -> Optional[int]:
     make_str = ','.join(['%s' for i in range(len(kwargs))])
     keys = form_args_list(kwargs.keys())
     values = form_args_list(kwargs.values())
