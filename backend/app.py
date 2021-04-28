@@ -13,21 +13,21 @@ import pymysql.cursors
 app = Flask(__name__)
 app.secret_key = urandom(16)
 conn = pymysql.connect(
-    host='localhost', 
-    user='airbook_admin', 
-    password='Airbook_admin_x7fo1a', 
-    database='airbook'
+    host="localhost",
+    user="airbook_admin",
+    password="Airbook_admin_x7fo1a",
+    database="airbook",
 )
 
-@app.route('/')
+
+@app.route("/")
 def home():
-    session['username'] = 'test'
-    response = jsonify(
-        result="success"
-    )
+    session["username"] = "test"
+    response = jsonify(result="success")
     return response
 
-@app.route('/register/<register_type>', methods=['GET','POST'])
+
+@app.route("/register/<register_type>", methods=["GET", "POST"])
 @raise_error
 def register(register_type: str):
     data = request.get_json()
@@ -36,86 +36,97 @@ def register(register_type: str):
         if not is_user(user_type):
             raise ValueError()
     except ValueError:
-        raise JsonError('Invalid registration method!')
+        raise JsonError("Invalid registration method!")
 
     if data is None:
-        raise JsonError('Empty data fields!')
+        raise JsonError("Empty data fields!")
 
     try:
-        hashed_password, salt = generate_hash(data['password'])
+        hashed_password, salt = generate_hash(data["password"])
 
         if user_type == DataType.CUST:
             insert_into(
-                conn, 
-                user_type.get_table(), 
-                email=data['email'],
-                name=data['name'],
+                conn,
+                user_type.get_table(),
+                email=data["email"],
+                name=data["name"],
                 password=hashed_password,
                 salt=salt,
-                phone_number=data['phone_number'],
-                date_of_birth=data.get('date_of_birth', ''),
-                passport_number=data.get('passport_number', ''),
-                passport_expiration=data.get('passport_expiration', ''),
-                passport_country=data.get('passport_country', 'China'),
-                street=data.get('street', ''),
-                city=data.get('city', ''),
-                state=data.get('state', ''),
+                phone_number=data["phone_number"],
+                date_of_birth=data.get("date_of_birth", ""),
+                passport_number=data.get("passport_number", ""),
+                passport_expiration=data.get("passport_expiration", ""),
+                passport_country=data.get("passport_country", "China"),
+                street=data.get("street", ""),
+                city=data.get("city", ""),
+                state=data.get("state", ""),
             )
-            session['email'] = data['email']
+            session["email"] = data["email"]
         elif user_type == DataType.STAFF:
             insert_into(
                 conn,
                 user_type.get_table(),
-                username=data['username'],
+                username=data["username"],
                 password=hashed_password,
                 salt=salt,
-                first_name=data['first_name'],
-                last_name=data['last_name'],
-                date_of_birth=data['date_of_birth'],
-                airline_name=data['airline_name'],
+                first_name=data["first_name"],
+                last_name=data["last_name"],
+                date_of_birth=data["date_of_birth"],
+                airline_name=data["airline_name"],
             )
-            session['username'] = data['username']
+            session["username"] = data["username"]
         elif user_type == DataType.AGENT:
             agent_id = insert_into(
                 conn,
                 user_type.get_table(),
-                email=data['email'],
+                email=data["email"],
                 password=hashed_password,
                 salt=salt,
             )
-            session['agent_id'] = agent_id
-            session['agent_email'] = data['email']
+            session["agent_id"] = agent_id
+            session["agent_email"] = data["email"]
     except QueryKeyError as err:
         raise MissingKeyError(err.get_key())
 
-    session['user_type'] = user_type.value
+    session["user_type"] = user_type.value
 
-    return jsonify(
-        result="success"
-    )
+    return jsonify(result="success")
 
-@app.route('/search-public/<filter>', methods=['POST'])
+
+@app.route("/search-public/<filter>", methods=["POST"])
 @raise_error
 def search_public(filter: str):
     data = request.get_json()
-    result = json.dumps(do_search(conn, data, session, filter, True), indent=4, sort_keys=True, default=str)
+    result = json.dumps(
+        do_search(conn, data, session, filter, True),
+        indent=4,
+        sort_keys=True,
+        default=str,
+    )
     return jsonify(
         result="success",
         data=result,
     )
 
-@app.route('/search/<filter>', methods=['POST'])
+
+@app.route("/search/<filter>", methods=["POST"])
 @require_session
 @raise_error
 def search(filter: str):
     data = request.get_json()
-    result = json.dumps(do_search(conn, data, session, filter, False), indent=4, sort_keys=True, default=str)
+    result = json.dumps(
+        do_search(conn, data, session, filter, False),
+        indent=4,
+        sort_keys=True,
+        default=str,
+    )
     return jsonify(
         result="success",
         data=result,
     )
 
-@app.route('/login/<login_type>', methods=['GET','POST'])
+
+@app.route("/login/<login_type>", methods=["GET", "POST"])
 @raise_error
 def login(login_type: str):
     data = request.get_json()
@@ -124,24 +135,22 @@ def login(login_type: str):
         if not is_user(user_type):
             raise ValueError()
     except ValueError:
-        raise JsonError('Invalid login method!')
+        raise JsonError("Invalid login method!")
     # If no error is thrown in check_login, our user is OK
     user_data = check_login(conn, user_type, **data)
-    
-    session.clear()
-    session['user_type'] = user_type.value
-    if user_type == DataType.CUST:
-        session['email'] = user_data[0]
-    elif user_type == DataType.AGENT:
-        session['agent_id'] = user_data[0]
-        session['agent_email'] = user_data[1]
-    elif user_type == DataType.STAFF:
-        session['username'] = user_data[0]
 
-    return jsonify(
-        result="success"
-    )
-    
+    session.clear()
+    session["user_type"] = user_type.value
+    if user_type == DataType.CUST:
+        session["email"] = user_data[0]
+    elif user_type == DataType.AGENT:
+        session["agent_id"] = user_data[0]
+        session["agent_email"] = user_data[1]
+    elif user_type == DataType.STAFF:
+        session["username"] = user_data[0]
+
+    return jsonify(result="success")
+
 
 @app.errorhandler(401)
 def forbidden(error):
