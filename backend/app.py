@@ -1,5 +1,6 @@
 from os import urandom
 from flask import Flask, request, jsonify, make_response, session
+from flask_cors import CORS  # type: ignore
 from backend.utils.authentication import check_login, require_session
 from backend.utils.query import insert_into, query
 from backend.utils.authentication import PublicFilters, DataType, is_user
@@ -10,7 +11,8 @@ from backend.search import do_search
 import json
 import pymysql.cursors
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path="", static_folder="../web/build")
+CORS(app)
 app.secret_key = urandom(16)
 conn = pymysql.connect(
     host="localhost",
@@ -20,11 +22,9 @@ conn = pymysql.connect(
 )
 
 
-@app.route("/")
+@app.route("/", methods=["GET"])
 def home():
-    session["username"] = "test"
-    response = jsonify(result="success")
-    return response
+    return app.send_static_file("index.html")
 
 
 @app.route("/register/<register_type>", methods=["GET", "POST"])
