@@ -26,12 +26,22 @@ class TestFilter(unittest.TestCase):
         self.assertEqual(expected, result)
     
     def test_filter_flight_email(self):
-        result = get_filter_flight(emails=FilterSet(["ny123@nyu.edu"]), filter_by_emails=True)
-        expected = ('SELECT * FROM Flight WHERE (EXISTS (SELECT * FROM Ticket WHERE email=%s))', ["ny123@nyu.edu"])
+        result = get_filter_flight(
+            emails=FilterSet(["ny123@nyu.edu"]), filter_by_emails=True
+        )
+        expected = (
+            "SELECT * FROM Flight WHERE (EXISTS (SELECT * FROM Ticket WHERE email=%s AND (Ticket.dep_date, Ticket.dep_time, Ticket.flight_number)=(Flight.dep_date, Flight.dep_time, Flight.flight_number)))",
+            ["ny123@nyu.edu"],
+        )
         self.assertEqual(expected, result)
-        
-        result = get_filter_flight(emails=FilterSet(["ny233@nyu.edu", "ny123@nyu.edu"]), filter_by_emails=True)
-        expected = ('SELECT * FROM Flight WHERE (EXISTS (SELECT * FROM Ticket WHERE email IN (%s,%s)))', ["ny123@nyu.edu", "ny233@nyu.edu"])
+
+        result = get_filter_flight(
+            emails=FilterSet(["ny233@nyu.edu", "ny123@nyu.edu"]), filter_by_emails=True
+        )
+        expected = (
+            "SELECT * FROM Flight WHERE (EXISTS (SELECT * FROM Ticket WHERE email IN (%s,%s) AND (Ticket.dep_date, Ticket.dep_time, Ticket.flight_number)=(Flight.dep_date, Flight.dep_time, Flight.flight_number)))",
+            ["ny123@nyu.edu", "ny233@nyu.edu"],
+        )
         self.assertEqual(expected[0], result[0])
         self.assertCountEqual(expected[1], result[1])
     
