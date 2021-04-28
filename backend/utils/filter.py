@@ -1,4 +1,4 @@
-from typing import Optional, TypeVar, Generic, Iterable, Any, Union, Tuple, List, Set
+from typing import Any, Optional, TypeVar, Generic, Iterable, Union, Tuple, List, Set, Callable
 from enum import Enum, auto
 from functools import partial
 from datetime import date, time, datetime
@@ -67,11 +67,13 @@ class FilterType(Enum):
     ALL_FUTURE_FLIGHTS = 'all_future'
     CUST_FUTURE_FLIGHTS = 'customer_future'
     CUST_TICKETS = 'customer_tickets'
+    FLIGHT_COMMENTS = 'flight_comments'
     # The following filters are advanced filters that require the filter generator.
     # We need to keep track of the advanced filters in the set ADVANCED_FILTERS.
     ADVANCED_FLIGHT = 'advanced_flight'
     ADVANCED_SPENDINGS = 'advanced_spendings'
 
+SELECT_FLIGHT_COMMENTS = 'SELECT * FROM Feedback WHERE flight_number={} AND dep_date=%(dep_date)s AND dep_time=%(dep_time)s'
 SELECT_ALL_FUTURE_FLIGHTS = 'SELECT * FROM future_flights;'
 SELECT_CUSTOMER_TICKETS = 'call customer_tickets(%(email)s);' # "email" must matches the key name for session
 SELECT_CUSTOMER_FLIGHTS = 'call customer_flights(%(email)s);'
@@ -133,7 +135,7 @@ class Filter:
     def add_aggregated(self, column_name: str, func_name: str):
         pass
         
-    def add_optional_constraint(self, column_name: str, constraint: Optional[str]):
+    def add_optional_constraint(self, column_name: str, constraint: Optional[T]):
         """
         Create a '=' constraint in the where clause if it's specified. The arguments still need to be 
         passed to cursor.execute as we cannot trust user inputs of string values (like for airport name).
@@ -141,8 +143,11 @@ class Filter:
         if constraint is None:
             return self
         else:
-            self.where_clause.append('{}=%s'.format(column_name))
-            self.string_values.append(constraint)
+            if isinstance(constraint, int):
+                self.where_clause.append('{}={}'.format(column_name, str(constraint)))
+            else:
+                self.where_clause.append('{}=%s'.format(column_name))
+                self.string_values.append(constraint)
             return self
     
     def add_sub_filter(self, sub_filter):
@@ -163,6 +168,23 @@ class Filter:
             self.string_values.append(value)
         return self
     
+    def add_static_filter(self, predicate: str, *values):
+        self.where_clause.append(predicate)
+        for value in values:
+            self.string_values.append(value)
+        return self
+    
+    def conditonally_add(self, condition: bool, func: Callable, *args: Any):
+        # We use this to avoid calling functions from instances of filter.
+        try:
+            func_ = getattr(self, func.__name__)
+        except AttributeError:
+            raise AssertionError('conditionally_add expects to take an add function from filter!')
+        if condition:
+            func_(*args)
+
+        return self
+    
     def get_formatted(self) -> Tuple[str, list]:
         """
         Returns a query string, formatted, and the values left for string interpolation.
@@ -172,6 +194,8 @@ class Filter:
         return self.base_query.format(where='WHERE ' + ' AND '.join(self.where_clause) if len(self.where_clause) > 0 else ''), self.string_values
 
 def get_filter_flight(
+    flight_number: Optional[int] = None,
+    filter_by_emails: Optional[bool] = False,
     dep_date_range: Optional[FilterRange[str]] = None,
     dep_time_range: Optional[FilterRange[str]] = None,
     arr_date_range: Optional[FilterRange[str]] = None,
@@ -180,24 +204,36 @@ def get_filter_flight(
     dep_city: Optional[str] = None,
     arr_airport: Optional[str] = None,
     arr_city: Optional[str] = None,
-    customer_emails: Optional[FilterSet] = None,
+    emails: Optional[FilterSet] = None,
+    is_customer: Optional[bool] = True,
     round_trip: bool = False,
 ) -> Tuple[str, list]:
     if arr_city or dep_city:
         base_query = 'SELECT * FROM verbose_flights {where}' 
+        flight_table = 'verbose_flights'
     else:
         base_query = 'SELECT * FROM Flight {where}'
+        flight_table = 'Flight'
     filter = Filter(base_query)
-    sec_filter = Filter('EXISTS (SELECT * FROM Ticket {where})').add_filter_set('email', customer_emails) if customer_emails is not None and customer_emails.filter_set is not None else None
+    if emails is not None and emails.filter_set is not None:
+        if is_customer:
+            sec_filter = Filter('EXISTS (SELECT * FROM Ticket {where})').add_filter_set('email', emails)
+        else:
+            sec_filter = Filter('EXISTS (SELECT * FROM Ticket JOIN BookingAgent ON(Ticket.booking_agent_ID=BookingAgent.booking_agent_ID) {where})').add_filter_set('BookingAgent.email', emails)
+        sec_filter.add_static_filter('(Ticket.dep_date, Ticket.dep_time, Ticket.flight_number)=({flight}.dep_date, {flight}.dep_time, {flight}.flight_number)'.format(flight=flight_table))
+    else:
+        sec_filter = None
     filter.add_filter_range('dep_date', dep_date_range)\
         .add_filter_range('dep_time', dep_time_range)\
         .add_filter_range('arr_date', arr_date_range)\
         .add_filter_range('arr_time', arr_time_range)\
+        .add_optional_constraint('flight_number', flight_number)\
         .add_optional_constraint('dep_airport', dep_airport)\
         .add_optional_constraint('arr_airport', arr_airport)\
         .add_optional_constraint('dep_city', dep_city)\
         .add_optional_constraint('arr_city', arr_city)\
-        .add_sub_filter(sec_filter)
+        .conditonally_add(filter_by_emails, filter.add_sub_filter, sec_filter)
+    print(filter.get_formatted())
     return filter.get_formatted()
 
 def get_filter_spendings(
@@ -236,6 +272,8 @@ def get_filter_query(filter: FilterType, **kwargs) -> Tuple[str, Union[list, dic
             )
         elif filter is FilterType.ADVANCED_FLIGHT:
             return get_filter_flight(
+                flight_number=kwargs.get('flight_number'),
+                filter_by_emails=kwargs.get('filter_by_emails'),
                 dep_date_range=FilterRange(kwargs.get('dep_date_lower'), kwargs.get('dep_date_upper')),
                 dep_time_range=FilterRange(kwargs.get('dep_time_lower'), kwargs.get('dep_time_upper')),
                 arr_date_range=FilterRange(kwargs.get('arr_date_lower'), kwargs.get('arr_date_upper')),
@@ -244,7 +282,8 @@ def get_filter_query(filter: FilterType, **kwargs) -> Tuple[str, Union[list, dic
                 dep_city=kwargs.get('dep_city'),
                 arr_airport=kwargs.get('arr_airport'),
                 arr_city=kwargs.get('arr_city'),
-                customer_emails=FilterSet(kwargs.get('customer_emails')),
+                emails=FilterSet(kwargs.get('emails')),
+                is_customer=kwargs.get('is_customer'),
             )
         else:
             raise ValueError('The filter {filter} is invalid.'.format(filter=filter))

@@ -26,11 +26,13 @@ def do_search(conn: Connection, data: Dict[str, Any], session: Dict[str, Any], f
 
     if user_type is DataType.CUST:
         filter_data['emails'] = [session['email']]
+        filter_data['is_customer'] = True
     elif user_type is DataType.AGENT:
         filter_data['emails'] = [session['agent_email']]
+        filter_data['is_customer'] = False
 
     try:
-        result = query_by_filter(conn, filter_type, **data.get('filter_data', {}), **session)
+        result = query_by_filter(conn, filter_type, **filter_data, **session)
     except TypeError as err:
         raise JsonError('Malformed request! Are you attempting to pass your email address?')
     except QueryKeyError as err:

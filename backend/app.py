@@ -128,6 +128,7 @@ def login(login_type: str):
     # If no error is thrown in check_login, our user is OK
     user_data = check_login(conn, user_type, **data)
     
+    session.clear()
     session['user_type'] = user_type.value
     if user_type == DataType.CUST:
         session['email'] = user_data[0]

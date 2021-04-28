@@ -1,6 +1,7 @@
 import flask_unittest # type: ignore
 import json
 
+from typing import Any, Dict
 from flask import request, Flask, session
 from backend.app import app
 
@@ -101,14 +102,14 @@ class TestSearch(flask_unittest.ClientTestCase):
         self.assertEqual(dict(result='error', message='You don\'t have the permission to use this filter!'), response.json)
     
     def test_search_advanced_flight(self, client):
-        response = client.post('/login/agent', json=dict(booking_agent_id=1, email='book3083@booking.com', password='best123'))
-        assert dict(result='success') == response.json 
+        response = client.post('/login/staff', json=dict(username='staffnumberone', password='wendy'))
+        assert dict(result='success') == response.json
 
         response = client.post('/search/advanced_flight', json=dict(filter_data=dict(dep_date_lower='2021-05-27', dep_date_upper='2022-05-29')))
         self.assertEqual('success', response.json['result'])
         self.assertEqual(self.future_flights, json.loads(response.json['data']))
         
-        filter_data = dict(
+        filter_data: Dict[str, Any] = dict(
             dep_date_lower='2022-01-01',
             dep_date_upper='2023-01-01',
             dep_time_lower='00:15:44',
@@ -142,6 +143,62 @@ class TestSearch(flask_unittest.ClientTestCase):
         ]
         
         response = client.post('/search/advanced_flight', json=dict(filter_data=filter_data))
+        self.assertEqual('success', response.json['result'])
+        self.assertEqual(expected, json.loads(response.json['data']))
+        
+        # Test flight filter for customer
+
+        filter_data['filter_by_emails'] = True
+
+        response = client.post('/login/cust', json=dict(email='speiaz123@nyu.edu', password='wendy'))
+        assert dict(result='success') == response.json
+
+        response = client.post('/search/advanced_flight', json=dict(filter_data=filter_data))
+        self.assertEqual('success', response.json['result'])
+        self.assertEqual([], json.loads(response.json['data']))
+
+        expected = [
+            [
+                12345,
+                '2021-03-28',
+                '13:33:44',
+                'PVG',
+                '2021-03-28',
+                '23:43:44',
+                'JFK',
+                '40.00',
+                'ontime',
+                5,
+                'Evergreen'
+            ]
+        ]
+        
+        response = client.post('/search/advanced_flight', json=dict(filter_data=dict(filter_by_emails=True)))
+        self.assertEqual('success', response.json['result'])
+        self.assertEqual(expected, json.loads(response.json['data']))
+
+        # Test flight filter for booking agent
+
+        expected = [
+            [
+                12345,
+                '2021-03-28',
+                '13:33:44',
+                'PVG',
+                '2021-03-28',
+                '23:43:44',
+                'JFK',
+                '40.00',
+                'ontime',
+                5,
+                'Evergreen'
+            ]
+        ]
+
+        response = client.post('/login/agent', json=dict(booking_agent_id=1, email='book3083@booking.com', password='best123'))
+        assert dict(result='success') == response.json 
+        
+        response = client.post('/search/advanced_flight', json=dict(filter_data=dict(filter_by_emails=True)))
         self.assertEqual('success', response.json['result'])
         self.assertEqual(expected, json.loads(response.json['data']))
 
