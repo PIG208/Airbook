@@ -21,6 +21,10 @@
     "jsx": "react-jsx"
   },
   "include": [
-    "src"
+    "src",
+    "src/pages",
+    "src/components",
+    "src/tests",
+    "src/api",
   ]
 }
