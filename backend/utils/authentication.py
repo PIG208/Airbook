@@ -61,14 +61,24 @@ def have_access_to_filter(data_type: Optional[DataType], filter: FilterType):
 
 def check_login(conn: Connection, login_type: DataType, **kwargs: str):
     try:
-        if "password" not in kwargs:
-            raise MissingKeyError("password")
-        if login_type == DataType.CUST:
-            result = query(conn, CHECK_CUST_LOGIN, FetchMode.ONE, 1, kwargs)
-        elif login_type == DataType.STAFF:
-            result = query(conn, CHECK_STAFF_LOGIN, FetchMode.ONE, 1, kwargs)
-        elif login_type == DataType.AGENT:
-            result = query(conn, CHECK_AGENT_LOGIN, FetchMode.ONE, 1, kwargs)
+        data = {}
+        try:
+            if login_type is DataType.STAFF:
+                data["username"] = kwargs["username"]
+            else:
+                data["email"] = kwargs["email"]
+            if login_type is DataType.AGENT:
+                data["booking_agent_id"] = kwargs["booking_agent_id"]
+            data["password"] = kwargs["password"]
+        except KeyError as err:
+            raise MissingKeyError(key=err.args[0])
+
+        if login_type is DataType.CUST:
+            result = query(conn, CHECK_CUST_LOGIN, FetchMode.ONE, 1, data)
+        elif login_type is DataType.STAFF:
+            result = query(conn, CHECK_STAFF_LOGIN, FetchMode.ONE, 1, data)
+        elif login_type is DataType.AGENT:
+            result = query(conn, CHECK_AGENT_LOGIN, FetchMode.ONE, 1, data)
         else:
             raise JsonError("Invalid login method!")
     except QueryKeyError as err:
