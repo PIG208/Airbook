@@ -16,16 +16,16 @@
 
     ---
 
-    **supported params**
+    **Supported Params**
 
     - register_type:
-        - CUST
-        - STAFF
-        - AGENT
+        - cust
+        - staff
+        - agent
 
     ---
 
-    **request**
+    **Request**
     
     - `POST /register/cust`:
 
@@ -67,13 +67,22 @@
 
     ---
 
-    **response**
+    **Response**
 
     ```json
     {
         "result": "success"
     }
     ```
+
+    - For booking agent registration
+  
+        ```json
+        {
+            "result": "success",
+            "id": 2
+        }
+        ```
 
     ```json
     {
@@ -88,20 +97,20 @@
 
     Request filtered data from the server (public information only).
 
-    **supported params**
+    **Supported Params**
 
     - filter:
         - all_future
     
     ---
 
-    **request**
+    **Request**
 
     No required fields.
     
     ---
 
-    **response**
+    **Response**
 
     - `GET /search-public/all_future`
 
@@ -145,7 +154,7 @@
 
     Request data from the server using advanced filters (authenticated users only).
 
-    **supported params**
+    **Supported Params**
 
     - filter
 
@@ -161,7 +170,7 @@
     
     ---
     
-    **request**
+    **Request**
     
     - `POST /search/customer_future`: Give all the future flights of the customer.
 
@@ -193,3 +202,60 @@
 -----
 
 - `POST /login/<login_type>`
+
+    Login as one of the three types of users.
+
+    ---
+
+    **Supported Params**
+
+    - login_type:
+        - cust
+        - staff
+        - agent
+
+    ---
+
+    **Request**
+
+    - `POST /login/cust`
+    
+        ```json
+        {
+            "email": "test@example.com",
+            "password": "123123"
+        }
+        ```
+
+    - `POST /login/agent`
+    
+        ```json
+        {
+            "email": "booking@agent.com",
+            "booking_agent_id": "2",
+            "password": "asdasd"
+        }
+        ```
+        
+    - `POST /login/staff`
+    
+        ```json
+        {
+            "username": "staffone",
+            "password": "ouasdasd"
+        }
+        ```
+    
+    **Response**
+
+    ```json
+    {
+        "result": "success"
+    }
+    ```
+
+    ```json
+    {
+        "result": "error",
+        "message": "The input information or the password does not match"
+    }
