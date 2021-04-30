@@ -19,8 +19,23 @@ class MissingKeyError(JsonError):
         super().__init__('Missing required key "{}"!'.format(key), key=key)
 
 
+class ExistingRegisterError(JsonError):
+    def __init__(self, key: str, value: str):
+        super().__init__(
+            "{} has already been used!".format(value),
+            key=key,
+            value=value,
+        )
+
+
 class QueryError(AirbookError):
     pass
+
+
+class QueryDuplicateError(QueryError):
+    def __init__(self, key: str, value: str):
+        self.key = key
+        self.value = value
 
 
 class QueryKeyError(QueryError):

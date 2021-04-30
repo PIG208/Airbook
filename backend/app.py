@@ -5,7 +5,14 @@ from backend.utils.authentication import check_login, require_session
 from backend.utils.query import insert_into, query
 from backend.utils.authentication import PublicFilters, DataType, is_user
 from backend.utils.encryption import check_hash, generate_hash
-from backend.utils.error import raise_error, JsonError, MissingKeyError, QueryKeyError
+from backend.utils.error import (
+    raise_error,
+    JsonError,
+    MissingKeyError,
+    QueryKeyError,
+    QueryDuplicateError,
+    ExistingRegisterError,
+)
 from backend.search import do_search
 
 import json
@@ -45,7 +52,7 @@ def register(register_type: str):
     try:
         hashed_password, salt = generate_hash(data["password"])
 
-        if user_type == DataType.CUST:
+        if user_type is DataType.CUST:
             insert_into(
                 conn,
                 user_type.get_table(),
@@ -63,7 +70,7 @@ def register(register_type: str):
                 state=data.get("state", ""),
             )
             session["email"] = data["email"]
-        elif user_type == DataType.STAFF:
+        elif user_type is DataType.STAFF:
             insert_into(
                 conn,
                 user_type.get_table(),
@@ -76,7 +83,7 @@ def register(register_type: str):
                 airline_name=data["airline_name"],
             )
             session["username"] = data["username"]
-        elif user_type == DataType.AGENT:
+        elif user_type is DataType.AGENT:
             agent_id = insert_into(
                 conn,
                 user_type.get_table(),
@@ -88,10 +95,15 @@ def register(register_type: str):
             session["agent_email"] = data["email"]
     except QueryKeyError as err:
         raise MissingKeyError(err.get_key())
+    except QueryDuplicateError as err:
+        raise ExistingRegisterError(err.key, err.value)
 
     session["user_type"] = user_type.value
 
-    return jsonify(result="success")
+    if user_type is DataType.AGENT:
+        return jsonify(result="success", id=agent_id)
+    else:
+        return jsonify(result="success")
 
 
 @app.route("/search-public/<filter>", methods=["POST"])

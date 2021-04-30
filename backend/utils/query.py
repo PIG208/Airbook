@@ -1,9 +1,11 @@
+import re
+
 from pymysql import IntegrityError, ProgrammingError
 from pymysql.connections import Connection
 from typing import Dict, Any, Optional, Union
 from enum import Enum, auto
 
-from backend.utils.error import QueryError, QueryKeyError
+from backend.utils.error import QueryError, QueryKeyError, QueryDuplicateError
 
 INSERT_INTO = "INSERT INTO {} ({}) VALUES ({});"
 SELECT_IDENTITY = "SELECT @@IDENTITY;"
@@ -69,6 +71,10 @@ ENTITY_TO_TABLE_MAP = {
     DataType.PHONENUM: "PhoneNumber",
 }
 
+DUPLICATE_KEY_ERROR_PATTERN = re.compile(
+    r"Duplicate entry \'(.*)\' for key \'(.*)\.(.*)\'"
+)
+
 
 def form_args_list(args, backticks=False):
     """
@@ -96,7 +102,11 @@ def insert_into(conn: Connection, table_name: str, **kwargs: Any) -> Optional[in
             )
             result = cursor.lastrowid
     except IntegrityError as err:
-        raise QueryError(*err.args)
+        matches = DUPLICATE_KEY_ERROR_PATTERN.match(err.args[1])
+        if err.args[0] == 1062 and matches is not None:
+            raise QueryDuplicateError(matches.group(3), matches.group(1))
+        else:
+            raise QueryError(*err.args)
     except ProgrammingError as err:
         raise QueryError(*err.args)
     if result is not None:
