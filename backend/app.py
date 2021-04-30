@@ -1,6 +1,6 @@
 from os import urandom
 from flask import Flask, request, jsonify, make_response, session
-from flask_cors import CORS  # type: ignore
+from flask_cors import CORS, cross_origin  # type: ignore
 from backend.utils.authentication import check_login, require_session
 from backend.utils.query import insert_into, query
 from backend.utils.authentication import PublicFilters, DataType, is_user
@@ -27,7 +27,8 @@ def home():
     return app.send_static_file("index.html")
 
 
-@app.route("/register/<register_type>", methods=["GET", "POST"])
+@app.route("/register/<register_type>", methods=["POST"])
+@cross_origin(supports_credentials=True)
 @raise_error
 def register(register_type: str):
     data = request.get_json()
@@ -126,7 +127,8 @@ def search(filter: str):
     )
 
 
-@app.route("/login/<login_type>", methods=["GET", "POST"])
+@app.route("/login/<login_type>", methods=["POST"])
+@cross_origin(supports_credentials=True)
 @raise_error
 def login(login_type: str):
     data = request.get_json()
