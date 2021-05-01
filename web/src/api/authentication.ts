@@ -18,13 +18,14 @@ export type LoginProp = {
 export type RegisterProp = {
   registerType: UserType;
   password: string;
+  passwordConfirm?: string;
   email?: string;
-  dateOfBirth?: string;
+  dateOfBirth?: Date;
   // Customer-only fields
   name?: string;
   phoneNumber?: string;
   passportNumber?: string;
-  passportExpiration?: string;
+  passportExpiration?: Date;
   passportCountry?: string;
   street?: string;
   city?: string;
@@ -53,16 +54,32 @@ export async function login(prop: LoginProp): Promise<ResponseProp> {
 
 export async function register(prop: RegisterProp): Promise<ResponseProp> {
   let data = null;
+  let dateOfBirth = null;
+  let passportExpiration = null;
+  if (prop.registerType !== UserType.AGENT) {
+    try {
+      dateOfBirth = prop.dateOfBirth?.toJSON().slice(0, 10);
+    } catch {
+      return { result: "error", message: "Invalid date of birth!" };
+    }
+  }
+  if (prop.registerType === UserType.CUST) {
+    try {
+      passportExpiration = prop.passportExpiration?.toJSON().slice(0, 10);
+    } catch {
+      return { result: "error", message: "Invalid passport expiration date!" };
+    }
+  }
   await axios
     .post(getRegisterURL(prop.registerType), {
       password: prop.password,
       email: prop.email,
-      date_of_birth: prop.dateOfBirth,
+      date_of_birth: dateOfBirth,
       // Fields for customer
       name: prop.name,
       phone_number: prop.phoneNumber,
       passport_number: prop.passportNumber,
-      passport_expiration: prop.passportExpiration,
+      passport_expiration: passportExpiration,
       passport_country: prop.passportCountry,
       street: prop.street,
       city: prop.city,
