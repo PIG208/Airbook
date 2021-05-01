@@ -123,6 +123,37 @@ export default function RegisterForm() {
       </ConditionalFormGroup>
 
       <ConditionalFormGroup
+        controlId="formAirlineName"
+        condition={watchRegisterType === UserType.STAFF}
+      >
+        <Form.Label>Airline Name</Form.Label>
+        <Controller
+          name="airlineName"
+          control={control}
+          defaultValue={""}
+          rules={{
+            validate: {
+              required: (v) => {
+                return (
+                  getValues().registerType !== UserType.STAFF ||
+                  !!v ||
+                  "The airline name is required!"
+                );
+              },
+            },
+          }}
+          render={({ field }) => (
+            <Form.Control
+              {...field}
+              placeholder="Your airline name here"
+              isInvalid={errors.airlineName !== undefined}
+            />
+          )}
+        />
+        <FormErrorMessage message={errors.airlineName?.message} />
+      </ConditionalFormGroup>
+
+      <ConditionalFormGroup
         controlId="formUsername"
         condition={watchRegisterType === UserType.STAFF}
       >
