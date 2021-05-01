@@ -93,6 +93,8 @@ def register(register_type: str):
             )
             session["agent_id"] = agent_id
             session["agent_email"] = data["email"]
+    except KeyError as err:
+        raise MissingKeyError(err.args[0])
     except QueryKeyError as err:
         raise MissingKeyError(err.get_key())
     except QueryDuplicateError as err:
