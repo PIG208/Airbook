@@ -1,5 +1,15 @@
 .portico {
   display: block;
-  width: 400px;
+  width: 50vw;
+  max-width: 600px;
   color: black;
+}
+
+@media (max-width: 767px) {
+  .portico {
+    max-width: unset;
+    border-radius: 0;
+    width: 100vw;
+    min-height: 100vh;
+  }
 }

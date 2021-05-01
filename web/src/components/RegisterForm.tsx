@@ -12,6 +12,7 @@ import HintMessage from "./HintMessage";
 
 import "react-datepicker/dist/react-datepicker.css";
 import "../assets/Form.css";
+import { Col } from "react-bootstrap";
 
 export default function RegisterForm() {
   const {
@@ -149,6 +150,73 @@ export default function RegisterForm() {
         />
         <FormErrorMessage message={errors.userName?.message} />
       </ConditionalFormGroup>
+      <Form.Row>
+        <Col>
+          <ConditionalFormGroup
+            controlId="formFirstName"
+            condition={watchRegisterType === UserType.STAFF}
+          >
+            <Form.Label>First Name</Form.Label>
+            <Controller
+              name="firstName"
+              control={control}
+              defaultValue={""}
+              rules={{
+                validate: {
+                  required: (v) => {
+                    return (
+                      getValues().registerType !== UserType.STAFF ||
+                      !!v ||
+                      "The first name is required!"
+                    );
+                  },
+                },
+              }}
+              render={({ field }) => (
+                <Form.Control
+                  {...field}
+                  placeholder="Your first name here"
+                  isInvalid={errors.firstName !== undefined}
+                />
+              )}
+            />
+            <FormErrorMessage message={errors.firstName?.message} />
+          </ConditionalFormGroup>
+        </Col>
+
+        <Col>
+          <ConditionalFormGroup
+            controlId="formLastName"
+            condition={watchRegisterType === UserType.STAFF}
+          >
+            <Form.Label>Last Name</Form.Label>
+            <Controller
+              name="lastName"
+              control={control}
+              defaultValue={""}
+              rules={{
+                validate: {
+                  required: (v) => {
+                    return (
+                      getValues().registerType !== UserType.STAFF ||
+                      !!v ||
+                      "The last name is required!"
+                    );
+                  },
+                },
+              }}
+              render={({ field }) => (
+                <Form.Control
+                  {...field}
+                  placeholder="Your last name here"
+                  isInvalid={errors.lastName !== undefined}
+                />
+              )}
+            />
+            <FormErrorMessage message={errors.lastName?.message} />
+          </ConditionalFormGroup>
+        </Col>
+      </Form.Row>
 
       <ConditionalFormGroup
         controlId="formName"

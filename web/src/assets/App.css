@@ -17,6 +17,12 @@
   }
 }
 
+@media (max-width: 767px) {
+  .App-logo {
+    display: none;
+  }
+}
+
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
