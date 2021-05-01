@@ -1,0 +1,32 @@
+.fadein {
+  transition: all 0.33s;
+  animation: fadein ease 0.5s;
+}
+
+.fadeout {
+  transition: all 0.33s;
+  animation: fadeout ease 0.5s;
+  opacity: 0;
+}
+
+.transparent {
+  opacity: 0;
+}
+
+@keyframes fadein {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeout {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

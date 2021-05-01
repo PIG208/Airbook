@@ -1,0 +1,11 @@
+.hint-message {
+  display: flex;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  vertical-align: middle;
+}
+
+.hint-message span {
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
