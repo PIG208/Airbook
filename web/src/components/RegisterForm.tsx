@@ -1,10 +1,10 @@
-import React, { forwardRef, useState } from "react";
+import { forwardRef, useEffect, useState } from "react";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import DatePicker from "react-datepicker";
 import SelectUserType from "./SelectUserType";
 import { useForm, Controller } from "react-hook-form";
-import { login, register, RegisterProp, UserType } from "../api/authentication";
+import { register, RegisterProp, UserType } from "../api/authentication";
 import ConditionalFormGroup from "./ConditionalFormGroup";
 import AlertMessage from "./AlertMessage";
 import FormErrorMessage from "./FormErrorMessage";
@@ -12,12 +12,6 @@ import HintMessage from "./HintMessage";
 
 import "react-datepicker/dist/react-datepicker.css";
 import "../assets/Form.css";
-
-interface ICustomInput {
-  onChange: React.ChangeEventHandler;
-  value: string;
-  onClick: React.MouseEventHandler;
-}
 
 export default function RegisterForm() {
   const {
@@ -32,16 +26,26 @@ export default function RegisterForm() {
   const [pending, setPending] = useState(false);
   const watchRegisterType = watch("registerType", UserType.CUST);
 
+  useEffect(() => {
+    setRegisterError("");
+    clearErrors();
+    setPending(false);
+  }, [setRegisterError, clearErrors]);
+
   const handleRegister = (data: RegisterProp) => {
     setPending(true);
     const currentSubmitCount = submitCount;
     register(data)
       .then((resgisterResult) => {
         if (resgisterResult.result === "success") {
+          if (submitCount !== currentSubmitCount) {
+            console.log("Cancel on stale submission");
+            return;
+          }
           setRegisterError("");
           alert(
             `success ${
-              data.registerType == UserType.AGENT ? resgisterResult.id : ""
+              data.registerType === UserType.AGENT ? resgisterResult.id : ""
             }`
           );
         } else {
@@ -49,6 +53,10 @@ export default function RegisterForm() {
         }
       })
       .finally(() => {
+        if (submitCount !== currentSubmitCount) {
+          console.log("Cancel on stale submission");
+          return;
+        }
         setPending(false);
       });
   };
@@ -193,7 +201,7 @@ export default function RegisterForm() {
               numeric: (v) => {
                 return (
                   getValues().registerType !== UserType.CUST ||
-                  (Number(v) !== NaN && Number(v) > 0) ||
+                  (!isNaN(v) && Number(v) > 0) ||
                   "The phone number is invalid!"
                 );
               },

@@ -1,5 +1,3 @@
-import React from "react";
-import { register, UserType } from "../api/authentication";
 import logo from "../assets/logo.svg";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../assets/App.css";

@@ -150,7 +150,7 @@ export default function LoginForm() {
                   return (
                     getValues().loginType !== UserType.AGENT ||
                     !!v ||
-                    (v != "" && v == 0) ||
+                    (v !== "" && v !== 0) ||
                     "Booking agent ID is required!"
                   );
                 },
