@@ -7,6 +7,8 @@ import HintMessage from "./HintMessage";
 import SelectUserType from "./SelectUserType";
 import FormErrorMessage from "./FormErrorMessage";
 import "../assets/Form.css";
+import { IFormProps } from "../api/utils";
+import { ResponseProp } from "../api/api";
 
 export default function LoginForm() {
   const {

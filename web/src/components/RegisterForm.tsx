@@ -13,6 +13,8 @@ import HintMessage from "./HintMessage";
 import "react-datepicker/dist/react-datepicker.css";
 import "../assets/Form.css";
 import { Col } from "react-bootstrap";
+import { IFormProps } from "../api/utils";
+import { ResponseProp } from "../api/api";
 
 export default function RegisterForm() {
   const {
