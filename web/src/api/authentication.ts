@@ -5,6 +5,7 @@ export enum UserType {
   CUST = "cust",
   AGENT = "agent",
   STAFF = "staff",
+  PUBLIC = "public",
 }
 
 export type LoginProp = {
