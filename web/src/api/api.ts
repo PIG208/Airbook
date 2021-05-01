@@ -1,12 +1,15 @@
-import {UserType} from './authentication';
+import { UserType } from "./authentication";
 
 export type ResponseProp = {
-    result: string,
-    message?: string,
-    data?: any
-}
+  result: string;
+  message?: string;
+  data?: any;
+  id?: number;
+};
 
 const host = "http://localhost:5000";
 export const getLoginURL = (method: UserType) => `${host}/login/${method}`;
-export const getRegisterURL = (method: UserType) => `${host}/register/${method}`;
-export const getPublicSearchURL = (filter: string) => `${host}/search-public/${filter}`;
+export const getRegisterURL = (method: UserType) =>
+  `${host}/register/${method}`;
+export const getPublicSearchURL = (filter: string) =>
+  `${host}/search-public/${filter}`;
