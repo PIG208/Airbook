@@ -1,5 +1,7 @@
 import React from "react";
 import { WithChildren } from "./Utils";
+import Card from "react-bootstrap/Card";
+import "../assets/Portico.css";
 
 type PorticoProp = {
   title?: string;
@@ -7,10 +9,12 @@ type PorticoProp = {
 
 const Portico = (props: WithChildren<PorticoProp>) => {
   return (
-    <div style={{ minWidth: "400px" }}>
-      <h1>{props.title}</h1>
-      {props.children}
-    </div>
+    <Card className="portico">
+      <Card.Header>
+        <h2>{props.title}</h2>
+      </Card.Header>
+      <Card.Body>{props.children}</Card.Body>
+    </Card>
   );
 };
 
