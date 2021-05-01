@@ -29,6 +29,7 @@ export default function LoginForm() {
 
   const handleLogin = (data: LoginProp) => {
     setPending(true);
+    setLoginError("");
     const currentSubmitCount = submitCount;
     login(data)
       .then((loginResult) => {

@@ -34,6 +34,7 @@ export default function RegisterForm() {
 
   const handleRegister = (data: RegisterProp) => {
     setPending(true);
+    setRegisterError("");
     const currentSubmitCount = submitCount;
     register(data)
       .then((resgisterResult) => {
