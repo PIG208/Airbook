@@ -10,13 +10,15 @@ class TestLogin(flask_unittest.ClientTestCase):
         response = client.post(
             "/login/cust", json=dict(email="speiaz123@nyu.edu", password="wendy")
         )
-        self.assertEqual(dict(result="success"), response.json)
+        self.assertEqual("success", response.json["result"])
+        # self.assertEqual(dict(result="success"), response.json)
 
     def test_staff_login(self, client):
         response = client.post(
             "/login/staff", json=dict(username="staffnumberone", password="wendy")
         )
-        self.assertEqual(dict(result="success"), response.json)
+        self.assertEqual("success", response.json["result"])
+        # self.assertEqual(dict(result="success"), response.json)
 
     def test_agent_login(self, client):
         response = client.post(
@@ -25,7 +27,8 @@ class TestLogin(flask_unittest.ClientTestCase):
                 booking_agent_id=1, email="book3083@booking.com", password="best123"
             ),
         )
-        self.assertEqual(dict(result="success"), response.json)
+        self.assertEqual("success", response.json["result"])
+        # self.assertEqual(dict(result="success"), response.json)
 
     def test_login_missing_key(self, client):
         response = client.post(
@@ -53,7 +56,10 @@ class TestLogin(flask_unittest.ClientTestCase):
         )
 
     def test_login_missing_password(self, client):
-        response = client.post("/login/agent", json=dict(booking_agent_id="1"))
+        response = client.post(
+            "/login/agent",
+            json=dict(booking_agent_id="1", email="book3083@booking.com"),
+        )
         self.assertEqual(
             dict(
                 result="error",

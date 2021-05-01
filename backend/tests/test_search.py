@@ -48,7 +48,7 @@ class TestSearch(flask_unittest.ClientTestCase):
         response = client.post(
             "/login/cust", json=dict(email="speiaz123@nyu.edu", password="wendy")
         )
-        assert dict(result="success") == response.json
+        assert response.json["result"] == "success"
 
         response = client.post("/search/customer_future")
         self.assertEqual("success", response.json["result"])
@@ -85,7 +85,7 @@ class TestSearch(flask_unittest.ClientTestCase):
         response = client.post(
             "/login/cust", json=dict(email="speiaz123@nyu.edu", password="wendy")
         )
-        assert dict(result="success") == response.json
+        assert response.json["result"] == "success"
 
         response = client.post(
             "/search/customer_future",
@@ -102,7 +102,7 @@ class TestSearch(flask_unittest.ClientTestCase):
         response = client.post(
             "/login/staff", json=dict(username="staffnumberone", password="wendy")
         )
-        assert dict(result="success") == response.json
+        assert response.json["result"] == "success"
 
         response = client.post("/search/advanced_spendings", json=dict(filter_data={}))
         self.assertEqual(
@@ -138,7 +138,7 @@ class TestSearch(flask_unittest.ClientTestCase):
                 booking_agent_id=1, email="book3083@booking.com", password="best123"
             ),
         )
-        assert dict(result="success") == response.json
+        assert response.json["result"] == "success"
 
         response = client.post("/search/customer_future")
         self.assertEqual(
@@ -153,7 +153,7 @@ class TestSearch(flask_unittest.ClientTestCase):
         response = client.post(
             "/login/staff", json=dict(username="staffnumberone", password="wendy")
         )
-        assert dict(result="success") == response.json
+        assert response.json["result"] == "success"
 
         response = client.post(
             "/search/advanced_flight",
@@ -212,7 +212,7 @@ class TestSearch(flask_unittest.ClientTestCase):
         response = client.post(
             "/login/cust", json=dict(email="speiaz123@nyu.edu", password="wendy")
         )
-        assert dict(result="success") == response.json
+        assert response.json["result"] == "success"
 
         response = client.post(
             "/search/advanced_flight", json=dict(filter_data=filter_data)
@@ -267,7 +267,7 @@ class TestSearch(flask_unittest.ClientTestCase):
                 booking_agent_id=1, email="book3083@booking.com", password="best123"
             ),
         )
-        assert dict(result="success") == response.json
+        assert response.json["result"] == "success"
 
         response = client.post(
             "/search/advanced_flight",
@@ -280,7 +280,7 @@ class TestSearch(flask_unittest.ClientTestCase):
         response = client.post(
             "/login/cust", json=dict(email="ny2311@nyu.edu", password="best123")
         )
-        assert dict(result="success") == response.json
+        assert response.json["result"] == "success"
 
         response = client.post("/search/advanced_spendings", json=dict(filter_data={}))
         expected = [
