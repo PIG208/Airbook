@@ -1,5 +1,5 @@
 from os import urandom
-from flask import Flask, request, jsonify, make_response, session
+from flask import Flask, request, jsonify, make_response, session, send_file
 from flask_cors import CORS, cross_origin  # type: ignore
 from backend.utils.authentication import check_login, require_session
 from backend.utils.query import insert_into, query
@@ -18,8 +18,8 @@ from backend.search import do_search
 import json
 import pymysql.cursors
 
-app = Flask(__name__, static_url_path="", static_folder="../web/build")
-CORS(app)
+app = Flask(__name__)
+CORS(app, with_credentials=True)
 app.secret_key = urandom(16)
 conn = pymysql.connect(
     host="localhost",
@@ -29,9 +29,12 @@ conn = pymysql.connect(
 )
 
 
-@app.route("/", methods=["GET"])
-def home():
-    return app.send_static_file("index.html")
+# @app.route("/", defaults={"path": ""})
+# @app.route("/<path:path>", methods=["GET"])
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:test>")
+def home(test):
+    return send_file("../web/build/index.html")
 
 
 @app.route("/register/<register_type>", methods=["POST"])
@@ -112,6 +115,7 @@ def register(register_type: str):
 @raise_error
 def search_public(filter: str):
     data = request.get_json()
+    print(session)
     result = json.dumps(
         do_search(conn, data, session, filter, True),
         indent=4,
@@ -165,7 +169,7 @@ def login(login_type: str):
     elif user_type == DataType.STAFF:
         session["username"] = user_data[0]
 
-    return jsonify(result="success")
+    return jsonify(result="success", user_data=user_data)
 
 
 @app.errorhandler(401)
