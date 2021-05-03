@@ -1,0 +1,224 @@
+// We will have a left bar for functionalities
+// and a main view for displaying the data
+import "../assets/dashboard.css";
+
+import { AuthContext, useAuth } from "../api/use-auth";
+import Home from "../components/tools/Home";
+import {
+  AgentTools,
+  CustomerTools,
+  inUserTools,
+  ITools,
+  PublicTools,
+  Tools,
+} from "../api/tool";
+import {
+  useRouteMatch,
+  Route,
+  Switch,
+  Link,
+  useHistory,
+} from "react-router-dom";
+import { Nav } from "react-bootstrap";
+import { ReactComponent as Plane } from "../assets/paper-plane.svg";
+import {
+  List,
+  House,
+  Receipt,
+  BoxArrowRight,
+  Handbag,
+  ChatRightText,
+  Cash,
+  People,
+  Wallet,
+  Search,
+} from "react-bootstrap-icons";
+import { PublicUser } from "../api/authentication";
+import ViewFlights from "../components/tools/ViewFlights";
+import { useEffect } from "react";
+import LookupFlights from "../components/tools/LookupFlights";
+import PurchaseTickets from "../components/tools/PurchaseTickets";
+
+type DashboardRoute = {
+  tool: ITools;
+  ToolView: (props: { auth: AuthContext }) => React.ReactElement;
+  sidebar: (props: { auth: AuthContext }) => JSX.Element;
+};
+
+const routes: DashboardRoute[] = [
+  {
+    tool: PublicTools.HOME,
+    ToolView: () => <Home />,
+    sidebar: () => (
+      <div>
+        <House />
+        Home
+      </div>
+    ),
+  },
+  {
+    tool: PublicTools.VIEW_FLIGHTS,
+    ToolView: () => <ViewFlights />,
+    sidebar: () => (
+      <div>
+        <List />
+        View Flights
+      </div>
+    ),
+  },
+  {
+    tool: PublicTools.SEARCH_FLIGHTS,
+    ToolView: () => <LookupFlights />,
+    sidebar: () => (
+      <div>
+        <Search />
+        Search Flights
+      </div>
+    ),
+  },
+  {
+    tool: Tools.PURCHASE,
+    ToolView: () => <PurchaseTickets />,
+    sidebar: () => (
+      <div>
+        <Handbag />
+        Purchase Tickets
+      </div>
+    ),
+  },
+  {
+    tool: CustomerTools.VIEW_SPENDINGS,
+    ToolView: () => <Home />,
+    sidebar: () => (
+      <div>
+        <Wallet />
+        View Spendings
+      </div>
+    ),
+  },
+  {
+    tool: CustomerTools.COMMENT,
+    ToolView: () => <Home />,
+    sidebar: () => (
+      <div>
+        <ChatRightText />
+        Comment & Rate
+      </div>
+    ),
+  },
+  {
+    tool: AgentTools.VIEW_COMMISSION,
+    ToolView: () => <Home />,
+    sidebar: () => (
+      <div>
+        <Cash />
+        View Commission
+      </div>
+    ),
+  },
+  {
+    tool: AgentTools.TOP_CUST,
+    ToolView: () => <Home />,
+    sidebar: () => (
+      <div>
+        <People />
+        Top Customers
+      </div>
+    ),
+  },
+  {
+    tool: Tools.VIEW_REPORT,
+    ToolView: () => <Home />,
+    sidebar: () => (
+      <div>
+        <Receipt />
+        View Report
+      </div>
+    ),
+  },
+  {
+    tool: Tools.LOGOUT,
+    ToolView: ({ auth }) => {
+      let history = useHistory();
+      setTimeout(() => {
+        auth.logout((data) => {
+          history.push("/visitor");
+        });
+      }, 100);
+      return <div></div>;
+    },
+    sidebar: ({ auth }) => (
+      <div>
+        <BoxArrowRight />
+        {auth.userProp === PublicUser ? "Login" : "Logout"}
+      </div>
+    ),
+  },
+];
+
+export default function Dashboard() {
+  let match = useRouteMatch<{ tool: string }>("/dashboard/:tool");
+  let history = useHistory();
+  const auth = useAuth();
+
+  useEffect(() => {
+    if (match?.params.tool === undefined) {
+      history.replace("/dashboard/home");
+    }
+    auth.fetchSession();
+  }, []);
+
+  return (
+    <div className="dashboard">
+      <Nav className="flex-column dashboard-navbar" variant="pills">
+        <div className="nav-brand">
+          <Plane className="nav-icon" fill="white" stroke="transparent" />
+          <h2>Airbook</h2>
+        </div>
+        {routes
+          .filter((route) => {
+            return inUserTools(route.tool, auth.userProp.userType);
+          })
+          .map((route, index) => {
+            return (
+              <Nav.Item key={index}>
+                <Link
+                  to={`/dashboard/${route.tool}`}
+                  className={`nav-link ${
+                    match?.params.tool === route.tool ? "active" : ""
+                  }`}
+                >
+                  <route.sidebar auth={auth} />
+                </Link>
+              </Nav.Item>
+            );
+          })}
+      </Nav>
+      <div className="dashboard-view">
+        <div className="dashboard-main">
+          <Switch>
+            {routes.map((route, index) => {
+              return (
+                <Route
+                  key={index}
+                  path={`/dashboard/${route.tool}`}
+                  children={<route.ToolView auth={auth} />}
+                />
+              );
+            })}
+          </Switch>
+        </div>
+        <footer>
+          <div>
+            Special thanks to <a href="https://reactjs.org/">React</a>/
+            <a href="https://react-bootstrap.github.io/">React-Bootstrap</a>/
+            <a href="https://flask.palletsprojects.com/en/1.1.x/">Flask</a>/
+            <a href="https://www.freepik.com" title="Freepik">
+              Freepik
+            </a>
+          </div>
+        </footer>
+      </div>
+    </div>
+  );
+}

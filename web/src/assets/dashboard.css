@@ -1,0 +1,78 @@
+.dashboard {
+  width: 100vw;
+}
+
+.dashboard-navbar {
+  flex-wrap: nowrap;
+  height: 100vh;
+  width: 250px;
+  background-color: #282c34;
+  color: white;
+  box-shadow: -3px 1px 20px #282c34;
+}
+
+.dashboard-navbar .nav-brand {
+  font-size: 1.5rem;
+  text-align: center;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.dashboard-navbar .nav-brand .nav-icon {
+  width: 4rem;
+  transition: all 0.2s;
+}
+.dashboard-navbar .nav-brand:hover .nav-icon {
+  width: 4.5rem;
+}
+
+.dashboard-navbar .nav-link {
+  transition: border 0.2s;
+}
+
+.dashboard-navbar .nav-link > div {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.dashboard-navbar .nav-link > div svg {
+  margin-top: -4px;
+  margin-right: 0.25rem;
+  transition: all 0.2s;
+}
+
+.dashboard-navbar .nav-link:hover {
+  border: solid 1px white;
+}
+
+.dashboard-navbar .nav-link:hover > div svg {
+  font-size: 1.25rem;
+  width: 3rem;
+}
+
+.dashboard-navbar .nav-link {
+  color: white;
+}
+
+.dashboard-view {
+  position: absolute;
+  top: 0;
+  left: 250px;
+  width: calc(100% - 250px - 1rem);
+  padding: 1rem 0 0 1rem;
+  overflow-y: auto;
+  height: 100vh;
+}
+
+.dashboard-view .dashboard-main {
+  min-height: 96%;
+}
+
+.dashboard-view footer {
+  text-align: right;
+  margin-top: auto;
+  white-space: nowrap;
+  width: 100%;
+  height: 4%;
+  color: grey;
+}
