@@ -3,6 +3,8 @@
   width: 50vw;
   max-width: 600px;
   color: black;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
 }
 
 @media (max-width: 767px) {
@@ -11,5 +13,7 @@
     border-radius: 0;
     width: 100vw;
     min-height: 100vh;
+    margin-top: 0;
+    margin-bottom: 0;
   }
 }
