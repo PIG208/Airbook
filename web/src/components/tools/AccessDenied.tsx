@@ -1,8 +1,13 @@
 import { Card } from "react-bootstrap";
 import { ExclamationCircle } from "react-bootstrap-icons";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../api/use-auth";
 
 export default function AccessDenied() {
+  const auth = useAuth();
+  if (auth.authPending) {
+    return <div></div>;
+  }
   return (
     <Card>
       <Card.Body>

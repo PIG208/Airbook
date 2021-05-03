@@ -13,9 +13,11 @@ import {
   fetchSession as doFetchSession,
   LoginProp,
 } from "./authentication";
+import useIncrement from "./use-increment";
 
 export interface AuthContext {
   userProp: UserProp;
+  authPending: boolean;
   login: (props: LoginProp) => Promise<ResponseProp>;
   logout: (cb?: (data: ResponseProp) => void) => Promise<ResponseProp>;
   register: (props: RegisterProp) => Promise<ResponseProp>;
@@ -44,43 +46,88 @@ export const useAuth = () => {
 
 export const useProvideAuth = () => {
   const [userProp, setUserProp] = useState<UserProp>(PublicUser);
+  const [authPending, setAuthPending] = useState(false);
+  const { count, increment, reset } = useIncrement();
 
   const login = (props: LoginProp) => {
-    return doLogin(props).then((response) => {
-      if (response.result !== "error" && response.userData) {
-        setUserProp(response.userData);
-      }
-      return response;
-    });
+    increment();
+    const current = count;
+    setAuthPending(true);
+    return doLogin(props)
+      .then((response) => {
+        if (response.result !== "error" && response.userData) {
+          setUserProp(response.userData);
+        }
+        return response;
+      })
+      .finally(() => {
+        if (current === count) {
+          setAuthPending(false);
+        }
+      });
   };
 
   const register = (props: RegisterProp) => {
-    return doRegister(props).then((response) => {
-      if (response.result !== "error" && response.userData) {
-        setUserProp(response.userData);
-      }
-      return response;
-    });
+    increment();
+    const current = count;
+    setAuthPending(true);
+    return doRegister(props)
+      .then((response) => {
+        if (response.result !== "error" && response.userData) {
+          setUserProp(response.userData);
+        }
+        return response;
+      })
+      .finally(() => {
+        if (current === count) {
+          setAuthPending(false);
+        }
+      });
   };
 
   const fetchSession = () => {
-    return doFetchSession().then((response) => {
-      if (response.result !== "error" && response.userData) {
-        setUserProp(response.userData);
-      }
-      return response;
-    });
+    increment();
+    const current = count;
+    setAuthPending(true);
+    return doFetchSession()
+      .then((response) => {
+        if (response.result !== "error" && response.userData) {
+          setUserProp(response.userData);
+        }
+        return response;
+      })
+      .finally(() => {
+        if (current === count) {
+          setAuthPending(false);
+        }
+      });
   };
 
   const logout = (cb?: (data: ResponseProp) => void) => {
-    return doLogout().then((data) => {
-      if (userProp !== PublicUser) {
-        setUserProp(PublicUser);
-      }
-      if (cb) cb(data);
-      return data;
-    });
+    reset();
+    const current = count;
+    setAuthPending(true);
+    return doLogout()
+      .then((data) => {
+        if (userProp !== PublicUser) {
+          setUserProp(PublicUser);
+        }
+        if (cb) cb(data);
+        return data;
+      })
+      .finally(() => {
+        if (current === count) {
+          setAuthPending(false);
+        }
+      });
   };
 
-  return { userProp, login, register, fetchSession, logout } as AuthContext;
+  return {
+    userProp,
+    login,
+    register,
+    fetchSession,
+    authPending,
+    logout,
+  } as AuthContext;
 };
