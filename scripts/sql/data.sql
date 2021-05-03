@@ -82,6 +82,18 @@ INSERT INTO Flight VALUES (
     'ontime',
     20,
     'China Eastern'
+), (
+    7777,
+    '2021-5-28',
+    '15:31:14',
+    'MSC',
+    '2021-5-29',
+    '12:40:14',
+    'JFK',
+    1000,
+    'ontime',
+    20,
+    'China Eastern'
 );
 -- The passwords are "wendy", "goodman", "best123"
 INSERT INTO Customer VALUES (
