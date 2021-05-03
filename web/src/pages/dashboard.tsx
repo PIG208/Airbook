@@ -39,6 +39,7 @@ import { useEffect } from "react";
 import LookupFlights from "../components/tools/LookupFlights";
 import PurchaseTickets from "../components/tools/PurchaseTickets";
 import AccessDenied from "../components/tools/AccessDenied";
+import ToolNotFound from "../components/tools/ToolNotFound";
 
 type DashboardRoute = {
   tool: ITools;
@@ -218,6 +219,9 @@ export default function Dashboard() {
                 />
               );
             })}
+            <Route path={`/dashboard/:tool`}>
+              <ToolNotFound />
+            </Route>
           </Switch>
         </div>
         <footer>
