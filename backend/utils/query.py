@@ -1,6 +1,6 @@
 import re
 
-from pymysql import IntegrityError, ProgrammingError
+from pymysql.err import IntegrityError, ProgrammingError, InternalError
 from pymysql.connections import Connection
 from typing import Dict, Any, Optional, Union
 from enum import Enum, auto
@@ -91,6 +91,7 @@ def form_args_list(args, backticks=False):
 
 
 def insert_into(conn: Connection, table_name: str, **kwargs: Any) -> Optional[int]:
+    conn.ping(True)
     make_str = ",".join(["%s" for i in range(len(kwargs))])
     keys = form_args_list(kwargs.keys())
     values = form_args_list(kwargs.values())
@@ -109,6 +110,7 @@ def insert_into(conn: Connection, table_name: str, **kwargs: Any) -> Optional[in
             raise QueryError(*err.args)
     except ProgrammingError as err:
         raise QueryError(*err.args)
+    conn.commit()
     if result is not None:
         return result
 
@@ -120,6 +122,7 @@ def query(
     size: int = 1,
     args: Optional[Union[dict, tuple, list]] = None,
 ):
+    conn.ping(True)
     # Throws QueryKeyError
     with conn.cursor() as cursor:
         try:
@@ -128,6 +131,8 @@ def query(
             raise QueryKeyError(key=err.args[0])
         except ProgrammingError as err:
             print(err, sql)
+        except InternalError as err:
+            print(err, sql)
 
         if fetch_mode is FetchMode.ONE:
             return cursor.fetchone()
@@ -135,3 +140,4 @@ def query(
             return cursor.fetchmany(size)
         elif fetch_mode is FetchMode.ALL:
             return cursor.fetchall()
+    conn.commit()
