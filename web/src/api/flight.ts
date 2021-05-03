@@ -1,7 +1,7 @@
 import { getPublicSearchURL, getSearchURL, ResponseProp } from "./api";
 import axios from "axios";
 import { FlightProp } from "./data";
-import { resolve } from "node:path";
+import { useCredentials } from "./authentication";
 
 export interface FlightFilterProp {
   filterByEmails?: boolean; // Equivalent to view purchased flights
@@ -41,10 +41,10 @@ const parseFlightData = (flightData: Array<any>) => {
 const flightDataHandler = [
   (res: any) => {
     const data = res.data;
-    let flightData = JSON.parse(data.data ?? "") as Array<any>;
     if (data.result === "error") {
       return data;
     }
+    let flightData = JSON.parse(data.data ?? "") as Array<any>;
     if (flightData !== undefined) {
       return {
         result: "success",
@@ -65,6 +65,16 @@ export function futureFlights(): Promise<ResponseProp> {
   return axios
     .post<{ data?: string; result: string; message?: string }>(
       getPublicSearchURL("all_future")
+    )
+    .then(...flightDataHandler);
+}
+
+export function custFutureFlights(): Promise<ResponseProp> {
+  return axios
+    .post<{ data?: string; result: string; message?: string }>(
+      getSearchURL("customer_future"),
+      {},
+      useCredentials
     )
     .then(...flightDataHandler);
 }
@@ -136,9 +146,7 @@ export function searchFlights(props: FlightFilterProp): Promise<ResponseProp> {
           arr_city: props.arrCity,
         },
       },
-      {
-        withCredentials: true,
-      }
+      useCredentials
     )
     .then(...flightDataHandler);
 }

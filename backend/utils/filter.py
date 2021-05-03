@@ -86,9 +86,9 @@ class FilterType(Enum):
     CUST_FUTURE_FLIGHTS = "customer_future"
     CUST_TICKETS = "customer_tickets"
     FLIGHT_COMMENTS = "flight_comments"
-    ADVANCED_FLIGHT = "advanced_flight"
     # The following filters are advanced filters that require the filter generator.
     # We need to keep track of the advanced filters in the set ADVANCED_FILTERS.
+    ADVANCED_FLIGHT = "advanced_flight"
     ADVANCED_SPENDINGS = "advanced_spendings"
 
 

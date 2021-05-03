@@ -65,6 +65,10 @@ export type UserProp = Omit<
 
 export const PublicUser = { userType: UserType.PUBLIC } as UserProp;
 
+export const useCredentials = {
+  withCredentials: true,
+};
+
 export function parseUserData(
   userType: UserType,
   data: { user_data: any }
@@ -101,9 +105,7 @@ export async function login(props: LoginProp): Promise<ResponseProp> {
         booking_agent_id: Number(props.agentId),
         password: props.password,
       },
-      {
-        withCredentials: true,
-      }
+      useCredentials
     )
     .then(
       (res) => {
@@ -167,9 +169,7 @@ export async function register(props: RegisterProp): Promise<ResponseProp> {
         last_name: props.lastName,
         airline_name: props.airlineName,
       },
-      {
-        withCredentials: true,
-      }
+      useCredentials
     )
     .then(
       (res) => {
@@ -193,74 +193,58 @@ export async function register(props: RegisterProp): Promise<ResponseProp> {
 }
 
 export async function logout(): Promise<ResponseProp> {
-  return axios
-    .post(
-      getLogoutURL(),
-      {},
-      {
-        withCredentials: true,
+  return axios.post(getLogoutURL(), {}, useCredentials).then(
+    (res) => {
+      const data = res.data;
+      if (data.result === "error") {
+        return data;
+      } else {
+        return { result: "success" };
       }
-    )
-    .then(
-      (res) => {
-        const data = res.data;
-        if (data.result === "error") {
-          return data;
-        } else {
-          return { result: "success" };
-        }
-      },
-      (err) => {
-        console.log("logout failed:", err);
-        return { result: "error", message: "A network error occurred!" };
-      }
-    );
+    },
+    (err) => {
+      console.log("logout failed:", err);
+      return { result: "error", message: "A network error occurred!" };
+    }
+  );
 }
 
 export async function fetchSession(): Promise<ResponseProp> {
   // If there is a session cookie presented in this session, we will login directly.
-  return axios
-    .post(
-      getFetchSessionURL(),
-      {},
-      {
-        withCredentials: true,
+  return axios.post(getFetchSessionURL(), {}, useCredentials).then(
+    (res) => {
+      const data = res.data;
+      if (data.result === "error") {
+        return data;
       }
-    )
-    .then(
-      (res) => {
-        const data = res.data;
-        if (data.result === "error") {
-          return data;
-        }
-        if (data !== undefined) {
-          try {
-            let userType = UserType.PUBLIC;
-            switch (data.user_data.user_type) {
-              case "cust":
-                userType = UserType.CUST;
-                break;
-              case "agent":
-                userType = UserType.AGENT;
-                break;
-              case "staff":
-                userType = UserType.STAFF;
-                break;
-            }
-            const userData = parseUserData(userType, data);
-            return { result: "success", userData: userData };
-          } catch {
-            return {
-              result: "error",
-              message: "Failed to parse the user data!",
-            };
+      if (data !== undefined) {
+        try {
+          let userType = UserType.PUBLIC;
+          switch (data.user_data.user_type) {
+            case "cust":
+              userType = UserType.CUST;
+              break;
+            case "agent":
+              userType = UserType.AGENT;
+              break;
+            case "staff":
+              userType = UserType.STAFF;
+              break;
           }
+          const userData = parseUserData(userType, data);
+          return { result: "success", userData: userData };
+        } catch {
+          return {
+            result: "error",
+            message: "Failed to parse the user data!",
+          };
         }
-        return { result: "error", message: "Recieved empty user data." };
-      },
-      (err) => {
-        console.log(err);
-        return { result: "error", message: "Some sorts of errors occurred." };
       }
-    );
+      return { result: "error", message: "Recieved empty user data." };
+    },
+    (err) => {
+      console.log(err);
+      return { result: "error", message: "Some sorts of errors occurred." };
+    }
+  );
 }

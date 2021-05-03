@@ -38,10 +38,12 @@ CREATE PROCEDURE
 customer_flights (email VARCHAR(320))
 BEGIN
     SELECT * FROM Flight
-    WHERE (flight_number, dep_date, dep_time) = 
+    WHERE EXISTS
         (SELECT flight_number, dep_date, dep_time
          FROM Ticket
-         WHERE Ticket.email = email)
+         WHERE Ticket.email = email 
+         AND (Flight.flight_number, Flight.dep_date, Flight.dep_time) 
+         = (Ticket.flight_number, Ticket.dep_date, Ticket.dep_time))
     ;
 END [[
 DELIMITER ;
