@@ -169,7 +169,9 @@ export default function Dashboard() {
     if (match?.params.tool === undefined) {
       history.replace("/dashboard/home");
     }
-    auth.fetchSession();
+    if (!auth.authPending) {
+      auth.fetchSession();
+    }
   }, []);
 
   return (
