@@ -2,6 +2,7 @@ import { getTicketPriceURL, getTicketPurchaseURL, ResponseProp } from "./api";
 import { FlightPrimaryProp, PurchaseProp } from "./data";
 import { convertDate } from "./flight";
 import axios from "axios";
+import { useCredentials } from "./authentication";
 
 export function getFlightPrice(
   props: FlightPrimaryProp
@@ -30,17 +31,21 @@ export function getFlightPrice(
 
 export function purchase(props: PurchaseProp): Promise<ResponseProp> {
   return axios
-    .post(getTicketPurchaseURL(), {
-      email: props.email,
-      card_type: props.cardType,
-      card_number: props.cardNumber,
-      name_on_card: props.nameOnCard,
-      exp_date: convertDate(props.expDate),
-      airline_name: props.airlineName,
-      flight_number: props.flightNumber,
-      dep_date: props.depDate,
-      dep_time: props.depTime,
-    })
+    .post(
+      getTicketPurchaseURL(),
+      {
+        email: props.email,
+        card_type: props.cardType,
+        card_number: props.cardNumber,
+        name_on_card: props.nameOnCard,
+        exp_date: convertDate(props.expDate),
+        airline_name: props.airlineName,
+        flight_number: props.flightNumber,
+        dep_date: props.depDate,
+        dep_time: props.depTime,
+      },
+      useCredentials
+    )
     .then(
       (res) => {
         const data = res.data;
