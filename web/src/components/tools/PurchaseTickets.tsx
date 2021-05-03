@@ -56,6 +56,7 @@ export function FlightInfo() {
           </Form.Label>
           <Form.Control
             value={number}
+            placeholder="Flight number here"
             onChange={(e) => {
               setNumber(e.target.value);
             }}
@@ -104,11 +105,9 @@ export default function PurchaseTickets() {
     <div>
       <Switch>
         <Route path={`${path}/:flightNumber(\\d+)/`}>
-          test1
           <FlightInfo />
         </Route>
         <Route exact path={`${path}/`}>
-          test2
           <FlightInfo />
         </Route>
       </Switch>
