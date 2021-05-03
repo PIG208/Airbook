@@ -180,7 +180,7 @@
 
         No required fields.
 
-    - `POST /search/advanced_flights`: Return a list of flights given some specific constraints.
+    - `POST /search/advanced_flight`: Return a list of flights given some specific constraints.
 
         - [Optional] filter_by_emails: `boolean` Default to False. When set to True, the result will only contain flights that the specified customer/booking agent (by email) have bought tickets for.
         - [Optional] emails: `list[str]` Can only be used by staff users. This field is set to their email for booking agents and customers.
@@ -259,3 +259,7 @@
         "result": "error",
         "message": "The input information or the password does not match"
     }
+
+- `POST /fetch-session`
+
+    Fetch the current session and retrieve the user data (if there is any).

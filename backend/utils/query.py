@@ -21,6 +21,13 @@ CUSTOMER_WHO_BOUGHT_TICKETS = "SELECT * FROM Customer\
         SELECT * FROM Ticket\
         WHERE Customer.email=Ticket.email\
     );"
+TICKET_PRICE = "SELECT base_price * \
+    (SELECT IF((SELECT COUNT(*)/\
+        (SELECT seat_capacity \
+            FROM Flight JOIN Airplane USING(plane_ID)\
+            where (flight_number, dep_date, dep_time)=({flight_number},%(dep_date)s,%(dep_time)s))\
+        FROM Ticket where (flight_number, dep_date, dep_time)=({flight_number},%(dep_date)s,%(dep_time)s))>0.7,1.2,1)) \
+    FROM Flight WHERE (flight_number, dep_date, dep_time)=({flight_number},%(dep_date)s,%(dep_time)s)"  # 0.7 is the 70% capacity cap; 1.2 is for the extra price
 
 CHECK_CUST_LOGIN = "SELECT * FROM Customer\
     WHERE email=%(email)s;"
