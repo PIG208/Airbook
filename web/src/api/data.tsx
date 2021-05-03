@@ -28,10 +28,10 @@ export interface PurchaseProp {
   cardNumber: string;
   nameOnCard: string;
   expDate: Date;
-  airlineName: string;
-  flightNumber: number;
-  depDate: string;
-  depTime: string;
+  airlineName?: string;
+  flightNumber?: number;
+  depDate?: string;
+  depTime?: string;
 }
 
 export interface TicketProp {

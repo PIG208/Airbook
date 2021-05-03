@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button, Form, ListGroup } from "react-bootstrap";
+import { Button, Form, ListGroup, Modal } from "react-bootstrap";
 import Switch from "react-bootstrap/esm/Switch";
 import { Route, useHistory, useParams, useRouteMatch } from "react-router";
 import { Item } from "./Home";
@@ -8,6 +8,7 @@ import { getFlightByNumber } from "../../api/flight";
 import { Link } from "react-router-dom";
 import AlertMessage from "../AlertMessage";
 import "../../assets/PurchaseTickets.css";
+import PurchaseForm from "../PurchaseForm";
 
 export function FlightInfo() {
   const { flightNumber } = useParams<{ flightNumber?: string }>();
@@ -16,7 +17,15 @@ export function FlightInfo() {
   );
   const [flights, setFlights] = useState<FlightProp[] | undefined>(undefined);
   const [errorMessage, setErrorMessage] = useState("");
+  const [show, setShow] = useState(false);
+  const [currentFlight, setCurrentFlight] = useState<FlightProp | undefined>(
+    undefined
+  );
   let history = useHistory();
+
+  const handlePurchaseSubmit = () => {
+    console.log("submitted");
+  };
 
   useEffect(() => {
     async function fetchFlights() {
@@ -89,11 +98,27 @@ export function FlightInfo() {
                 <Item tag="Arrival Time" value={value.arrTime} />
                 <Item tag="Arrival Airport" value={value.arrAirport} />
                 <Item tag="Airline Name" value={value.airlineName} />
-                <Button variant="success">Purchase</Button>
+                <Button
+                  variant="success"
+                  onClick={(e) => {
+                    setCurrentFlight(value);
+                    setShow(true);
+                  }}
+                >
+                  Purchase
+                </Button>
               </ListGroup>
             );
           })}
       </div>
+      <Modal show={show} onHide={() => setShow(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Purchase Ticket</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <PurchaseForm {...currentFlight} onSubmit={handlePurchaseSubmit} />
+        </Modal.Body>
+      </Modal>
       <AlertMessage message={errorMessage} />
     </div>
   );

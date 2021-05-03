@@ -10,15 +10,28 @@ import "../assets/Form.css";
 import { IFormProps } from "../api/utils";
 import { useAuth } from "../api/use-auth";
 import { CardType, PurchaseProp } from "../api/data";
+import ConditionalFormGroup from "./ConditionalFormGroup";
+import { purchase } from "../api/purchase";
 
-export default function PurchaseForm(props: IFormProps<UserProp>) {
+type UserPurchaseProp = Omit<
+  PurchaseProp,
+  "airlineName" | "flightNumber" | "depDate" | "depTime"
+>;
+
+export default function PurchaseForm(
+  props: IFormProps<UserPurchaseProp> & {
+    airlineName?: string;
+    flightNumber?: number;
+    depDate?: string;
+    depTime?: string;
+  }
+) {
   const {
     handleSubmit,
     control,
     formState: { errors, submitCount },
     clearErrors,
-    getValues,
-  } = useForm<PurchaseProp>();
+  } = useForm<UserPurchaseProp>();
   const [purchaseError, setPurchaseError] = useState("");
   const [pending, setPending] = useState(false);
   const auth = useAuth();
@@ -35,33 +48,25 @@ export default function PurchaseForm(props: IFormProps<UserProp>) {
     return <Form.Control {...props} ref={ref} />;
   });
 
-  const handlePurchase = (data: LoginProp) => {
+  const handlePurchase = (data: UserPurchaseProp) => {
     setPending(true);
     setPurchaseError("");
     let currentSubmitCount = submitCount;
-    auth
-      .login(data)
-      .then((loginResult) => {
-        if (submitCount !== currentSubmitCount) {
-          console.log("Cancel on stale submission");
+    purchase(Object.assign({}, data, props))
+      .then((res) => {
+        if (currentSubmitCount !== submitCount) {
+          console.log("Aborted stale purchase.");
           return;
         }
-        if (
-          loginResult.result === "success" &&
-          loginResult.userData !== undefined
-        ) {
-          setPurchaseError("");
-          currentSubmitCount = -1; // Force cancel any other requests.
-          props.onSubmit(loginResult.userData);
-        } else {
-          setPurchaseError(
-            loginResult.message ?? "Some unknown errors occurred!"
-          );
+        if (res.result === "error") {
+          setPurchaseError(res.message ?? "An unknown error occurred.");
+          return data;
         }
+        props.onSubmit(data);
       })
       .finally(() => {
-        if (submitCount !== currentSubmitCount) {
-          console.log("Cancel on stale submission");
+        if (currentSubmitCount !== submitCount) {
+          console.log("Aborted stale purchase.");
           return;
         }
         setPending(false);
@@ -71,12 +76,52 @@ export default function PurchaseForm(props: IFormProps<UserProp>) {
   return (
     <Form
       onSubmit={handleSubmit(handlePurchase)}
-      id="login-form"
+      id="purchase-form"
       className="app-form"
     >
       <AlertMessage message={purchaseError} />
 
+      <ConditionalFormGroup
+        controlId="formEmail"
+        condition={auth.userProp.userType === UserType.AGENT}
+      >
+        <Form.Label>Email to purchase for</Form.Label>
+        <Controller
+          name="email"
+          control={control}
+          defaultValue={""}
+          rules={{
+            validate: {
+              required: (v) => {
+                return (
+                  auth.userProp.userType !== UserType.AGENT ||
+                  !!v ||
+                  "The email is required!"
+                );
+              },
+              pattern: (v) => {
+                return (
+                  auth.userProp.userType !== UserType.AGENT ||
+                  v === undefined ||
+                  /^\S+@\S+$/i.test(v) ||
+                  "Please enter a valid email."
+                );
+              },
+            },
+          }}
+          render={({ field }) => (
+            <Form.Control
+              {...field}
+              placeholder="The customer email here"
+              isInvalid={errors.email !== undefined}
+            />
+          )}
+        />
+        <FormErrorMessage message={errors.email?.message} />
+      </ConditionalFormGroup>
+
       <Form.Group controlId="formCardType">
+        <Form.Label>Card Type</Form.Label>
         <Controller
           name="cardType"
           control={control}
@@ -176,7 +221,7 @@ export default function PurchaseForm(props: IFormProps<UserProp>) {
           Submit
         </Button>
       </Form.Group>
-      <HintMessage message="Logging you in..." control={pending} />
+      <HintMessage message="Handling transaction..." control={pending} />
     </Form>
   );
 }
