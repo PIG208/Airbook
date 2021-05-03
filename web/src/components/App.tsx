@@ -28,7 +28,7 @@ function Redirector() {
         history.replace("/visitor");
       }
     });
-  });
+  }, []);
 
   return <div></div>;
 }
