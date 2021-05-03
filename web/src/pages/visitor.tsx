@@ -32,7 +32,7 @@ export default function Visitor() {
         history.replace("/dashboard");
       }
     });
-  });
+  }, []);
 
   const handleSubmit = () => {
     history.push("/dashboard/");

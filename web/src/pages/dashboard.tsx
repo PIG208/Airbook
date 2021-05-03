@@ -141,12 +141,15 @@ const routes: DashboardRoute[] = [
     tool: Tools.LOGOUT,
     ToolView: ({ auth }) => {
       let history = useHistory();
-      setTimeout(() => {
-        auth.logout((data) => {
-          history.push("/visitor");
-        });
-      }, 100);
-      return <div></div>;
+      const Logout = () => {
+        useEffect(() => {
+          auth.logout(() => {
+            history.push("/visitor");
+          });
+        }, []);
+        return <div></div>;
+      };
+      return <Logout />;
     },
     sidebar: ({ auth }) => (
       <div>

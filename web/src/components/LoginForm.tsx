@@ -45,7 +45,7 @@ export default function LoginForm(props: IFormProps<UserProp>) {
           loginResult.result === "success" &&
           loginResult.userData !== undefined
         ) {
-          setLoginError("");
+          //setLoginError("");
           currentSubmitCount = -1; // Force cancel any other requests.
           props.onSubmit(loginResult.userData);
         } else {
