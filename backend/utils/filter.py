@@ -86,9 +86,9 @@ class FilterType(Enum):
     CUST_FUTURE_FLIGHTS = "customer_future"
     CUST_TICKETS = "customer_tickets"
     FLIGHT_COMMENTS = "flight_comments"
+    ADVANCED_FLIGHT = "advanced_flight"
     # The following filters are advanced filters that require the filter generator.
     # We need to keep track of the advanced filters in the set ADVANCED_FILTERS.
-    ADVANCED_FLIGHT = "advanced_flight"
     ADVANCED_SPENDINGS = "advanced_spendings"
 
 
@@ -176,7 +176,7 @@ class Filter:
         else:
             if isinstance(constraint, int):
                 self.where_clause.append("{}={}".format(column_name, str(constraint)))
-            else:
+            elif isinstance(constraint, str) and len(constraint.strip()) > 0:
                 self.where_clause.append("{}=%s".format(column_name))
                 self.string_values.append(constraint)
             return self
@@ -289,7 +289,6 @@ def get_filter_flight(
     ).conditonally_add(
         filter_by_emails, filter.add_sub_filter, sec_filter
     )
-    print(filter.get_formatted())
     return filter.get_formatted()
 
 

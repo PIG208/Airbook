@@ -14,11 +14,13 @@ from backend.utils.query import (
 from backend.utils.filter import FilterType
 from flask import request, abort, session
 
-PublicFilters = {FilterType.ALL_FUTURE_FLIGHTS}
+PublicFilters = {
+    FilterType.ALL_FUTURE_FLIGHTS,
+    FilterType.ADVANCED_FLIGHT,
+}
 
 # These are the filters that can be accessed by any logged in users.
 ProtectedFilters = {
-    FilterType.ADVANCED_FLIGHT,
     FilterType.ADVANCED_SPENDINGS,
 }
 
