@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Portico from "../components/Portico";
 import LoginForm from "../components/LoginForm";
 import RegisterForm from "../components/RegisterForm";
-import { ToggleButton, ToggleButtonGroup } from "react-bootstrap";
+import { Image, ToggleButton, ToggleButtonGroup } from "react-bootstrap";
 import { useHistory, Link, Redirect } from "react-router-dom";
 import { useAuth } from "../api/use-auth";
 import { UserType } from "../api/authentication";
@@ -40,7 +40,7 @@ export default function Visitor() {
 
   return (
     <header className="visitor">
-      <img src={logo} className="App-logo" alt="logo" />
+      <Image src={logo} className="App-logo" alt="logo" />
       <Portico title={option}>
         {option === Option.LOGIN && (
           <div>
