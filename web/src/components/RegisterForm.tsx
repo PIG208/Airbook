@@ -4,19 +4,18 @@ import Button from "react-bootstrap/Button";
 import DatePicker from "react-datepicker";
 import SelectUserType from "./SelectUserType";
 import { useForm, Controller } from "react-hook-form";
-import { register, RegisterProp, UserType } from "../api/authentication";
+import { RegisterProp, UserProp, UserType } from "../api/authentication";
 import ConditionalFormGroup from "./ConditionalFormGroup";
 import AlertMessage from "./AlertMessage";
 import FormErrorMessage from "./FormErrorMessage";
 import HintMessage from "./HintMessage";
 
-import "react-datepicker/dist/react-datepicker.css";
 import "../assets/Form.css";
 import { Col } from "react-bootstrap";
 import { IFormProps } from "../api/utils";
-import { ResponseProp } from "../api/api";
+import { useAuth } from "../api/use-auth";
 
-export default function RegisterForm() {
+export default function RegisterForm(props: IFormProps<UserProp>) {
   const {
     handleSubmit,
     control,
@@ -27,33 +26,43 @@ export default function RegisterForm() {
   } = useForm<RegisterProp>();
   const [registerError, setRegisterError] = useState("");
   const [pending, setPending] = useState(false);
+  const auth = useAuth();
   const watchRegisterType = watch("registerType", UserType.CUST);
 
   useEffect(() => {
     setRegisterError("");
     clearErrors();
     setPending(false);
-  }, [setRegisterError, clearErrors]);
+  }, [watchRegisterType, clearErrors]);
 
   const handleRegister = (data: RegisterProp) => {
     setPending(true);
     setRegisterError("");
-    const currentSubmitCount = submitCount;
-    register(data)
+    let currentSubmitCount = submitCount;
+    auth
+      .register(data)
       .then((resgisterResult) => {
-        if (resgisterResult.result === "success") {
+        if (
+          resgisterResult.result === "success" &&
+          (data.registerType !== UserType.AGENT ||
+            (resgisterResult.userData !== undefined &&
+              resgisterResult.userData.agentId !== undefined))
+        ) {
           if (submitCount !== currentSubmitCount) {
             console.log("Cancel on stale submission");
             return;
           }
           setRegisterError("");
-          alert(
-            `success ${
-              data.registerType === UserType.AGENT ? resgisterResult.id : ""
-            }`
-          );
+          currentSubmitCount = -1; // Force cancel any other requests.
+          props.onSubmit({
+            ...data,
+            userType: data.registerType,
+            agentId: resgisterResult.userData?.agentId,
+          });
         } else {
-          setRegisterError(resgisterResult.message ?? "");
+          setRegisterError(
+            resgisterResult.message ?? "Some unknown errors occurred!"
+          );
         }
       })
       .finally(() => {
@@ -115,6 +124,7 @@ export default function RegisterForm() {
             <Form.Control
               {...field}
               placeholder="Your email here"
+              autoComplete="username"
               isInvalid={errors.email !== undefined}
             />
           )}
@@ -177,6 +187,7 @@ export default function RegisterForm() {
             <Form.Control
               {...field}
               placeholder="Your username here"
+              autoComplete="username"
               isInvalid={errors.userName !== undefined}
             />
           )}
@@ -430,6 +441,98 @@ export default function RegisterForm() {
       </ConditionalFormGroup>
 
       <ConditionalFormGroup
+        controlId="formBuildingNumber"
+        condition={watchRegisterType === UserType.CUST}
+      >
+        <Form.Label>Building Number</Form.Label>
+        <Controller
+          name="buildingNumber"
+          control={control}
+          defaultValue={""}
+          rules={{
+            validate: {
+              numeric: (v) => {
+                return (
+                  getValues().registerType !== UserType.CUST ||
+                  v === "" ||
+                  (!isNaN(v) && Number(v) > 0) ||
+                  "The building number is invalid!"
+                );
+              },
+            },
+          }}
+          render={({ field }) => (
+            <Form.Control
+              {...field}
+              placeholder="Your building number here"
+              isInvalid={errors.buildingNumber !== undefined}
+            />
+          )}
+        />
+        <FormErrorMessage message={errors.buildingNumber?.message} />
+      </ConditionalFormGroup>
+
+      <ConditionalFormGroup
+        controlId="formStreet"
+        condition={watchRegisterType === UserType.CUST}
+      >
+        <Form.Label>Street</Form.Label>
+        <Controller
+          name="street"
+          control={control}
+          defaultValue={""}
+          render={({ field }) => (
+            <Form.Control
+              {...field}
+              placeholder="Your street here"
+              isInvalid={errors.street !== undefined}
+            />
+          )}
+        />
+        <FormErrorMessage message={errors.street?.message} />
+      </ConditionalFormGroup>
+
+      <ConditionalFormGroup
+        controlId="formCity"
+        condition={watchRegisterType === UserType.CUST}
+      >
+        <Form.Label>City</Form.Label>
+        <Controller
+          name="city"
+          control={control}
+          defaultValue={""}
+          render={({ field }) => (
+            <Form.Control
+              {...field}
+              placeholder="Your city here"
+              isInvalid={errors.city !== undefined}
+            />
+          )}
+        />
+        <FormErrorMessage message={errors.city?.message} />
+      </ConditionalFormGroup>
+
+      <ConditionalFormGroup
+        controlId="formState"
+        condition={watchRegisterType === UserType.CUST}
+      >
+        <Form.Label>State</Form.Label>
+        <Controller
+          name="state"
+          control={control}
+          defaultValue={""}
+          render={({ field }) => (
+            <Form.Control
+              {...field}
+              placeholder="Your state here (2-digit code)"
+              isInvalid={errors.state !== undefined}
+            />
+          )}
+        />
+        <FormErrorMessage message={errors.state?.message} />
+      </ConditionalFormGroup>
+
+      <ConditionalFormGroup
         controlId="formDOB"
         condition={watchRegisterType !== UserType.AGENT}
       >
@@ -492,6 +595,7 @@ export default function RegisterForm() {
               {...field}
               type="password"
               placeholder="Your password here"
+              autoComplete="new-password"
               isInvalid={errors.password !== undefined}
             />
           )}
@@ -522,6 +626,7 @@ export default function RegisterForm() {
               {...field}
               type="password"
               placeholder="Re-enter your password here"
+              autoComplete="new-password"
               isInvalid={errors.passwordConfirm !== undefined}
             />
           )}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { login, LoginProp, UserType } from "../api/authentication";
+import { LoginProp, UserProp, UserType } from "../api/authentication";
 import { Button, Form } from "react-bootstrap";
 import AlertMessage from "./AlertMessage";
 import HintMessage from "./HintMessage";
@@ -8,9 +8,9 @@ import SelectUserType from "./SelectUserType";
 import FormErrorMessage from "./FormErrorMessage";
 import "../assets/Form.css";
 import { IFormProps } from "../api/utils";
-import { ResponseProp } from "../api/api";
+import { useAuth } from "../api/use-auth";
 
-export default function LoginForm() {
+export default function LoginForm(props: IFormProps<UserProp>) {
   const {
     handleSubmit,
     control,
@@ -21,6 +21,7 @@ export default function LoginForm() {
   } = useForm<LoginProp>();
   const [loginError, setLoginError] = useState("");
   const [pending, setPending] = useState(false);
+  const auth = useAuth();
   const watchLoginType = watch("loginType", UserType.CUST);
 
   useEffect(() => {
@@ -32,18 +33,23 @@ export default function LoginForm() {
   const handleLogin = (data: LoginProp) => {
     setPending(true);
     setLoginError("");
-    const currentSubmitCount = submitCount;
-    login(data)
+    let currentSubmitCount = submitCount;
+    auth
+      .login(data)
       .then((loginResult) => {
         if (submitCount !== currentSubmitCount) {
           console.log("Cancel on stale submission");
           return;
         }
-        if (loginResult.result === "success") {
-          alert("success");
+        if (
+          loginResult.result === "success" &&
+          loginResult.userData !== undefined
+        ) {
           setLoginError("");
+          currentSubmitCount = -1; // Force cancel any other requests.
+          props.onSubmit(loginResult.userData);
         } else {
-          setLoginError(loginResult.message ?? "");
+          setLoginError(loginResult.message ?? "Some unknown errors occurred!");
         }
       })
       .finally(() => {
@@ -104,6 +110,7 @@ export default function LoginForm() {
               <Form.Control
                 {...field}
                 placeholder="Your email here"
+                autoComplete="username"
                 isInvalid={errors.email !== undefined}
               />
             )}
@@ -132,6 +139,7 @@ export default function LoginForm() {
               <Form.Control
                 {...field}
                 placeholder="Your username here"
+                autoComplete="username"
                 isInvalid={errors.userName !== undefined}
               />
             )}
@@ -190,6 +198,7 @@ export default function LoginForm() {
             <Form.Control
               {...field}
               type="password"
+              autoComplete="current-password"
               placeholder="Your password here"
               isInvalid={errors.password !== undefined}
             />
