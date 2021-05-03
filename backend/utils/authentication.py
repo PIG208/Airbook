@@ -107,8 +107,9 @@ def require_session(func):
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        if "user_type" not in session:
-            abort(401)
+        if "user_type" not in session or session["user_type"] == "public":
+            raise JsonError("Please login to access this page!")
+            # abort(401)
         return func(*args, **kwargs)
 
     return wrapper

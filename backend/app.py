@@ -140,8 +140,8 @@ def search_public(filter: str):
 
 @app.route("/search/<filter>", methods=["POST"])
 @cross_origin(supports_credentials=True)
-@require_session
 @raise_error
+@require_session
 def search(filter: str):
     data = request.get_json()
     result = json.dumps(
@@ -177,8 +177,8 @@ def login(login_type: str):
 
 @app.route("/session-fetch", methods=["POST"])
 @cross_origin(supports_credentials=True)
-@require_session
 @raise_error
+@require_session
 def session_fetch():
     data = request.get_json()
     user_data_raw = None
@@ -224,8 +224,8 @@ def session_fetch():
 
 @app.route("/logout", methods=["POST"])
 @cross_origin(supports_credentials=True)
-@require_session
 @raise_error
+@require_session
 def logout():
     session.clear()
     return jsonify(result="success")
@@ -244,8 +244,8 @@ def ticket_price():
 
 @app.route("/ticket_purchase", methods=["POST"])
 @cross_origin(supports_credentials=True)
-@require_session
 @raise_error
+@require_session
 def ticket_purchase():
     data = request.get_json()
     if session["user_type"] in (DataType.CUST.value, DataType.AGENT.value):

@@ -38,6 +38,7 @@ import ViewFlights from "../components/tools/ViewFlights";
 import { useEffect } from "react";
 import LookupFlights from "../components/tools/LookupFlights";
 import PurchaseTickets from "../components/tools/PurchaseTickets";
+import AccessDenied from "../components/tools/AccessDenied";
 
 type DashboardRoute = {
   tool: ITools;
@@ -202,7 +203,13 @@ export default function Dashboard() {
                 <Route
                   key={index}
                   path={`/dashboard/${route.tool}`}
-                  children={<route.ToolView auth={auth} />}
+                  children={
+                    inUserTools(route.tool, auth.userProp.userType) ? (
+                      <route.ToolView auth={auth} />
+                    ) : (
+                      <AccessDenied />
+                    )
+                  }
                 />
               );
             })}
