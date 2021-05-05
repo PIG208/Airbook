@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { FlightProp } from "../../api/data";
 import { inUserTools, Tools } from "../../api/tool";
 import { useAuth } from "../../api/use-auth";
+import { parseISODate, parseISOTime } from "../../api/utils";
 
 import "../../assets/FlightTable.css";
 import HintMessage from "../HintMessage";
@@ -59,16 +60,10 @@ export default function FlightTable(props: {
                   }
                   if (key === "depDate" || key === "arrDate") {
                     // Dates
-                    return (
-                      <td key={key}>{new Date(value).toLocaleDateString()}</td>
-                    );
+                    return <td key={key}>{parseISODate(value)}</td>;
                   } else if (key === "depTime" || key === "arrTime") {
                     // Times
-                    return (
-                      <td key={key}>
-                        {new Date(`2020-02-02T${value}Z`).toLocaleTimeString()}
-                      </td>
-                    );
+                    return <td key={key}>{parseISOTime(value)}</td>;
                   } else {
                     return <td key={key}>{value}</td>;
                   }
