@@ -11,8 +11,9 @@ import { IFormProps } from "../api/utils";
 import { useAuth } from "../api/use-auth";
 import { CardType, PurchaseProp } from "../api/data";
 import ConditionalFormGroup from "./ConditionalFormGroup";
-import { purchase } from "../api/purchase";
+import { getFlightPrice, purchase } from "../api/purchase";
 import SuccessMessage, { useMessage } from "./SuccessMessage";
+import useIncrement from "../api/use-increment";
 
 type UserPurchaseProp = Omit<
   PurchaseProp,
@@ -35,16 +36,40 @@ export default function PurchaseForm(
   } = useForm<UserPurchaseProp>();
   const [purchaseError, setPurchaseError] = useState("");
   const [pending, setPending] = useState(false);
+  const [price, setPrice] = useState();
+  const { count, increment } = useIncrement();
   const { message, showTimeout } = useMessage("success");
   const auth = useAuth();
 
   useEffect(() => {
+    increment();
+    const current = count;
+    if (
+      props.depDate &&
+      props.depTime &&
+      (props.flightNumber || props.flightNumber === 0)
+    ) {
+      getFlightPrice({
+        flightNumber: props.flightNumber,
+        depDate: props.depDate,
+        depTime: props.depTime,
+      }).then((res) => {
+        if (current !== count) {
+          return;
+        }
+        if (res.result !== "error") {
+          setPrice(res.data.price);
+        } else {
+          setPurchaseError("Failed to fetch the price.");
+        }
+      });
+    }
     return () => {
       setPurchaseError("");
       clearErrors();
       setPending(false);
     };
-  }, []);
+  }, [props, submitCount]);
 
   const DateCustomInput = forwardRef((props: any, ref) => {
     return <Form.Control {...props} ref={ref} />;
@@ -83,6 +108,11 @@ export default function PurchaseForm(
       className="app-form"
     >
       <AlertMessage message={purchaseError} />
+      {price && (
+        <div>
+          Current Price: <strong style={{ color: "green" }}>${price}</strong>
+        </div>
+      )}
 
       <ConditionalFormGroup
         controlId="formEmail"
