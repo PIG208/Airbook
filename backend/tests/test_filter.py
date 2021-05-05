@@ -39,7 +39,7 @@ class TestFilter(unittest.TestCase):
 
     def test_filter_flight_empty(self):
         result = get_filter_flight()
-        expected: Tuple[Any, Any] = ("SELECT * FROM Flight ", list())
+        expected: Tuple[Any, Any] = ("SELECT * FROM verbose_flights ", list())
         self.assertEqual(expected, result)
 
     def test_filter_flight_email(self):
@@ -47,7 +47,7 @@ class TestFilter(unittest.TestCase):
             emails=FilterSet(["ny123@nyu.edu"]), filter_by_emails=True
         )
         expected = (
-            "SELECT * FROM Flight WHERE (EXISTS (SELECT * FROM Ticket WHERE email=%s AND (Ticket.dep_date, Ticket.dep_time, Ticket.flight_number)=(Flight.dep_date, Flight.dep_time, Flight.flight_number)))",
+            "SELECT * FROM verbose_flights WHERE (EXISTS (SELECT * FROM Ticket WHERE email=%s AND (Ticket.dep_date, Ticket.dep_time, Ticket.flight_number)=(verbose_flights.dep_date, verbose_flights.dep_time, verbose_flights.flight_number)))",
             ["ny123@nyu.edu"],
         )
         self.assertEqual(expected, result)
@@ -56,7 +56,7 @@ class TestFilter(unittest.TestCase):
             emails=FilterSet(["ny233@nyu.edu", "ny123@nyu.edu"]), filter_by_emails=True
         )
         expected = (
-            "SELECT * FROM Flight WHERE (EXISTS (SELECT * FROM Ticket WHERE email IN (%s,%s) AND (Ticket.dep_date, Ticket.dep_time, Ticket.flight_number)=(Flight.dep_date, Flight.dep_time, Flight.flight_number)))",
+            "SELECT * FROM verbose_flights WHERE (EXISTS (SELECT * FROM Ticket WHERE email IN (%s,%s) AND (Ticket.dep_date, Ticket.dep_time, Ticket.flight_number)=(verbose_flights.dep_date, verbose_flights.dep_time, verbose_flights.flight_number)))",
             ["ny123@nyu.edu", "ny233@nyu.edu"],
         )
         self.assertEqual(expected[0], result[0])

@@ -5,16 +5,19 @@ export enum FlightStatus {
 
 export interface FlightProp {
   flightNumber: number;
+  airlineName: string;
   depDate: string;
   depTime: string;
-  depAirport: string;
   arrDate: string;
   arrTime: string;
-  arrAirport: string;
   basePrice: number;
   status: FlightStatus;
+  seatCapacity: number;
+  depCity: string;
+  arrCity: string;
+  arrAirport: string;
+  depAirport: string;
   planeID: number;
-  airlineName: string;
 }
 
 export enum CardType {

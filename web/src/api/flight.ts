@@ -21,17 +21,20 @@ export interface FlightFilterProp {
 const parseFlightData = (flightData: Array<any>) => {
   return flightData.reduce((accumulator, current) => {
     let temp = {
-      flightNumber: current[0],
-      depDate: current[1],
-      depTime: current[2],
-      depAirport: current[3],
-      arrDate: current[4],
-      arrTime: current[5],
-      arrAirport: current[6],
-      basePrice: current[7],
-      status: current[8],
-      planeID: current[9],
-      airlineName: current[10],
+      flightNumber: current[4],
+      airlineName: current[3],
+      depCity: current[12],
+      depAirport: current[1],
+      arrCity: current[13],
+      arrAirport: current[0],
+      depDate: current[5],
+      depTime: current[6],
+      arrDate: current[7],
+      arrTime: current[8],
+      basePrice: current[9],
+      status: current[10],
+      seatCapacity: current[11],
+      planeID: current[2],
     };
     accumulator.push(temp);
     return accumulator;

@@ -249,12 +249,8 @@ def get_filter_flight(
     is_customer: Optional[bool] = True,
     round_trip: bool = False,
 ) -> Tuple[str, list]:
-    if arr_city or dep_city:
-        base_query = "SELECT * FROM verbose_flights {where}"
-        flight_table = "verbose_flights"
-    else:
-        base_query = "SELECT * FROM Flight {where}"
-        flight_table = "Flight"
+    base_query = "SELECT * FROM verbose_flights {where}"
+    flight_table = "verbose_flights"
     filter = Filter(base_query)
     if emails is not None and emails.filter_set is not None:
         if is_customer:

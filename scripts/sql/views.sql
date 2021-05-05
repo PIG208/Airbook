@@ -1,13 +1,6 @@
 SELECT 'Setting up the views.' AS '';
 USE airbook;
 
-DROP VIEW IF EXISTS future_flights;
-CREATE VIEW future_flights AS 
-    SELECT * FROM Flight
-    WHERE dep_date > CURDATE()
-    OR (dep_date = CURDATE() AND dep_time > CURTIME())
-    ;
-
 DROP VIEW IF EXISTS spendings;
 CREATE VIEW spendings AS
     SELECT email, Book.booking_agent_id, Ticket.ticket_id, sold_price, sold_price + IFNULL(commission, 0) as actual_price, IFNULL(commission,0) as commission, purchase_date, purchase_time FROM Customer 
@@ -19,6 +12,13 @@ CREATE VIEW verbose_flights AS
     SELECT * FROM Flight NATURAL JOIN Airplane 
     NATURAL JOIN (SELECT airport_name AS dep_airport,city as dep_city FROM Airport) AS A1 
     NATURAL JOIN (SELECT airport_name AS arr_airport,city as arr_city FROM Airport) AS A2
+    ;
+
+DROP VIEW IF EXISTS future_flights;
+CREATE VIEW future_flights AS 
+    SELECT * FROM verbose_flights
+    WHERE dep_date > CURDATE()
+    OR (dep_date = CURDATE() AND dep_time > CURTIME())
     ;
 
 DELIMITER [[

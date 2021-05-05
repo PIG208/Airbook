@@ -4,18 +4,23 @@ import { FlightProp } from "../../api/data";
 import { inUserTools, Tools } from "../../api/tool";
 import { useAuth } from "../../api/use-auth";
 
+import "../../assets/FlightTable.css";
+
 const keys = [
   "Flight Number",
+  "Airline Name",
+  "Dep City",
+  "Dep Airport",
+  "Arr City",
+  "Arr Airport",
   "Dep Date",
   "Dep Time",
-  "Dep Airport",
   "Arr Date",
   "Arr Time",
-  "Arr Airport",
   "Base Price",
   "Status",
+  "Seat Capacity",
   "Plane ID",
-  "Airline Name",
 ];
 
 export const getFlightKeys = () => keys;
@@ -23,35 +28,53 @@ export const getFlightKeys = () => keys;
 export default function FlightTable(props: { flights: FlightProp[] }) {
   let auth = useAuth();
   return (
-    <Table>
-      <thead>
-        <tr>
-          {keys.map((value, index) => {
-            return <th key={index}>{value}</th>;
+    <div className="flight-table-container">
+      <Table>
+        <thead>
+          <tr>
+            {keys.map((value, index) => {
+              return <th key={index}>{value}</th>;
+            })}
+          </tr>
+        </thead>
+        <tbody>
+          {props.flights.map((values, index) => {
+            return (
+              <tr key={index}>
+                {Object.entries(values).map(([key, value]) => {
+                  if (
+                    key === "flightNumber" &&
+                    inUserTools(Tools.PURCHASE, auth.userProp.userType)
+                  ) {
+                    return (
+                      <td key={key}>
+                        <Link to={`/dashboard/purchase/${value}`}>{value}</Link>
+                      </td>
+                    );
+                  }
+                  if (key === "depDate" || key === "arrDate") {
+                    // Dates
+                    return (
+                      <td key={key}>{new Date(value).toLocaleDateString()}</td>
+                    );
+                  } else if (key === "depTime" || key === "arrTime") {
+                    // Times
+                    return (
+                      <td key={key}>
+                        {new Date("2020-02-02T" + value).toLocaleTimeString()}
+                      </td>
+                    );
+                  } else {
+                    return <td key={key}>{value}</td>;
+                  }
+                })}
+
+                <td></td>
+              </tr>
+            );
           })}
-        </tr>
-      </thead>
-      <tbody>
-        {props.flights.map((values, index) => {
-          return (
-            <tr key={index}>
-              {Object.values(values).map((value, index) => {
-                if (
-                  index === 0 &&
-                  inUserTools(Tools.PURCHASE, auth.userProp.userType)
-                ) {
-                  return (
-                    <td key={index}>
-                      <Link to={`/dashboard/purchase/${value}`}>{value}</Link>
-                    </td>
-                  );
-                }
-                return <td key={index}>{value}</td>;
-              })}
-            </tr>
-          );
-        })}
-      </tbody>
-    </Table>
+        </tbody>
+      </Table>
+    </div>
   );
 }
