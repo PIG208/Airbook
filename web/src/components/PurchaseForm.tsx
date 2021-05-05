@@ -12,6 +12,7 @@ import { useAuth } from "../api/use-auth";
 import { CardType, PurchaseProp } from "../api/data";
 import ConditionalFormGroup from "./ConditionalFormGroup";
 import { purchase } from "../api/purchase";
+import SuccessMessage, { useMessage } from "./SuccessMessage";
 
 type UserPurchaseProp = Omit<
   PurchaseProp,
@@ -34,6 +35,7 @@ export default function PurchaseForm(
   } = useForm<UserPurchaseProp>();
   const [purchaseError, setPurchaseError] = useState("");
   const [pending, setPending] = useState(false);
+  const { message, showTimeout } = useMessage("success");
   const auth = useAuth();
 
   useEffect(() => {
@@ -62,6 +64,7 @@ export default function PurchaseForm(
           setPurchaseError(res.message ?? "An unknown error occurred.");
           return data;
         }
+        showTimeout();
         props.onSubmit(data);
       })
       .finally(() => {
@@ -221,6 +224,7 @@ export default function PurchaseForm(
           Submit
         </Button>
       </Form.Group>
+      <SuccessMessage message={message} />
       <HintMessage message="Handling transaction..." control={pending} />
     </Form>
   );

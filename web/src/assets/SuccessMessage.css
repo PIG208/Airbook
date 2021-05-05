@@ -1,0 +1,19 @@
+.success-message {
+  transition: all 0.2s;
+  opacity: 0;
+  font-size: 1.5rem;
+  color: green;
+  text-align: center;
+}
+
+.success-message span {
+  margin: 1rem 1rem 1rem 1rem;
+}
+
+.success-message.show {
+  opacity: 1;
+}
+
+.success-message.hide {
+  opacity: 0;
+}
