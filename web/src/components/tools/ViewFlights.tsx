@@ -63,8 +63,7 @@ export default function ViewFlights() {
           loadFlights();
         }}
       />
-      <FlightTable flights={flights} />
-      <HintMessage control={pending} message="Loading..." />
+      <FlightTable flights={flights} pending={pending} />
     </div>
   );
 }

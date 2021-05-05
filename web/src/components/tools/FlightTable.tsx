@@ -1,10 +1,12 @@
 import { Table } from "react-bootstrap";
+import { InfoCircleFill } from "react-bootstrap-icons";
 import { Link } from "react-router-dom";
 import { FlightProp } from "../../api/data";
 import { inUserTools, Tools } from "../../api/tool";
 import { useAuth } from "../../api/use-auth";
 
 import "../../assets/FlightTable.css";
+import HintMessage from "../HintMessage";
 
 const keys = [
   "Flight Number",
@@ -25,7 +27,10 @@ const keys = [
 
 export const getFlightKeys = () => keys;
 
-export default function FlightTable(props: { flights: FlightProp[] }) {
+export default function FlightTable(props: {
+  flights: FlightProp[];
+  pending: boolean;
+}) {
   let auth = useAuth();
   return (
     <div className="flight-table-container">
@@ -75,6 +80,12 @@ export default function FlightTable(props: { flights: FlightProp[] }) {
           })}
         </tbody>
       </Table>
+      <HintMessage control={props.pending} message="Loading..." />
+      {!props.pending && props.flights.length === 0 && (
+        <div className="nothing-here">
+          <InfoCircleFill /> Nothing to show here.
+        </div>
+      )}
     </div>
   );
 }

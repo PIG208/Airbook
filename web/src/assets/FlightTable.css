@@ -1,3 +1,9 @@
 .flight-table-container {
   overflow-x: auto;
 }
+
+.flight-table-container .nothing-here {
+  text-align: center;
+  font-size: 1.25rem;
+  margin-bottom: 1.5rem;
+}

@@ -264,8 +264,7 @@ export default function LookupFlights() {
           </Form.Row>
         </Form>
       </Card.Body>
-      <FlightTable flights={flights} />
-      <HintMessage control={pending} message="Loading..." />
+      <FlightTable flights={flights} pending={pending} />
     </Card>
   );
 }
