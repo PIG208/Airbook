@@ -41,6 +41,7 @@ import PurchaseTickets from "../components/tools/PurchaseTickets";
 import AccessDenied from "../components/tools/AccessDenied";
 import ToolNotFound from "../components/tools/ToolNotFound";
 import { ViewSpendings } from "../components/tools/ViewSpendings";
+import Feedback from "../components/tools/Feedback";
 
 type DashboardRoute = {
   tool: ITools;
@@ -101,7 +102,7 @@ const routes: DashboardRoute[] = [
   },
   {
     tool: CustomerTools.COMMENT,
-    ToolView: () => <Home />,
+    ToolView: () => <Feedback />,
     sidebar: () => (
       <div>
         <ChatRightText />
