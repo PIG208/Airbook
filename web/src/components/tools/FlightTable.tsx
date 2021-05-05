@@ -66,7 +66,7 @@ export default function FlightTable(props: {
                     // Times
                     return (
                       <td key={key}>
-                        {new Date("2020-02-02T" + value).toLocaleTimeString()}
+                        {new Date(`2020-02-02T${value}Z`).toLocaleTimeString()}
                       </td>
                     );
                   } else {

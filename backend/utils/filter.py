@@ -62,7 +62,7 @@ class FilterGroup(Enum):
 
 
 class FilterSet(Generic[V]):
-    def __init__(self, filter_set: Optional[Iterable[V]]):
+    def __init__(self, filter_set: Optional[Iterable[V]] = None):
         # Note that the order doesn't matter here as the order of an iterable can be non-deterministic
         self._filter_set: Optional[Set[V]] = (
             {item for item in filter_set} if filter_set is not None else None
@@ -116,8 +116,9 @@ def is_advanced_filter(filter: FilterType):
 
 
 class Filter:
-    def __init__(self, base_query: str):
+    def __init__(self, base_query: str, is_predicate: bool = False):
         self.base_query = base_query
+        self.is_predicate = is_predicate
         self.where_clause: List[str] = []
         self.string_values: List[str] = []
 
@@ -192,6 +193,8 @@ class Filter:
         if sub_filter is None:
             return self
         assert isinstance(sub_filter, Filter)
+        if sub_filter.get_formatted()[0] == "":
+            return self
         sql, values = sub_filter.get_formatted()
         if sql.strip() != "":
             self.where_clause.append("({})".format(sql))
@@ -218,36 +221,59 @@ class Filter:
 
         return self
 
+    def add_or(
+        self, func_a: Callable, func_b: Callable, args_a: Any = (), args_b: Any = ()
+    ):
+        dummy_filter = Filter("{where}")
+        try:
+            func_a = getattr(dummy_filter, func_a.__name__)
+            func_b = getattr(dummy_filter, func_b.__name__)
+        except AttributeError:
+            raise AssertionError("or expects to take an add function from filter!")
+        func_a(*args_a)
+        func_b(*args_b)
+        if len(dummy_filter.where_clause) > 0:
+            self.where_clause.append(
+                "({})".format(" OR ".join(dummy_filter.where_clause))
+            )
+            for s in dummy_filter.string_values:
+                self.string_values.append(s)
+        return self
+
     def get_formatted(self) -> Tuple[str, list]:
         """
         Returns a query string, formatted, and the values left for string interpolation.
         """
-        if len(self.where_clause) > 0 and "{where}" not in self.base_query:
-            raise ValueError("Placeholder for the where clause is not found.")
-        return (
-            self.base_query.format(
-                where="WHERE " + " AND ".join(self.where_clause)
-                if len(self.where_clause) > 0
-                else ""
-            ),
-            self.string_values,
-        )
+        if self.is_predicate:
+            return (
+                " AND ".join(self.where_clause) if len(self.where_clause) > 0 else "",
+                self.string_values,
+            )
+        else:
+            return (
+                self.base_query.format(
+                    where="WHERE " + " AND ".join(self.where_clause)
+                    if len(self.where_clause) > 0
+                    else ""
+                ),
+                self.string_values,
+            )
 
 
 def get_filter_flight(
+    dep_date_range: FilterRange[str],
+    dep_time_range: FilterRange[str],
+    arr_date_range: FilterRange[str],
+    arr_time_range: FilterRange[str],
     flight_number: Optional[int] = None,
-    filter_by_emails: Optional[bool] = False,
-    dep_date_range: Optional[FilterRange[str]] = None,
-    dep_time_range: Optional[FilterRange[str]] = None,
-    arr_date_range: Optional[FilterRange[str]] = None,
-    arr_time_range: Optional[FilterRange[str]] = None,
     dep_airport: Optional[str] = None,
     dep_city: Optional[str] = None,
     arr_airport: Optional[str] = None,
     arr_city: Optional[str] = None,
-    emails: Optional[FilterSet] = None,
+    emails: FilterSet[str] = None,
+    filter_by_emails: Optional[bool] = False,
     is_customer: Optional[bool] = True,
-    round_trip: bool = False,
+    round_trip: Optional[bool] = False,
 ) -> Tuple[str, list]:
     base_query = "SELECT * FROM verbose_flights {where}"
     flight_table = "verbose_flights"
@@ -268,15 +294,9 @@ def get_filter_flight(
         )
     else:
         sec_filter = None
-    filter.add_filter_range("dep_date", dep_date_range).add_filter_range(
-        "dep_time", dep_time_range
-    ).add_filter_range("arr_date", arr_date_range).add_filter_range(
-        "arr_time", arr_time_range
-    ).add_optional_constraint(
+    filter.add_optional_constraint(
         "flight_number", flight_number
-    ).add_optional_constraint(
-        "dep_airport", dep_airport
-    ).add_optional_constraint(
+    ).add_optional_constraint("dep_airport", dep_airport).add_optional_constraint(
         "arr_airport", arr_airport
     ).add_optional_constraint(
         "dep_city", dep_city
@@ -285,13 +305,41 @@ def get_filter_flight(
     ).conditonally_add(
         filter_by_emails, filter.add_sub_filter, sec_filter
     )
+    add_date_time_range(filter, dep_date_range, dep_time_range, "dep_date", "dep_time")
+    add_date_time_range(filter, arr_date_range, arr_time_range, "arr_date", "arr_time")
     return filter.get_formatted()
+
+
+def add_date_time_range(
+    filter: Filter,
+    date_rage: FilterRange,
+    time_range: FilterRange,
+    date_column_name: str,
+    time_column_name: str,
+):
+    sub_lower = (
+        Filter("", True)
+        .add_optional_constraint(date_column_name, date_rage.lower)
+        .add_filter_range(time_column_name, FilterRange(lower=time_range.lower))
+    )
+    sub_upper = (
+        Filter("", True)
+        .add_optional_constraint(date_column_name, date_rage.upper)
+        .add_filter_range(time_column_name, FilterRange(upper=time_range.upper))
+    )
+    filter.add_or(
+        filter.add_filter_range,
+        filter.add_or,
+        (date_column_name, date_rage),
+        (filter.add_sub_filter, filter.add_sub_filter, (sub_lower,), (sub_upper,)),
+    )
+    return filter
 
 
 def get_filter_spendings(
     emails: FilterSet[str],
-    purchase_date_range: Optional[FilterRange[str]] = None,
-    purchase_time_range: Optional[FilterRange[str]] = None,
+    purchase_date_range: FilterRange[str],
+    purchase_time_range: FilterRange[str],
     filter_group: Optional[FilterGroup] = None,
 ) -> Tuple[str, list]:
     assert isinstance(emails, FilterSet)
@@ -305,10 +353,14 @@ def get_filter_spendings(
         )
     else:
         filter = Filter("SELECT purchase_date, actual_price FROM spendings {where}")
-
-    filter.add_filter_range("purchase_date", purchase_date_range).add_filter_range(
-        "purchase_time", purchase_time_range
-    ).add_filter_set("email", emails)
+    add_date_time_range(
+        filter,
+        purchase_date_range,
+        purchase_time_range,
+        "purchase_date",
+        "purchase_time",
+    )
+    filter.add_filter_set("email", emails)
     return filter.get_formatted()
 
 
@@ -338,7 +390,6 @@ def get_filter_query(filter: FilterType, **kwargs) -> Tuple[str, Union[list, dic
         elif filter is FilterType.ADVANCED_FLIGHT:
             return get_filter_flight(
                 flight_number=kwargs.get("flight_number"),
-                filter_by_emails=kwargs.get("filter_by_emails"),
                 dep_date_range=FilterRange(
                     kwargs.get("dep_date_lower"), kwargs.get("dep_date_upper")
                 ),
@@ -356,6 +407,7 @@ def get_filter_query(filter: FilterType, **kwargs) -> Tuple[str, Union[list, dic
                 arr_airport=kwargs.get("arr_airport"),
                 arr_city=kwargs.get("arr_city"),
                 emails=FilterSet(kwargs.get("emails")),
+                filter_by_emails=kwargs.get("filter_by_emails"),
                 is_customer=kwargs.get("is_customer"),
             )
         else:
