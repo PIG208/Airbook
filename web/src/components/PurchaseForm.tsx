@@ -239,6 +239,7 @@ export default function PurchaseForm(
               onChange={onChange}
               placeholderText="MM/DD/YYYY"
               wrapperClassName={"form-control"}
+              autoComplete="off"
               showYearDropdown
               customInput={
                 <DateCustomInput isInvalid={errors.expDate !== undefined} />

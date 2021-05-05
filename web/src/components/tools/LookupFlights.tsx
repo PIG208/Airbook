@@ -172,6 +172,7 @@ export default function LookupFlights() {
                   wrapperClassName={"form-control"}
                   showTimeSelect
                   dateFormat="MMMM d, yyyy h:mm aa"
+                  autoComplete="off"
                   customInput={
                     <DateCustomInput
                       isInvalid={errors.depTimeLower !== undefined}
@@ -195,6 +196,7 @@ export default function LookupFlights() {
                   wrapperClassName={"form-control"}
                   showTimeSelect
                   dateFormat="MMMM d, yyyy h:mm aa"
+                  autoComplete="off"
                   customInput={
                     <DateCustomInput
                       isInvalid={errors.depTimeUpper !== undefined}
@@ -220,6 +222,7 @@ export default function LookupFlights() {
                   wrapperClassName={"form-control"}
                   showTimeSelect
                   dateFormat="MMMM d, yyyy h:mm aa"
+                  autoComplete="off"
                   customInput={
                     <DateCustomInput
                       value={value}
@@ -244,6 +247,7 @@ export default function LookupFlights() {
                   wrapperClassName={"form-control"}
                   showTimeSelect
                   dateFormat="MMMM d, yyyy h:mm aa"
+                  autoComplete="off"
                   customInput={
                     <DateCustomInput
                       isInvalid={errors.arrTimeUpper !== undefined}

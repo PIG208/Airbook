@@ -397,6 +397,7 @@ export default function RegisterForm(props: IFormProps<UserProp>) {
               onChange={onChange}
               placeholderText="MM/DD/YYYY"
               wrapperClassName={"form-control"}
+              autoComplete="off"
               showYearDropdown
               customInput={
                 <DateCustomInput
@@ -567,6 +568,7 @@ export default function RegisterForm(props: IFormProps<UserProp>) {
               onChange={onChange}
               placeholderText="MM/DD/YYYY"
               wrapperClassName={"form-control"}
+              autoComplete="off"
               showYearDropdown
               customInput={
                 <DateCustomInput isInvalid={errors.dateOfBirth !== undefined} />
