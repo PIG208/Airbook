@@ -57,6 +57,7 @@ const flightDataHandler = [
     return { result: "error", message: "Failed to parse the flight data." };
   },
   (err: any) => {
+    console.log(err);
     return {
       result: "error",
       message: "Network error occurred while fetching data.",
@@ -69,6 +70,16 @@ export function futureFlights(): Promise<ResponseProp> {
     .post<{ data?: string; result: string; message?: string }>(
       getPublicSearchURL("all_future")
     )
+    .then(...flightDataHandler);
+}
+
+export function previousFlights(): Promise<ResponseProp<FlightProp[]>> {
+  return axios
+    .post(getPublicSearchURL("advanced_flight"), {
+      dep_date_upper: convertDate(new Date()),
+      dep_time_upper: convertTime(new Date()),
+      filter_by_emails: true,
+    })
     .then(...flightDataHandler);
 }
 
