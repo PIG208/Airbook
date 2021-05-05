@@ -100,7 +100,7 @@ export default function LookupFlights() {
           </Form.Row>
           <Form.Row>
             <Form.Group as={Col} controlId="formDepCity">
-              <Form.Label>Arrival City</Form.Label>
+              <Form.Label>Departure City</Form.Label>
               <Controller
                 name="depCity"
                 control={control}
@@ -117,14 +117,14 @@ export default function LookupFlights() {
             <Form.Group as={Col} controlId="formArrCity">
               <Form.Label>Arrival City</Form.Label>
               <Controller
-                name="depCity"
+                name="arrCity"
                 control={control}
                 defaultValue={""}
                 render={({ field }) => (
                   <Form.Control
                     {...field}
                     placeholder="Arrival city (Optional)"
-                    isInvalid={errors.depCity !== undefined}
+                    isInvalid={errors.arrCity !== undefined}
                   />
                 )}
               />
