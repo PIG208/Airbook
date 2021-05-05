@@ -1,6 +1,6 @@
 import React, { useEffect, useState, forwardRef } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { LoginProp, UserProp, UserType } from "../api/authentication";
+import { UserType } from "../api/authentication";
 import { Button, Form } from "react-bootstrap";
 import AlertMessage from "./AlertMessage";
 import HintMessage from "./HintMessage";

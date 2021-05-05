@@ -17,7 +17,7 @@ export default function LookupFlights() {
   const {
     handleSubmit,
     control,
-    formState: { errors, submitCount },
+    formState: { errors },
   } = useForm<FlightFilterProp>();
   const [flights, setFlights] = useState<FlightProp[]>([]);
   const [pending, setPending] = useState(false);

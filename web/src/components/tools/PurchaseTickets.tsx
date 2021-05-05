@@ -125,7 +125,7 @@ export function FlightInfo() {
 }
 
 export default function PurchaseTickets() {
-  const { path, url } = useRouteMatch();
+  const { path } = useRouteMatch();
   return (
     <div>
       <Switch>

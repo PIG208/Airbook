@@ -5,7 +5,6 @@ import { custFutureFlights, futureFlights } from "../../api/flight";
 import useIncrement from "../../api/use-increment";
 import { useEffect, useState } from "react";
 import AlertMessage from "../AlertMessage";
-import HintMessage from "../HintMessage";
 import SearchFlights from "./SearchFlights";
 import { useAuth } from "../../api/use-auth";
 import { ResponseProp } from "../../api/api";
