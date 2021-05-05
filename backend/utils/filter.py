@@ -352,7 +352,7 @@ def get_filter_spendings(
             )
         )
     else:
-        filter = Filter("SELECT purchase_date, actual_price FROM spendings {where}")
+        filter = Filter("SELECT * FROM spendings {where}")
     add_date_time_range(
         filter,
         purchase_date_range,

@@ -40,6 +40,7 @@ import LookupFlights from "../components/tools/LookupFlights";
 import PurchaseTickets from "../components/tools/PurchaseTickets";
 import AccessDenied from "../components/tools/AccessDenied";
 import ToolNotFound from "../components/tools/ToolNotFound";
+import { ViewSpendings } from "../components/tools/ViewSpendings";
 
 type DashboardRoute = {
   tool: ITools;
@@ -90,7 +91,7 @@ const routes: DashboardRoute[] = [
   },
   {
     tool: CustomerTools.VIEW_SPENDINGS,
-    ToolView: () => <Home />,
+    ToolView: () => <ViewSpendings />,
     sidebar: () => (
       <div>
         <Wallet />

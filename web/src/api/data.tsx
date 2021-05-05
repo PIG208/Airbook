@@ -54,6 +54,21 @@ export interface TicketProp {
   BookingAgentId?: number;
 }
 
+export interface SpendingsProp {
+  email?: string;
+  ticketID?: number;
+  soldPrice?: number;
+  actualPrice: string;
+  commission?: number;
+  purchaseDate: string;
+  purchaseTime?: string;
+}
+
+export interface SpendingsGroupProp {
+  groupDate: string;
+  spendingsSum: number;
+}
+
 export interface FlightPrimaryProp {
   flightNumber: number;
   depDate: string;

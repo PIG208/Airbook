@@ -1,9 +1,9 @@
 import { UserProp, UserType } from "./authentication";
 
-export type ResponseProp = {
+export type ResponseProp<T = any> = {
   result: string;
   message?: string;
-  data?: any;
+  data?: T;
   userData?: UserProp;
 };
 
