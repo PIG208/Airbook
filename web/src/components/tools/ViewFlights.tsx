@@ -48,7 +48,7 @@ export default function ViewFlights() {
       }
       setPending(false);
     };
-    if (auth.userProp.userType == UserType.CUST) {
+    if (auth.userProp.userType === UserType.CUST) {
       custFutureFlights().then(handleResponse).finally(handleFinally);
     } else {
       futureFlights().then(handleResponse).finally(handleFinally);
