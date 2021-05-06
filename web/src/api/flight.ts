@@ -1,6 +1,6 @@
 import { getPublicSearchURL, getSearchURL, ResponseProp } from "./api";
 import axios from "axios";
-import { FlightProp } from "./data";
+import { FlightPrimaryProp, FlightProp } from "./data";
 import { useCredentials } from "./authentication";
 import { handleError } from "./utils";
 
@@ -18,6 +18,14 @@ export interface FlightFilterProp {
   arrAirport?: string;
   arrCity?: string;
 }
+
+export const parseFlightPrimary = (props: FlightPrimaryProp) => {
+  return {
+    flight_number: props.flightNumber,
+    dep_date: props.depDate,
+    dep_time: props.depTime,
+  };
+};
 
 const parseFlightData = (flightData: Array<any>) => {
   return flightData.reduce((accumulator, current) => {
