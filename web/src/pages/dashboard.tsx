@@ -42,9 +42,11 @@ import LookupFlights from "../components/tools/LookupFlights";
 import PurchaseTickets from "../components/tools/PurchaseTickets";
 import AccessDenied from "../components/tools/AccessDenied";
 import ToolNotFound from "../components/tools/ToolNotFound";
-import { ViewSpendings } from "../components/tools/ViewSpendings";
+import ViewSpendings from "../components/tools/ViewSpendings";
 import Feedback from "../components/tools/Feedback";
 import FeedbackDisplay from "../components/tools/FeedbackDisplay";
+import ViewCommission from "../components/tools/ViewCommission";
+import TopCustomers from "../components/tools/TopCustomers";
 
 type DashboardRoute = {
   tool: ITools;
@@ -115,7 +117,7 @@ const routes: DashboardRoute[] = [
   },
   {
     tool: AgentTools.VIEW_COMMISSION,
-    ToolView: () => <Home />,
+    ToolView: () => <ViewCommission />,
     sidebar: () => (
       <div>
         <Cash />
@@ -125,7 +127,7 @@ const routes: DashboardRoute[] = [
   },
   {
     tool: AgentTools.TOP_CUST,
-    ToolView: () => <Home />,
+    ToolView: () => <TopCustomers />,
     sidebar: () => (
       <div>
         <People />

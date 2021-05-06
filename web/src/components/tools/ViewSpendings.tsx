@@ -102,7 +102,9 @@ export default function ViewSpendings() {
       </div>
       <div>
         {spendingsTotal > 0 ? (
-          <Bar redraw={false} data={chartData} type="bar" />
+          <div className="chart-container">
+            <Bar redraw={false} data={chartData} type="bar" />
+          </div>
         ) : (
           <div>no data</div>
         )}

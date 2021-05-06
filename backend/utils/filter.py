@@ -35,6 +35,9 @@ class FilterRange(Generic[T]):
 
         self._upper: Optional[T] = upper
 
+    def isEmpty(self) -> bool:
+        return self._lower is None and self._upper is None
+
     @property
     def lower(self) -> Optional[str]:
         if self._lower is not None:
@@ -46,19 +49,6 @@ class FilterRange(Generic[T]):
         if self._upper is not None:
             return str(self._upper)
         return None
-
-
-class FilterGroup(Enum):
-    DAY = "DAY"
-    MONTH = "MONTH"
-    YEAR = "YEAR"
-
-    @classmethod
-    def get_default(cls, value):
-        try:
-            return FilterGroup(value)
-        except ValueError:
-            return None
 
 
 class FilterSet(Generic[V]):
@@ -86,6 +76,7 @@ class FilterType(Enum):
     CUST_FUTURE_FLIGHTS = "customer_future"
     CUST_TICKETS = "customer_tickets"
     FLIGHT_COMMENTS = "flight_comments"
+    TOP_CUSTOMERS = "top_customers"
     # The following filters are advanced filters that require the filter generator.
     # We need to keep track of the advanced filters in the set ADVANCED_FILTERS.
     ADVANCED_FLIGHT = "advanced_flight"
@@ -99,6 +90,14 @@ SELECT_ALL_FUTURE_FLIGHTS = "SELECT * FROM future_flights;"
 SELECT_CUSTOMER_TICKETS = (
     "call customer_tickets(%(email)s);"  # "email" must matches the key name for session
 )
+SELECT_TOP_CUSTOMERS = '(SELECT * FROM \
+    (SELECT email, sum(commission) as total_commission, count(*) as tickets_bought \
+        FROM spendings where purchase_Date > UTC_TIMESTAMP() - INTERVAL 6 MONTH and booking_agent_id = %(agent_id)s \
+            GROUP BY email ORDER BY total_commission DESC)as temp) \
+                UNION ALL SELECT "divide" as email, "" as total_commission, "" as tickets_bought UNION ALL \
+                    (SELECT email, sum(commission) as total_commission, count(*) as tickets_bought \
+                        FROM spendings where purchase_Date > UTC_TIMESTAMP() - INTERVAL 6 MONTH and booking_agent_id = %(agent_id)s \
+                            GROUP BY email ORDER BY tickets_bought DESC)'
 SELECT_CUSTOMER_FLIGHTS = "call customer_flights(%(email)s);"
 
 FILTER_TO_QUERY_MAP = {
@@ -106,6 +105,7 @@ FILTER_TO_QUERY_MAP = {
     FilterType.CUST_FUTURE_FLIGHTS: SELECT_CUSTOMER_FLIGHTS,
     FilterType.CUST_TICKETS: SELECT_CUSTOMER_TICKETS,
     FilterType.FLIGHT_COMMENTS: SELECT_FLIGHT_COMMENTS,
+    FilterType.TOP_CUSTOMERS: SELECT_TOP_CUSTOMERS,
 }
 
 ADVANCED_FILTERS = {
@@ -328,23 +328,33 @@ def add_date_time_range(
     date_column_name: str,
     time_column_name: str,
 ):
+    if date_range.isEmpty() and time_range.isEmpty():
+        return
     sub_lower = (
         Filter("", True)
         .add_optional_constraint(date_column_name, date_range.lower)
         .add_filter_range(date_column_name, FilterRange(upper=date_range.upper))
         .add_filter_range(time_column_name, FilterRange(lower=time_range.lower))
+        if date_range.lower is not None
+        else Filter("", True).add_static_filter("FALSE")
     )
     sub_upper = (
         Filter("", True)
         .add_optional_constraint(date_column_name, date_range.upper)
         .add_filter_range(date_column_name, FilterRange(lower=date_range.lower))
         .add_filter_range(time_column_name, FilterRange(upper=time_range.upper))
+        if date_range.upper is not None
+        else Filter("", True).add_static_filter("FALSE")
     )
     sub_same_day = (
-        Filter("", True)
-        .add_optional_constraint(date_column_name, date_range.upper)
-        .add_optional_constraint(date_column_name, date_range.upper)
-        .add_filter_range(time_column_name, time_range)
+        (
+            Filter("", True)
+            .add_optional_constraint(date_column_name, date_range.upper)
+            .add_optional_constraint(date_column_name, date_range.lower)
+            .add_filter_range(time_column_name, time_range)
+        )
+        if date_range.upper is not None and date_range.lower is not None
+        else Filter("", True).add_static_filter("FALSE")
     )
     filter.add_or(
         filter.add_filter_range,
@@ -367,18 +377,16 @@ def add_date_time_range(
 
 def get_filter_spendings(
     emails: FilterSet[str],
+    agent_id: Optional[int],
     purchase_date_range: FilterRange[str],
     purchase_time_range: FilterRange[str],
-    filter_group: Optional[FilterGroup] = None,
+    group_by_month: bool = False,
+    is_customer: bool = False,
 ) -> Tuple[str, list]:
     assert isinstance(emails, FilterSet)
-    assert filter_group is None or isinstance(filter_group, FilterGroup)
-    if filter_group:
+    if group_by_month:
         filter = Filter(
-            "SELECT {Group}(purchase_date), sum(actual_price) FROM spendings \
-            {{where}} GROUP BY {Group}(purchase_date)".format(
-                Group=filter_group.value
-            )
+            "SELECT concat(year(purchase_date),'-', month(purchase_date)) as spendings_year_month, sum(actual_price) from spendings {where} GROUP BY spendings_year_month ORDER BY purchase_date"
         )
     else:
         filter = Filter("SELECT * FROM spendings {where}")
@@ -389,7 +397,9 @@ def get_filter_spendings(
         "purchase_date",
         "purchase_time",
     )
-    filter.add_filter_set("email", emails)
+    filter.conditonally_add(
+        is_customer, filter.add_filter_set, "email", emails
+    ).add_optional_constraint("booking_agent_id", agent_id)
     return filter.get_formatted()
 
 
@@ -407,14 +417,16 @@ def get_filter_query(filter: FilterType, **kwargs) -> Tuple[str, Union[list, dic
     try:
         if filter is FilterType.ADVANCED_SPENDINGS:
             return get_filter_spendings(
-                emails=FilterSet(kwargs["emails"]),
+                emails=FilterSet(kwargs.get("emails")),
+                agent_id=kwargs.get("agent_id"),
                 purchase_date_range=FilterRange(
                     kwargs.get("purchase_date_lower"), kwargs.get("purchase_date_upper")
                 ),
                 purchase_time_range=FilterRange(
                     kwargs.get("purchase_time_lower"), kwargs.get("purchase_time_upper")
                 ),
-                filter_group=FilterGroup.get_default(kwargs.get("group")),
+                group_by_month=kwargs.get("group_by_month"),
+                is_customer=kwargs.get("is_customer"),
             )
         elif filter is FilterType.ADVANCED_FLIGHT:
             return get_filter_flight(

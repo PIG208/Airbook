@@ -26,7 +26,7 @@ ProtectedFilters = {
 
 STAFF_FILTERS: Set[FilterType] = {FilterType.FLIGHT_COMMENTS}
 
-AGENT_FILTERS: Set[FilterType] = {}  # type: ignore
+AGENT_FILTERS: Set[FilterType] = {FilterType.TOP_CUSTOMERS}
 
 CUST_FILTERS: Set[FilterType] = {
     FilterType.CUST_FUTURE_FLIGHTS,
