@@ -6,6 +6,7 @@ import {
   getFetchSessionURL,
   ResponseProp,
 } from "./api";
+import { handleError } from "./utils";
 
 export enum UserType {
   CUST = "cust",
@@ -107,25 +108,19 @@ export async function login(props: LoginProp): Promise<ResponseProp> {
       },
       useCredentials
     )
-    .then(
-      (res) => {
-        data = res.data;
-        if (data.result === "error") {
-          return;
-        }
-        try {
-          data.userData = parseUserData(props.loginType, data);
-        } catch {
-          data = { result: "error", message: "Recieved malformed user data." };
-          return;
-        }
-        data.user_data = undefined;
-      },
-      (err) => {
-        console.log("reg failed:", err);
-        data = { result: "error", message: "A network error occurred!" };
+    .then((res) => {
+      data = res.data;
+      if (data.result === "error") {
+        return;
       }
-    );
+      try {
+        data.userData = parseUserData(props.loginType, data);
+      } catch {
+        data = { result: "error", message: "Recieved malformed user data." };
+        return;
+      }
+      data.user_data = undefined;
+    }, handleError);
   return data ?? { result: "error", message: "Invalid login method!" };
 }
 
@@ -171,80 +166,62 @@ export async function register(props: RegisterProp): Promise<ResponseProp> {
       },
       useCredentials
     )
-    .then(
-      (res) => {
-        data = res.data;
-        if (data.result === "error") {
-          return data;
-        }
-        data.userData = {
-          userType: props.registerType,
-          agentId: data.user_data?.agent_id,
-          ...props,
-        } as UserProp;
-        data.user_data = undefined;
-      },
-      (err) => {
-        console.log("reg failed:", err);
-        data = { result: "error", message: "A network error occurred!" };
+    .then((res) => {
+      data = res.data;
+      if (data.result === "error") {
+        return data;
       }
-    );
+      data.userData = {
+        userType: props.registerType,
+        agentId: data.user_data?.agent_id,
+        ...props,
+      } as UserProp;
+      data.user_data = undefined;
+    }, handleError);
   return data ?? { result: "error", message: "Invalid registration method" };
 }
 
 export async function logout(): Promise<ResponseProp> {
-  return axios.post(getLogoutURL(), {}, useCredentials).then(
-    (res) => {
-      const data = res.data;
-      if (data.result === "error") {
-        return data;
-      } else {
-        return { result: "success" };
-      }
-    },
-    (err) => {
-      console.log("logout failed:", err);
-      return { result: "error", message: "A network error occurred!" };
+  return axios.post(getLogoutURL(), {}, useCredentials).then((res) => {
+    const data = res.data;
+    if (data.result === "error") {
+      return data;
+    } else {
+      return { result: "success" };
     }
-  );
+  }, handleError);
 }
 
 export async function fetchSession(): Promise<ResponseProp> {
   // If there is a session cookie presented in this session, we will login directly.
-  return axios.post(getFetchSessionURL(), {}, useCredentials).then(
-    (res) => {
-      const data = res.data;
-      if (data.result === "error") {
-        return data;
-      }
-      if (data !== undefined) {
-        try {
-          let userType = UserType.PUBLIC;
-          switch (data.user_data.user_type) {
-            case "cust":
-              userType = UserType.CUST;
-              break;
-            case "agent":
-              userType = UserType.AGENT;
-              break;
-            case "staff":
-              userType = UserType.STAFF;
-              break;
-          }
-          const userData = parseUserData(userType, data);
-          return { result: "success", userData: userData };
-        } catch {
-          return {
-            result: "error",
-            message: "Failed to parse the user data!",
-          };
-        }
-      }
-      return { result: "error", message: "Recieved empty user data." };
-    },
-    (err) => {
-      console.log(err);
-      return { result: "error", message: "Some sorts of errors occurred." };
+  return axios.post(getFetchSessionURL(), {}, useCredentials).then((res) => {
+    const data = res.data;
+    if (data.result === "error") {
+      return data;
     }
-  );
+    if (data !== undefined) {
+      try {
+        let userType = UserType.PUBLIC;
+        switch (data.user_data.user_type) {
+          case "cust":
+            userType = UserType.CUST;
+            break;
+          case "agent":
+            userType = UserType.AGENT;
+            break;
+          case "staff":
+            userType = UserType.STAFF;
+            break;
+        }
+        const userData = parseUserData(userType, data);
+        return { result: "success", userData: userData };
+      } catch {
+        return {
+          result: "error",
+          message: "Failed to parse the user data!",
+        };
+      }
+    }
+    return { result: "error", message: "Recieved empty user data." };
+  }, handleError);
 }

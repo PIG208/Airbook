@@ -2,6 +2,7 @@ import { getPublicSearchURL, getSearchURL, ResponseProp } from "./api";
 import axios from "axios";
 import { FlightProp } from "./data";
 import { useCredentials } from "./authentication";
+import { handleError } from "./utils";
 
 export interface FlightFilterProp {
   filterByEmails?: boolean; // Equivalent to view purchased flights
@@ -56,13 +57,7 @@ const flightDataHandler = [
     }
     return { result: "error", message: "Failed to parse the flight data." };
   },
-  (err: any) => {
-    console.log(err);
-    return {
-      result: "error",
-      message: "Network error occurred while fetching data.",
-    };
-  },
+  handleError,
 ];
 
 export function futureFlights(): Promise<ResponseProp> {
