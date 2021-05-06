@@ -4,7 +4,6 @@ import { FlightProp } from "../../api/data";
 import { previousFlights } from "../../api/flight";
 import { parseISODate, parseISOTime } from "../../api/utils";
 import AlertMessage from "../AlertMessage";
-import "../../assets/Feedback.css";
 
 export default function Feekback() {
   const [flights, setFlights] = useState<FlightProp[]>([]);
@@ -21,7 +20,7 @@ export default function Feekback() {
     });
   }, []);
   return (
-    <div className="feedback-container">
+    <div className="card-flex-container">
       {flights.map((value, index) => {
         return (
           <Card>

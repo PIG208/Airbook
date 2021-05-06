@@ -74,3 +74,13 @@ export interface FlightPrimaryProp {
   depDate: string;
   depTime: string;
 }
+
+export interface FeedbackProp {
+  flightNumber: number;
+  depDate: string;
+  depTime: string;
+  email: string;
+  createdAt: string;
+  rate: number;
+  comment: string;
+}

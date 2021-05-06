@@ -92,7 +92,9 @@ class FilterType(Enum):
     ADVANCED_SPENDINGS = "advanced_spendings"
 
 
-SELECT_FLIGHT_COMMENTS = "SELECT * FROM Feedback WHERE flight_number={} AND dep_date=%(dep_date)s AND dep_time=%(dep_time)s"
+SELECT_FLIGHT_COMMENTS = "SELECT flight_number, dep_date, dep_time, created_at, email, rate, comment \
+    FROM Feedback NATURAL JOIN Flight NATURAL JOIN AirlineStaff \
+        WHERE username=%(username)s;"
 SELECT_ALL_FUTURE_FLIGHTS = "SELECT * FROM future_flights;"
 SELECT_CUSTOMER_TICKETS = (
     "call customer_tickets(%(email)s);"  # "email" must matches the key name for session
@@ -103,6 +105,7 @@ FILTER_TO_QUERY_MAP = {
     FilterType.ALL_FUTURE_FLIGHTS: SELECT_ALL_FUTURE_FLIGHTS,
     FilterType.CUST_FUTURE_FLIGHTS: SELECT_CUSTOMER_FLIGHTS,
     FilterType.CUST_TICKETS: SELECT_CUSTOMER_TICKETS,
+    FilterType.FLIGHT_COMMENTS: SELECT_FLIGHT_COMMENTS,
 }
 
 ADVANCED_FILTERS = {
@@ -418,4 +421,5 @@ def get_filter_query(filter: FilterType, **kwargs) -> Tuple[str, Union[list, dic
 
 def query_by_filter(conn: Connection, filter: FilterType, **kwargs):
     sql, values = get_filter_query(filter, **kwargs)
+    print(sql, values)
     return query(conn, sql, args=values)

@@ -10,6 +10,7 @@ import {
   inUserTools,
   ITools,
   PublicTools,
+  StaffTools,
   Tools,
 } from "../api/tool";
 import {
@@ -32,6 +33,7 @@ import {
   People,
   Wallet,
   Search,
+  ChatDotsFill,
 } from "react-bootstrap-icons";
 import { PublicUser } from "../api/authentication";
 import ViewFlights from "../components/tools/ViewFlights";
@@ -42,6 +44,7 @@ import AccessDenied from "../components/tools/AccessDenied";
 import ToolNotFound from "../components/tools/ToolNotFound";
 import { ViewSpendings } from "../components/tools/ViewSpendings";
 import Feedback from "../components/tools/Feedback";
+import FeedbackDisplay from "../components/tools/FeedbackDisplay";
 
 type DashboardRoute = {
   tool: ITools;
@@ -131,12 +134,22 @@ const routes: DashboardRoute[] = [
     ),
   },
   {
-    tool: Tools.VIEW_REPORT,
+    tool: StaffTools.VIEW_REPORT,
     ToolView: () => <Home />,
     sidebar: () => (
       <div>
         <Receipt />
         View Report
+      </div>
+    ),
+  },
+  {
+    tool: StaffTools.VIEW_RATINGS,
+    ToolView: () => <FeedbackDisplay />,
+    sidebar: () => (
+      <div>
+        <ChatDotsFill />
+        View Ratings
       </div>
     ),
   },

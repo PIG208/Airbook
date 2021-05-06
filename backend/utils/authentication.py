@@ -24,7 +24,7 @@ ProtectedFilters = {
     FilterType.ADVANCED_SPENDINGS,
 }
 
-STAFF_FILTERS: Set[FilterType] = {}  # type: ignore
+STAFF_FILTERS: Set[FilterType] = {FilterType.FLIGHT_COMMENTS}
 
 AGENT_FILTERS: Set[FilterType] = {}  # type: ignore
 
