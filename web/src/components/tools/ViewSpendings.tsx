@@ -6,13 +6,13 @@ import { SpendingsFilterProp, getSpendingsByMonth } from "../../api/spendings";
 import AlertMessage from "../AlertMessage";
 import { SpendingsGroupProp } from "../../api/data";
 import { Bar } from "react-chartjs-2";
+import RangePicker from "../RangePicker";
 
 export function ViewSpendings() {
   const {
     handleSubmit,
     control,
     formState: { errors },
-    getValues,
     watch,
   } = useForm<SpendingsFilterProp>();
   const [errorMessage, setErrorMessage] = useState("");
@@ -80,54 +80,13 @@ export function ViewSpendings() {
     <div>
       <Form onSubmit={handleSubmit(handleViewSpendings)} autoComplete="off">
         <AlertMessage message={errorMessage} />
-        <Form.Row>
-          <Form.Group as={Col} controlId="formSpendingsDateLower">
-            <Form.Label>Purchase Time Lower Bound</Form.Label>
-            <Controller
-              name="purchaseDatetimeLower"
-              control={control}
-              defaultValue={""}
-              render={({ field: { onChange, value } }) => (
-                <DatePicker
-                  selected={value}
-                  onChange={onChange}
-                  placeholderText="(Optional)"
-                  wrapperClassName={"form-control"}
-                  showTimeSelect
-                  dateFormat="yyyy/MM/dd h:mm aa"
-                  customInput={
-                    <DateCustomInput
-                      isInvalid={errors.purchaseDatetimeLower !== undefined}
-                    />
-                  }
-                />
-              )}
-            />
-          </Form.Group>
-          <Form.Group as={Col} controlId="formSpendingsDateUpper">
-            <Form.Label>Purchase Time Upper Bound</Form.Label>
-            <Controller
-              name="purchaseDatetimeUpper"
-              control={control}
-              defaultValue={""}
-              render={({ field: { onChange, value } }) => (
-                <DatePicker
-                  selected={value}
-                  onChange={onChange}
-                  placeholderText="(Optional)"
-                  wrapperClassName={"form-control"}
-                  showTimeSelect
-                  dateFormat="yyyy/MM/dd h:mm aa"
-                  customInput={
-                    <DateCustomInput
-                      isInvalid={errors.purchaseDatetimeUpper !== undefined}
-                    />
-                  }
-                />
-              )}
-            />
-          </Form.Group>
-        </Form.Row>
+        <RangePicker
+          lowerName="purchaseDatetimeLower"
+          lowerDisplay="Purchase Time Lower Bound"
+          upperName="purchaseDatetimeUpper"
+          upperDisplay="Purchase Time Upper Bound"
+          control={control}
+        />
       </Form>
       <div>
         Your total spending is <strong>${spendingsTotal}</strong>{" "}

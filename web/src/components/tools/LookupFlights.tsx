@@ -12,6 +12,7 @@ import FlightTable from "./FlightTable";
 import useIncrement from "../../api/use-increment";
 import { useAuth } from "../../api/use-auth";
 import { UserType } from "../../api/authentication";
+import RangePicker from "../RangePicker";
 
 export default function LookupFlights() {
   const {
@@ -157,107 +158,20 @@ export default function LookupFlights() {
             />
           </Form.Group>
         </Form.Row>
-        <Form.Row>
-          <Form.Group as={Col} controlId="formDepTimeLower">
-            <Form.Label>Departure Date Lower Bound</Form.Label>
-            <Controller
-              name="depTimeLower"
-              control={control}
-              defaultValue={""}
-              render={({ field: { onChange, value } }) => (
-                <DatePicker
-                  selected={value}
-                  onChange={onChange}
-                  placeholderText="(Optional)"
-                  wrapperClassName={"form-control"}
-                  showTimeSelect
-                  dateFormat="MMMM d, yyyy h:mm aa"
-                  autoComplete="off"
-                  customInput={
-                    <DateCustomInput
-                      isInvalid={errors.depTimeLower !== undefined}
-                    />
-                  }
-                />
-              )}
-            />
-          </Form.Group>
-          <Form.Group as={Col} controlId="formDepTimeUpper">
-            <Form.Label>Departure Date Upper Bound</Form.Label>
-            <Controller
-              name="depTimeUpper"
-              control={control}
-              defaultValue={""}
-              render={({ field: { onChange, value } }) => (
-                <DatePicker
-                  selected={value}
-                  onChange={onChange}
-                  placeholderText="(Optional)"
-                  wrapperClassName={"form-control"}
-                  showTimeSelect
-                  dateFormat="MMMM d, yyyy h:mm aa"
-                  autoComplete="off"
-                  customInput={
-                    <DateCustomInput
-                      isInvalid={errors.depTimeUpper !== undefined}
-                    />
-                  }
-                />
-              )}
-            />
-          </Form.Group>
-        </Form.Row>
-        <Form.Row>
-          <Form.Group as={Col} controlId="formArrDateLower">
-            <Form.Label>Arrival Date Lower Bound</Form.Label>
-            <Controller
-              name="arrTimeLower"
-              control={control}
-              defaultValue={""}
-              render={({ field: { onChange, value } }) => (
-                <DatePicker
-                  selected={value}
-                  onChange={onChange}
-                  placeholderText="(Optional)"
-                  wrapperClassName={"form-control"}
-                  showTimeSelect
-                  dateFormat="MMMM d, yyyy h:mm aa"
-                  autoComplete="off"
-                  customInput={
-                    <DateCustomInput
-                      value={value}
-                      isInvalid={errors.arrTimeLower !== undefined}
-                    />
-                  }
-                />
-              )}
-            />
-          </Form.Group>
-          <Form.Group as={Col} controlId="formArrDateUpper">
-            <Form.Label>Arrival Date Upper Bound</Form.Label>
-            <Controller
-              name="arrTimeUpper"
-              control={control}
-              defaultValue={""}
-              render={({ field: { onChange, value } }) => (
-                <DatePicker
-                  selected={value}
-                  onChange={onChange}
-                  placeholderText="(Optional)"
-                  wrapperClassName={"form-control"}
-                  showTimeSelect
-                  dateFormat="MMMM d, yyyy h:mm aa"
-                  autoComplete="off"
-                  customInput={
-                    <DateCustomInput
-                      isInvalid={errors.arrTimeUpper !== undefined}
-                    />
-                  }
-                />
-              )}
-            />
-          </Form.Group>
-        </Form.Row>
+        <RangePicker
+          control={control}
+          lowerDisplay="Departure Date Lower Bound"
+          lowerName="depTimeLower"
+          upperDisplay="Departure Date Upper Bound"
+          upperName="depTimeUpper"
+        />
+        <RangePicker
+          control={control}
+          lowerDisplay="Arrival Date Lower Bound"
+          lowerName="arrTimeLower"
+          upperDisplay="Arrival Date Upper Bound"
+          upperName="arrTimeUpper"
+        />
         <Form.Row>
           <Button type="submit">Search</Button>
         </Form.Row>

@@ -14,6 +14,7 @@ import "../assets/Form.css";
 import { Col } from "react-bootstrap";
 import { IFormProps } from "../api/utils";
 import { useAuth } from "../api/use-auth";
+import MyDatePicker from "./MyDatePicker";
 
 export default function RegisterForm(props: IFormProps<UserProp>) {
   const {
@@ -533,51 +534,19 @@ export default function RegisterForm(props: IFormProps<UserProp>) {
         <FormErrorMessage message={errors.state?.message} />
       </ConditionalFormGroup>
 
-      <ConditionalFormGroup
-        controlId="formDOB"
-        condition={watchRegisterType !== UserType.AGENT}
-      >
-        <Form.Label>Date of birth</Form.Label>
-        <Controller
+      {watchRegisterType !== UserType.AGENT && (
+        <MyDatePicker
+          control={control as any}
           name="dateOfBirth"
-          control={control}
-          defaultValue={""}
-          rules={{
-            validate: {
-              required: (v) => {
-                return (
-                  getValues().registerType === UserType.AGENT ||
-                  !!v ||
-                  "The date of birth is required!"
-                );
-              },
-              pattern: (v) => {
-                return (
-                  getValues().registerType === UserType.AGENT ||
-                  !/^(0?[1-9]|[1][0-2])\/(0?[1-9]|[1-2]\d|[3][0-1])\/(19|20)\d\d/.test(
-                    v
-                  ) ||
-                  "The date of birth is invalid!"
-                );
-              },
-            },
-          }}
-          render={({ field: { onChange, value } }) => (
-            <DatePicker
-              selected={value}
-              onChange={onChange}
-              placeholderText="MM/DD/YYYY"
-              wrapperClassName={"form-control"}
-              autoComplete="off"
-              showYearDropdown
-              customInput={
-                <DateCustomInput isInvalid={errors.dateOfBirth !== undefined} />
-              }
-            />
-          )}
+          displayName="Date of Birth"
+          placeholder="Your date of birth here"
+          dateFormat="MM/dd/yyyy"
+          required={true}
+          error={errors.dateOfBirth}
+          errorMessage="The date of birth is required"
+          pickerProps={{ showYearDropdown: true }}
         />
-        <FormErrorMessage message={errors.dateOfBirth?.message} />
-      </ConditionalFormGroup>
+      )}
 
       <Form.Group controlId="formPassword">
         <Form.Label>Password</Form.Label>
