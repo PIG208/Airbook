@@ -21,4 +21,8 @@ else
     source airbook/bin/activate
 fi
 pip install -r requirements.txt
+"Collection node packages..."
+cd web
+npm i
 echo "Done! Use \"source airbook/bin/activate\" to activate the virtual environment."
+echo "Use \"scripts/run\" to run the server."
