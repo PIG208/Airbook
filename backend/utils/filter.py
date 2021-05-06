@@ -92,7 +92,7 @@ class FilterType(Enum):
     ADVANCED_SPENDINGS = "advanced_spendings"
 
 
-SELECT_FLIGHT_COMMENTS = "SELECT flight_number, dep_date, dep_time, created_at, email, rate, comment \
+SELECT_FLIGHT_COMMENTS = "SELECT flight_number, dep_date, dep_time, created_at, email, rating, comment \
     FROM Feedback NATURAL JOIN Flight NATURAL JOIN AirlineStaff \
         WHERE username=%(username)s;"
 SELECT_ALL_FUTURE_FLIGHTS = "SELECT * FROM future_flights;"

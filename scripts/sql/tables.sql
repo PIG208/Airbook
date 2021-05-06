@@ -101,7 +101,7 @@ CREATE TABLE Feedback(
     dep_time TIME NOT NULL,
     created_at DATETIME NOT NULL DEFAULT(NOW()),
     email VARCHAR(320),
-    rate INT,
+    rating INT,
     comment TEXT,
     PRIMARY KEY(flight_number, dep_date, dep_time, email),
     FOREIGN KEY (flight_number, dep_date, dep_time) REFERENCES Flight(flight_number, dep_date, dep_time),

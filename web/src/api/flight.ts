@@ -79,9 +79,11 @@ export function futureFlights(): Promise<ResponseProp> {
 export function previousFlights(): Promise<ResponseProp<FlightProp[]>> {
   return axios
     .post(getPublicSearchURL("advanced_flight"), {
-      dep_date_upper: convertDate(new Date()),
-      dep_time_upper: convertTime(new Date()),
-      filter_by_emails: true,
+      filter_data: {
+        dep_date_upper: convertDate(new Date()),
+        dep_time_upper: convertTime(new Date()),
+        filter_by_emails: true,
+      },
     })
     .then(...flightDataHandler);
 }
