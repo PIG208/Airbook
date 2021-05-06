@@ -233,7 +233,7 @@ INSERT INTO Book VALUES (
     200
 );
 
-INSERT INTO Feedback VALUES (
+INSERT INTO Feedback ( flight_number, dep_date, dep_time, email, rate, comment) VALUES (
     12345,
     '2021-3-28',
     '13:33:44',

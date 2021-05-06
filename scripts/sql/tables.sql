@@ -99,6 +99,7 @@ CREATE TABLE Feedback(
     flight_number INT(5) NOT NULL,
     dep_date DATE NOT NULL,
     dep_time TIME NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT(NOW()),
     email VARCHAR(320),
     rate INT,
     comment TEXT,
