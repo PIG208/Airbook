@@ -170,7 +170,9 @@ class Filter:
     def add_aggregated(self, column_name: str, func_name: str):
         pass
 
-    def add_optional_constraint(self, column_name: str, constraint: Optional[T]):
+    def add_optional_constraint(
+        self, column_name: str, constraint: Optional[T], not_equal: bool = False
+    ):
         """
         Create a '=' constraint in the where clause if it's specified. The arguments still need to be
         passed to cursor.execute as we cannot trust user inputs of string values (like for airport name).
@@ -179,9 +181,15 @@ class Filter:
             return self
         else:
             if isinstance(constraint, int):
-                self.where_clause.append("{}={}".format(column_name, str(constraint)))
+                self.where_clause.append(
+                    "{}{}{}".format(
+                        column_name, "<>" if not_equal else "=", str(constraint)
+                    )
+                )
             elif isinstance(constraint, str) and len(constraint.strip()) > 0:
-                self.where_clause.append("{}=%s".format(column_name))
+                self.where_clause.append(
+                    "{}{}%s".format(column_name, "<>" if not_equal else "=")
+                )
                 self.string_values.append(constraint)
             return self
 
@@ -315,26 +323,44 @@ def get_filter_flight(
 
 def add_date_time_range(
     filter: Filter,
-    date_rage: FilterRange,
+    date_range: FilterRange,
     time_range: FilterRange,
     date_column_name: str,
     time_column_name: str,
 ):
     sub_lower = (
         Filter("", True)
-        .add_optional_constraint(date_column_name, date_rage.lower)
+        .add_optional_constraint(date_column_name, date_range.lower)
+        .add_filter_range(date_column_name, FilterRange(upper=date_range.upper))
         .add_filter_range(time_column_name, FilterRange(lower=time_range.lower))
     )
     sub_upper = (
         Filter("", True)
-        .add_optional_constraint(date_column_name, date_rage.upper)
+        .add_optional_constraint(date_column_name, date_range.upper)
+        .add_filter_range(date_column_name, FilterRange(lower=date_range.lower))
         .add_filter_range(time_column_name, FilterRange(upper=time_range.upper))
+    )
+    sub_same_day = (
+        Filter("", True)
+        .add_optional_constraint(date_column_name, date_range.upper)
+        .add_optional_constraint(date_column_name, date_range.upper)
+        .add_filter_range(time_column_name, time_range)
     )
     filter.add_or(
         filter.add_filter_range,
         filter.add_or,
-        (date_column_name, date_rage),
-        (filter.add_sub_filter, filter.add_sub_filter, (sub_lower,), (sub_upper,)),
+        (date_column_name, date_range),
+        (
+            filter.add_sub_filter,
+            filter.add_or,
+            (sub_lower,),
+            (
+                filter.add_sub_filter,
+                filter.add_sub_filter,
+                (sub_upper,),
+                (sub_same_day,),
+            ),
+        ),
     )
     return filter
 
