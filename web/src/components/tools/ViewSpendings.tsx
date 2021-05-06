@@ -16,14 +16,19 @@ export function ViewSpendings() {
     watch,
   } = useForm<SpendingsFilterProp>();
   const [errorMessage, setErrorMessage] = useState("");
-  const [spendingsData, setSpendingsData] = useState<SpendingsGroupProp[]>([]);
   const [spendingsTotal, setSpendingsTotal] = useState(0);
   const [chartData, setChartData] = useState({});
   const watchLowerBound = watch("purchaseDatetimeLower");
   const watchUpperBound = watch("purchaseDatetimeUpper");
 
   useEffect(() => {
-    console.log("reloaded");
+    handleViewSpendings({
+      purchaseDatetimeLower: watchLowerBound,
+      purchaseDatetimeUpper: watchUpperBound,
+    } as SpendingsFilterProp);
+  }, [watchLowerBound, watchUpperBound]);
+
+  const handleChartData = (spendingsData: SpendingsGroupProp[]) => {
     setChartData({
       labels: spendingsData.reduce(
         (accu: Array<any>, curr: SpendingsGroupProp) => {
@@ -46,11 +51,7 @@ export function ViewSpendings() {
         },
       ],
     });
-  }, [spendingsData]);
-
-  useEffect(() => {
-    handleViewSpendings(getValues());
-  }, [watchLowerBound, watchUpperBound]);
+  };
 
   const handleViewSpendings = (data: SpendingsFilterProp) => {
     getSpendingsByMonth(data).then((res) => {
@@ -58,17 +59,13 @@ export function ViewSpendings() {
         setErrorMessage(res.message ?? "Some network errors occurred!");
         return;
       }
-
       if (res.data === undefined) {
-        setSpendingsData([]);
+        setSpendingsTotal(0);
         return;
       }
-
-      console.log("1");
-      setSpendingsData(res.data);
-      console.log("2");
+      handleChartData(res.data);
       setSpendingsTotal(
-        spendingsData.reduce((sum: number, current: SpendingsGroupProp) => {
+        res.data.reduce((sum: number, current: SpendingsGroupProp) => {
           return sum + Number(current.spendingsSum);
         }, 0)
       );
@@ -151,7 +148,11 @@ export function ViewSpendings() {
         {!watchLowerBound && !watchUpperBound && "in the last six months"}
       </div>
       <div>
-        <Bar data={chartData} type="bar" />
+        {spendingsTotal > 0 ? (
+          <Bar redraw={false} data={chartData} type="bar" />
+        ) : (
+          <div>no data</div>
+        )}
       </div>
     </div>
   );

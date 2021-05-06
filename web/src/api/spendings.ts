@@ -1,7 +1,7 @@
 import axios from "axios";
 import { getSearchURL, ResponseProp } from "./api";
 import { useCredentials } from "./authentication";
-import { SpendingsGroupProp, SpendingsProp } from "./data";
+import { SpendingsGroupProp } from "./data";
 import { convertDate, convertTime } from "./flight";
 
 export interface SpendingsFilterProp {
