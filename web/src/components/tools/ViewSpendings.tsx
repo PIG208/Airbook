@@ -1,20 +1,14 @@
-import { Button, Col, Form } from "react-bootstrap";
-import DatePicker from "react-datepicker";
+import { Form } from "react-bootstrap";
 import { forwardRef, useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { SpendingsFilterProp, getSpendingsByMonth } from "../../api/spendings";
 import AlertMessage from "../AlertMessage";
 import { SpendingsGroupProp } from "../../api/data";
 import { Bar } from "react-chartjs-2";
 import RangePicker from "../RangePicker";
 
-export function ViewSpendings() {
-  const {
-    handleSubmit,
-    control,
-    formState: { errors },
-    watch,
-  } = useForm<SpendingsFilterProp>();
+export default function ViewSpendings() {
+  const { handleSubmit, control, watch } = useForm<SpendingsFilterProp>();
   const [errorMessage, setErrorMessage] = useState("");
   const [spendingsTotal, setSpendingsTotal] = useState(0);
   const [chartData, setChartData] = useState({});

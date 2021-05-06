@@ -1,6 +1,5 @@
 import { Form, Col, Button } from "react-bootstrap";
 import { Controller, useForm } from "react-hook-form";
-import DatePicker from "react-datepicker";
 import { forwardRef, useState } from "react";
 import {
   FlightFilterProp,
@@ -69,10 +68,6 @@ export default function LookupFlights() {
     }
     return;
   };
-
-  const DateCustomInput = forwardRef((props: any, ref) => {
-    return <Form.Control {...props} ref={ref} />;
-  });
 
   return (
     <div>
