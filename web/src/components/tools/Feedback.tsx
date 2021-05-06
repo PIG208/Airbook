@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
-import { Button, Card, ListGroup } from "react-bootstrap";
+import { Button, Card, ListGroup, Modal } from "react-bootstrap";
 import { FlightProp } from "../../api/data";
 import { previousFlights } from "../../api/flight";
 import { parseISODate, parseISOTime } from "../../api/utils";
 import AlertMessage from "../AlertMessage";
+import FeedbackForm, { FeedbackFormProp } from "../FeedbackForm";
 
 export default function Feekback() {
   const [flights, setFlights] = useState<FlightProp[]>([]);
+  const [currentFlight, setCurrentFlight] = useState<FlightProp>();
+  const [show, setShow] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   useEffect(() => {
-    console.log("asd");
     previousFlights().then((res) => {
-      console.log(res);
       if (res.result === "error") {
         setErrorMessage(res.message ?? "A network error occurred");
         return;
@@ -19,11 +20,15 @@ export default function Feekback() {
       setFlights(res.data ?? []);
     });
   }, []);
+
+  const handleCommentSubmit = (data: FeedbackFormProp) => {
+    setShow(false);
+  };
   return (
     <div className="card-flex-container">
       {flights.map((value, index) => {
         return (
-          <Card>
+          <Card key={index}>
             <Card.Header>Flight #{value.flightNumber}</Card.Header>
             <ListGroup>
               <ListGroup.Item>
@@ -40,11 +45,36 @@ export default function Feekback() {
               </ListGroup.Item>
             </ListGroup>
             <Card.Footer>
-              <Button variant="success">Rate & Comment</Button>
+              <Button
+                variant="success"
+                onClick={() => {
+                  setCurrentFlight(value);
+                  setShow(true);
+                }}
+              >
+                Rate & Comment
+              </Button>
             </Card.Footer>
           </Card>
         );
       })}
+      <Modal show={show} onHide={() => setShow(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>
+            Feedback{" "}
+            {currentFlight && (
+              <span>
+                For <strong>#{currentFlight.flightNumber}</strong>
+              </span>
+            )}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {currentFlight && (
+            <FeedbackForm {...currentFlight} onSubmit={handleCommentSubmit} />
+          )}
+        </Modal.Body>
+      </Modal>
       <AlertMessage message={errorMessage} />
     </div>
   );

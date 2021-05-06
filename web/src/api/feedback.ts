@@ -1,5 +1,6 @@
 import axios from "axios";
-import { getSearchURL, ResponseProp } from "./api";
+import { FeedbackFormProp } from "../components/FeedbackForm";
+import { getAddFeedbackURL, getSearchURL, ResponseProp } from "./api";
 import { useCredentials } from "./authentication";
 import { FeedbackProp, FlightPrimaryProp } from "./data";
 import { parseFlightPrimary } from "./flight";
@@ -44,4 +45,24 @@ export async function getFeedbacksForStaff(): Promise<
     }, handleError);
 }
 
-export const addFeedbackForFlight = () => {};
+export const addFeedbackForFlight = (
+  props: FlightPrimaryProp & FeedbackFormProp
+): Promise<ResponseProp> => {
+  return axios
+    .post(
+      getAddFeedbackURL(),
+      {
+        ...parseFlightPrimary(props),
+        comment: props.comment,
+        rating: props.rating,
+      },
+      useCredentials
+    )
+    .then((res) => {
+      const data = res.data;
+      if (!data.result) {
+        return { result: "error", message: "Unknown errors occurred." };
+      }
+      return data;
+    }, handleError);
+};

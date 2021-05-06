@@ -175,6 +175,32 @@ def login(login_type: str):
     return jsonify(result="success", user_data=user_data)
 
 
+@app.route("/add_feedback", methods=["POST"])
+@cross_origin(supports_credentials=True)
+@raise_error
+@require_session
+def add_feedback():
+    data = request.get_json()
+    if "email" not in session or session["user_type"] != DataType.CUST.value:
+        raise JsonError("Only customers are allowed to add feedbacks!")
+    try:
+        feedback_data = dict(
+            flight_number=data["flight_number"],
+            dep_date=data["dep_date"],
+            dep_time=data["dep_time"],
+            comment=data.get("comment", ""),
+            email=session["email"],
+            rating=data["rating"],
+        )
+    except KeyError as err:
+        raise MissingKeyError(err.args[0])
+    try:
+        insert_into(conn, "Feedback", **feedback_data)
+    except QueryDuplicateError:
+        raise JsonError("You have already given feedback for this flight!")
+    return jsonify(result="success")
+
+
 @app.route("/session-fetch", methods=["POST"])
 @cross_origin(supports_credentials=True)
 @raise_error
@@ -268,8 +294,8 @@ def ticket_purchase():
             ticket_data["dep_time"] = data["dep_time"]
             if "agent_id" in session:
                 ticket_data["booking_agent_id"] = session["agent_id"]
-            ticket_data["purchase_date"] = now.strftime("%Y-%m-%d")
-            ticket_data["purchase_time"] = now.strftime("%H:%M:%S")
+            # ticket_data["purchase_date"] = now.strftime("%Y-%m-%d")
+            # ticket_data["purchase_time"] = now.strftime("%H:%M:%S")
             ticket_data["sold_price"] = get_ticket_price(conn, data)
         except KeyError as err:
             raise MissingKeyError(err.args[0])

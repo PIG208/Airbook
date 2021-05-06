@@ -18,3 +18,4 @@ export const getPublicSearchURL = (filter: string) =>
 export const getSearchURL = (filter: string) => `${host}/search/${filter}`;
 export const getTicketPriceURL = () => `${host}/ticket_price`;
 export const getTicketPurchaseURL = () => `${host}/ticket_purchase`;
+export const getAddFeedbackURL = () => `${host}/add_feedback`;
