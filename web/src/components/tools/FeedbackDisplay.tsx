@@ -1,48 +1,125 @@
 import { useEffect, useState } from "react";
-import { Card, ListGroup } from "react-bootstrap";
-import { FeedbackProp } from "../../api/data";
-import { getFeedbacksForStaff } from "../../api/feedback";
-import { parseISODate, parseISOTime } from "../../api/utils";
+import { Button, Card, ListGroup, ListGroupItem, Modal } from "react-bootstrap";
+import { FeedbackProp, FlightPrimaryProp, FlightProp } from "../../api/data";
+import { searchFlights } from "../../api/flight";
+import { getFeedbacksByFlight } from "../../api/feedback";
+import {
+  handleError,
+  handleThen,
+  parseISODate,
+  parseISOTime,
+} from "../../api/utils";
 import AlertMessage from "../AlertMessage";
+import { HandThumbsDown, HandThumbsUp } from "react-bootstrap-icons";
 
 export default function FeedbackDisplay() {
-  const [feedbacks, setFeedbacks] = useState<FeedbackProp[]>([]);
+  const [show, setShow] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [flights, setFlights] = useState<FlightProp[]>([]);
+  const [feedbacks, setFeedbacks] = useState<FeedbackProp[]>([]);
+  const [totalRating, setTotalRating] = useState(0);
+
+  const fetchFeedback = (props: FlightPrimaryProp) => {
+    getFeedbacksByFlight({ ...props }).then((res) => {
+      if (res.data !== undefined && res.data.length > 0) {
+        setTotalRating(
+          res.data.reduce((accumulator: number, current: FeedbackProp) => {
+            accumulator += current.rate;
+            return accumulator;
+          }, 0)
+        );
+        setFeedbacks(res.data);
+      } else {
+        setShow(false);
+        setErrorMessage("No feedback data for this flight!");
+      }
+    }, handleError);
+  };
+
   useEffect(() => {
-    getFeedbacksForStaff().then((res) => {
+    searchFlights({ depTimeUpper: new Date() }).then((res) => {
       if (res.result === "error") {
         setErrorMessage(res.message ?? "Some unknown errors occurred");
         return;
       }
-      if (res.data?.length === 0) {
+      if (res.data?.length === 0 || res.data === undefined) {
+        setFlights([]);
         setErrorMessage("No ratings to show here.");
+      } else {
+        setFlights(res.data);
       }
-      setFeedbacks(res.data ?? []);
     });
   }, []);
+
   return (
-    <div className="card-flex-container">
+    <div>
       <AlertMessage message={errorMessage} />
-      {feedbacks.map((value, index) => {
-        return (
-          <Card key={index}>
-            <Card.Header>{value.email}</Card.Header>
-            <ListGroup>
-              <ListGroup.Item>
-                Flight Number: {value.flightNumber}
-              </ListGroup.Item>
-              <ListGroup.Item>
-                Departure Date: {parseISODate(value.depDate)}
-              </ListGroup.Item>
-              <ListGroup.Item>
-                Departure Time: {parseISOTime(value.depTime)}
-              </ListGroup.Item>
-              <ListGroup.Item>Rate: {value.rate}</ListGroup.Item>
-              <ListGroup.Item>Comment: {value.comment}</ListGroup.Item>
-            </ListGroup>
-          </Card>
-        );
-      })}
+      <div className="card-flex-container">
+        {flights.map((value, index) => {
+          return (
+            <Card key={index}>
+              <Card.Header>{value.flightNumber}</Card.Header>
+              <ListGroup>
+                <ListGroup.Item>
+                  Flight Number: {value.flightNumber}
+                </ListGroup.Item>
+                <ListGroup.Item>
+                  Departure Date: {parseISODate(value.depDate)}
+                </ListGroup.Item>
+                <ListGroup.Item>
+                  Departure Time: {parseISOTime(value.depTime)}
+                </ListGroup.Item>
+                <ListGroup.Item>
+                  <Button
+                    onClick={() => {
+                      setFeedbacks([]);
+                      setShow(true);
+                      fetchFeedback({ ...value });
+                    }}
+                  >
+                    View Ratings & Comments
+                  </Button>
+                </ListGroup.Item>
+              </ListGroup>
+            </Card>
+          );
+        })}
+      </div>
+      <Modal
+        show={show}
+        size="lg"
+        onHide={() => {
+          setShow(false);
+        }}
+      >
+        <Modal.Header>
+          Feedbacks for #
+          {feedbacks.length > 0 ? feedbacks[0].flightNumber : "Loading"}
+        </Modal.Header>
+        <Modal.Body>
+          {feedbacks.length > 0 && (
+            <span>
+              Average Rating:{" "}
+              <strong color="green">{totalRating / feedbacks.length}</strong>
+            </span>
+          )}
+
+          {feedbacks.map((value, index) => {
+            return (
+              <ListGroup key={index}>
+                <ListGroupItem>
+                  {value.email} created at {value.createdAt}
+                  <p>
+                    Rating: {value.rate}{" "}
+                    {value.rate >= 3 ? <HandThumbsUp /> : <HandThumbsDown />}
+                  </p>
+                  <p>{value.comment}</p>
+                </ListGroupItem>
+              </ListGroup>
+            );
+          })}
+        </Modal.Body>
+      </Modal>
     </div>
   );
 }

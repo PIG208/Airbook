@@ -90,7 +90,7 @@ class FilterType(Enum):
 
 SELECT_FLIGHT_COMMENTS = "SELECT flight_number, dep_date, dep_time, created_at, email, rating, comment \
     FROM Feedback NATURAL JOIN Flight NATURAL JOIN AirlineStaff \
-        WHERE username=%(username)s;"
+        WHERE username=%(username)s AND (flight_number, dep_date, dep_time)=(%(flight_number)s, %(dep_date)s, %(dep_time)s);"
 SELECT_ALL_FUTURE_FLIGHTS = "SELECT * FROM future_flights;"
 SELECT_CUSTOMER_TICKETS = (
     "call customer_tickets(%(email)s);"  # "email" must matches the key name for session

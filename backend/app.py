@@ -198,6 +198,13 @@ def add_feedback():
         )
     except KeyError as err:
         raise MissingKeyError(err.args[0])
+    result = query(
+        conn,
+        "SELECT * FROM Ticket WHERE (flight_number, dep_date, dep_time, email)=(%(flight_number)s, %(dep_date)s, %(dep_time)s, %(email)s)",
+        args=feedback_data,
+    )
+    if result == 0:
+        raise JsonError("You need to take the flight first before giving feedbacks!")
     try:
         insert_into(conn, "Feedback", **feedback_data)
     except QueryDuplicateError:

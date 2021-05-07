@@ -26,11 +26,19 @@ const parseFeedbackData = (data: Array<any>): FeedbackProp[] => {
   }
 };
 
-export async function getFeedbacksForStaff(): Promise<
-  ResponseProp<FeedbackProp[]>
-> {
+export async function getFeedbacksByFlight(
+  props: FlightPrimaryProp
+): Promise<ResponseProp<FeedbackProp[]>> {
   return axios
-    .post(getSearchURL("flight_comments"), {}, useCredentials)
+    .post(
+      getSearchURL("flight_comments"),
+      {
+        filter_data: {
+          ...parseFlightPrimary(props),
+        },
+      },
+      useCredentials
+    )
     .then((res) => {
       const data = res.data;
       if (data.result === "error") {

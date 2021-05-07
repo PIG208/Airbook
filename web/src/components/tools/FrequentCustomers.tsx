@@ -36,7 +36,6 @@ export default function FrequentCustomers() {
   }, []);
 
   const fetchCustomerFlights = (email: string) => {
-    console.log(show);
     increment();
     setShow(true);
     setPending(true);
