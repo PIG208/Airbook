@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import AlertMessage from "../AlertMessage";
 import "../../assets/PurchaseTickets.css";
 import PurchaseForm from "../PurchaseForm";
+import { parseISODate, parseISOTime } from "../../api/utils";
 
 export function FlightInfo() {
   const { flightNumber } = useParams<{ flightNumber?: string }>();
@@ -91,11 +92,17 @@ export function FlightInfo() {
             return (
               <ListGroup key={index}>
                 <Item tag="Flight Number" value={value.flightNumber} />
-                <Item tag="Departure Date" value={value.depDate} />
-                <Item tag="Departure Time" value={value.depTime} />
+                <Item
+                  tag="Departure Date"
+                  value={parseISODate(value.depDate)}
+                />
+                <Item
+                  tag="Departure Time"
+                  value={parseISOTime(value.depTime)}
+                />
                 <Item tag="Departure Airport" value={value.depAirport} />
-                <Item tag="Arrival Date" value={value.arrDate} />
-                <Item tag="Arrival Time" value={value.arrTime} />
+                <Item tag="Arrival Date" value={parseISODate(value.arrDate)} />
+                <Item tag="Arrival Time" value={parseISOTime(value.arrTime)} />
                 <Item tag="Arrival Airport" value={value.arrAirport} />
                 <Item tag="Airline Name" value={value.airlineName} />
                 <Button
