@@ -2,8 +2,6 @@ import React, { useEffect, useState, forwardRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { UserType } from "../api/authentication";
 import { Button, Form } from "react-bootstrap";
-import AlertMessage from "./AlertMessage";
-import HintMessage from "./HintMessage";
 import DatePicker from "react-datepicker";
 import FormErrorMessage from "./FormErrorMessage";
 import "../assets/Form.css";
@@ -14,6 +12,7 @@ import ConditionalFormGroup from "./ConditionalFormGroup";
 import { getFlightPrice, purchase } from "../api/purchase";
 import SuccessMessage, { useMessage } from "./SuccessMessage";
 import useIncrement from "../api/use-increment";
+import FormSubmit from "./FormSubmit";
 
 type UserPurchaseProp = Omit<
   PurchaseProp,
@@ -107,7 +106,6 @@ export default function PurchaseForm(
       id="purchase-form"
       className="app-form"
     >
-      <AlertMessage message={purchaseError} />
       {price && (
         <div>
           Current Price: <strong style={{ color: "green" }}>${price}</strong>
@@ -250,13 +248,13 @@ export default function PurchaseForm(
         <FormErrorMessage message={errors.expDate?.message} />
       </Form.Group>
 
-      <Form.Group>
-        <Button variant="primary" type="submit" disabled={pending}>
-          Submit
-        </Button>
-      </Form.Group>
-      <SuccessMessage message={message} />
-      <HintMessage message="Handling transaction..." control={pending} />
+      <FormSubmit
+        buttonMessage="Purchase"
+        pending={pending}
+        pendingMessage="Handling transaction..."
+        successMessage="Success!"
+        errorMessage={purchaseError}
+      />
     </Form>
   );
 }

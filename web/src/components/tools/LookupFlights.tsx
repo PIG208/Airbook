@@ -12,6 +12,7 @@ import useIncrement from "../../api/use-increment";
 import { useAuth } from "../../api/use-auth";
 import { UserType } from "../../api/authentication";
 import RangePicker from "../RangePicker";
+import FormSubmit from "../FormSubmit";
 
 export default function LookupFlights() {
   const {
@@ -21,6 +22,7 @@ export default function LookupFlights() {
   } = useForm<FlightFilterProp>();
   const [flights, setFlights] = useState<FlightProp[]>([]);
   const [pending, setPending] = useState(false);
+  const [lookupError, setLookupError] = useState("");
   const { count, increment } = useIncrement();
   const auth = useAuth();
 
@@ -38,6 +40,9 @@ export default function LookupFlights() {
             }
             if (res.result !== "error") {
               setFlights(res.data);
+              setLookupError("");
+            } else {
+              setLookupError(res.message ?? "Some errors occurred!");
             }
           })
           .finally(() => {
@@ -56,6 +61,9 @@ export default function LookupFlights() {
             }
             if (res.result !== "error") {
               setFlights(res.data);
+              setLookupError("");
+            } else {
+              setLookupError(res.message ?? "Some errors occurred!");
             }
           })
           .finally(() => {
@@ -171,9 +179,13 @@ export default function LookupFlights() {
           lowerError={errors.arrTimeLower}
           upperError={errors.arrTimeUpper}
         />
-        <Form.Row>
-          <Button type="submit">Search</Button>
-        </Form.Row>
+        <FormSubmit
+          buttonMessage="Login"
+          pending={pending}
+          pendingMessage="Logging you in..."
+          successMessage="Success!"
+          errorMessage={lookupError}
+        />
       </Form>
       <FlightTable flights={flights} pending={pending} />
     </div>

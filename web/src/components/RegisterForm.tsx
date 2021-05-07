@@ -1,14 +1,9 @@
-import { forwardRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Form from "react-bootstrap/Form";
-import Button from "react-bootstrap/Button";
-import DatePicker from "react-datepicker";
 import SelectUserType from "./SelectUserType";
 import { useForm, Controller } from "react-hook-form";
 import { RegisterProp, UserProp, UserType } from "../api/authentication";
-import ConditionalFormGroup from "./ConditionalFormGroup";
-import AlertMessage from "./AlertMessage";
 import FormErrorMessage from "./FormErrorMessage";
-import HintMessage from "./HintMessage";
 
 import "../assets/Form.css";
 import { Col } from "react-bootstrap";
@@ -17,6 +12,7 @@ import { useAuth } from "../api/use-auth";
 import MyDatePicker from "./MyDatePicker";
 import FormNumber from "./FormNumber";
 import MyFormInput from "./MyFormInput";
+import FormSubmit from "./FormSubmit";
 
 export default function RegisterForm(props: IFormProps<UserProp>) {
   const {
@@ -77,13 +73,8 @@ export default function RegisterForm(props: IFormProps<UserProp>) {
       });
   };
 
-  const DateCustomInput = forwardRef((props: any, ref) => {
-    return <Form.Control {...props} ref={ref} />;
-  });
-
   return (
     <Form onSubmit={handleSubmit(handleRegister)} className="app-form">
-      <AlertMessage message={registerError} />
       <Form.Group controlId="formRegisterType">
         <Controller
           name="registerType"
@@ -354,19 +345,13 @@ export default function RegisterForm(props: IFormProps<UserProp>) {
         <FormErrorMessage message={errors.passwordConfirm?.message} />
       </Form.Group>
 
-      <Form.Group>
-        <Button
-          variant="primary"
-          type="submit"
-          onClick={() => {
-            console.log(errors);
-          }}
-          disabled={pending}
-        >
-          Submit
-        </Button>
-      </Form.Group>
-      <HintMessage message="Registering..." control={pending} />
+      <FormSubmit
+        buttonMessage="Register"
+        pending={pending}
+        pendingMessage="Registering..."
+        successMessage="Success!"
+        errorMessage={registerError}
+      />
     </Form>
   );
 }

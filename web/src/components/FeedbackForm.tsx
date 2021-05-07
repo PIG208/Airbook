@@ -1,13 +1,12 @@
 import { useState } from "react";
-import { Button, Form } from "react-bootstrap";
+import { Form } from "react-bootstrap";
 import { Controller, useForm } from "react-hook-form";
 import { FlightPrimaryProp } from "../api/data";
 import useIncrement from "../api/use-increment";
 import ReactStars from "react-rating-stars-component";
 import { IFormProps } from "../api/utils";
 import { addFeedbackForFlight } from "../api/feedback";
-import AlertMessage from "./AlertMessage";
-import HintMessage from "./HintMessage";
+import FormSubmit from "./FormSubmit";
 
 export type FeedbackFormProp = { rating: string; comment: string };
 
@@ -42,7 +41,6 @@ export default function FeedbackForm(
   return (
     <Form onSubmit={handleSubmit(handleComment)}>
       <Form.Group>
-        <AlertMessage message={feedbackError} />
         <Form.Label>Rating</Form.Label>
         <Controller
           name="rating"
@@ -62,12 +60,13 @@ export default function FeedbackForm(
           render={({ field }) => <Form.Control as="textarea" {...field} />}
         />
       </Form.Group>
-      <Form.Group>
-        <Button type="submit" variant="success">
-          Submit
-        </Button>
-      </Form.Group>
-      <HintMessage message="Sending your feedback..." control={pending} />
+      <FormSubmit
+        buttonMessage="Submit"
+        pending={pending}
+        pendingMessage="Sending your feedback..."
+        successMessage="Success!"
+        errorMessage={feedbackError}
+      />
     </Form>
   );
 }

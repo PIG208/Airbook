@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { LoginProp, UserProp, UserType } from "../api/authentication";
-import { Button, Form } from "react-bootstrap";
-import AlertMessage from "./AlertMessage";
-import HintMessage from "./HintMessage";
+import { Form } from "react-bootstrap";
 import SelectUserType from "./SelectUserType";
 import FormErrorMessage from "./FormErrorMessage";
 import "../assets/Form.css";
 import { IFormProps } from "../api/utils";
 import { useAuth } from "../api/use-auth";
+import FormSubmit from "./FormSubmit";
 
 export default function LoginForm(props: IFormProps<UserProp>) {
   const {
@@ -67,8 +66,6 @@ export default function LoginForm(props: IFormProps<UserProp>) {
       id="login-form"
       className="app-form"
     >
-      <AlertMessage message={loginError} />
-
       <Form.Group controlId="formLoginType">
         <Controller
           name="loginType"
@@ -206,12 +203,13 @@ export default function LoginForm(props: IFormProps<UserProp>) {
         />
         <FormErrorMessage message={errors.password?.message} />
       </Form.Group>
-      <Form.Group>
-        <Button variant="primary" type="submit" disabled={pending}>
-          Submit
-        </Button>
-      </Form.Group>
-      <HintMessage message="Logging you in..." control={pending} />
+      <FormSubmit
+        buttonMessage="Login"
+        pending={pending}
+        pendingMessage="Logging you in..."
+        successMessage="Success!"
+        errorMessage={loginError}
+      />
     </Form>
   );
 }
