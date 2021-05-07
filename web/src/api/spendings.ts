@@ -120,7 +120,7 @@ export const getSpendingsByRange = (
   if (!props.purchaseDatetimeLower && !props.purchaseDatetimeUpper) {
     // By default, we want to only track the spendings in the past 30 days
     const lower = new Date();
-    lower.setMonth(lower.getDay() - 30);
+    lower.setUTCDate(lower.getUTCDate() - 30);
     props.purchaseDatetimeLower = lower;
   }
   return axios
