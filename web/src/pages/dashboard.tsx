@@ -60,6 +60,7 @@ import CreateFlight from "../components/tools/CreateFlight";
 import FlightChangeStatus from "../components/tools/FlightChangeStatus";
 import AddAirport from "../components/tools/AddAirport";
 import AddAirplane from "../components/tools/AddAirplane";
+import TopAgents from "../components/tools/TopAgents";
 
 type DashboardRoute = {
   tool: ITools;
@@ -200,7 +201,7 @@ const routes: DashboardRoute[] = [
   },
   {
     tool: StaffTools.VIEW_AGENTS,
-    ToolView: () => <FlightChangeStatus />,
+    ToolView: () => <TopAgents />,
     sidebar: () => (
       <div>
         <PersonLinesFill />

@@ -151,9 +151,15 @@ def query(
         except KeyError as err:
             raise QueryKeyError(key=err.args[0])
         except ProgrammingError as err:
-            print(err, sql)
+            print("A Programming error occurs =========")
+            print(sql)
+            print(err.args[0])
+            print(err.args[1])
+            print("=================")
         except InternalError as err:
-            print(err, sql)
+            print(sql)
+            print(err.args[0])
+            print(err.args[1])
 
         if fetch_mode is FetchMode.ONE:
             return cursor.fetchone()

@@ -78,6 +78,7 @@ class FilterType(Enum):
     FLIGHT_COMMENTS = "flight_comments"
     TOP_CUSTOMERS = "top_customers"
     AIRLINE_PLANES = "airline_planes"
+    TOP_AGENTS = "top_agents"
     # The following filters are advanced filters that require the filter generator.
     # We need to keep track of the advanced filters in the set ADVANCED_FILTERS.
     ADVANCED_FLIGHT = "advanced_flight"
@@ -101,6 +102,15 @@ SELECT_TOP_CUSTOMERS = '(SELECT * FROM \
                             GROUP BY email ORDER BY tickets_bought DESC)'
 SELECT_CUSTOMER_FLIGHTS = "call customer_flights(%(email)s);"
 SELECT_AIRLINE_PLANES = "SELECT * FROM Airplane WHERE airline_name = %(airline_name)s"
+# Note, do not pass user provided values to this query
+SELECT_TOP_AGENTS = 'SELECT * FROM (SELECT * FROM agent_stats_last_year ORDER BY total_commission DESC LIMIT 5) as temp1 \
+UNION ALL SELECT * FROM (SELECT "divide" as Booking_agent_ID, "" as total_commission, "" as tickets_total, "" as email) as temp2 \
+UNION ALL SELECT * FROM (SELECT * FROM agent_stats_last_month ORDER BY total_commission DESC LIMIT 5) as temp3 \
+UNION ALL SELECT * FROM (SELECT "divide" as booking_agent_id, "" as total_commission, "" as tickets_total, "" as email) as temp4 \
+UNION ALL SELECT * FROM (SELECT * FROM agent_stats_last_year ORDER BY total_tickets DESC LIMIT 5) as temp5 \
+UNION ALL SELECT * FROM (SELECT "divide" as booking_agent_id, "" as total_commission, "" as tickets_total, "" as email) as temp6 \
+UNION ALL SELECT * FROM (SELECT * FROM agent_stats_last_month ORDER BY total_tickets DESC LIMIT 5) as temp7'
+SELECT_MOST_FREQUENT_CUST = "SELECT email,total_visits, name FROM (SELECT email, COUNT(*) as total_visits FROM Ticket WHERE purchase_date > UTC_TIMESTAMP() - INTERVAL 1 YEAR GROUP BY email) AS temp NATURAL JOIN Customer"
 
 FILTER_TO_QUERY_MAP = {
     FilterType.ALL_FUTURE_FLIGHTS: SELECT_ALL_FUTURE_FLIGHTS,
@@ -108,7 +118,8 @@ FILTER_TO_QUERY_MAP = {
     FilterType.CUST_TICKETS: SELECT_CUSTOMER_TICKETS,
     FilterType.FLIGHT_COMMENTS: SELECT_FLIGHT_COMMENTS,
     FilterType.TOP_CUSTOMERS: SELECT_TOP_CUSTOMERS,
-    FilterType.AIRLINE_PLANES: SELECT_AIRLINE_PLANES
+    FilterType.AIRLINE_PLANES: SELECT_AIRLINE_PLANES,
+    FilterType.TOP_AGENTS: SELECT_TOP_AGENTS,
 }
 
 ADVANCED_FILTERS = {

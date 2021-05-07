@@ -21,6 +21,22 @@ CREATE VIEW future_flights AS
     OR (dep_date = CURDATE() AND dep_time > CURTIME())
     ;
 
+DROP VIEW IF EXISTS agent_stats_last_month;
+CREATE VIEW agent_stats_last_month AS
+    SELECT temp.booking_agent_ID, total_commission, total_tickets, email
+    FROM (SELECT booking_agent_ID, SUM(commission) as total_commission, COUNT(*) as total_tickets 
+    FROM spendings WHERE purchase_date > UTC_TIMESTAMP() - INTERVAL 1 MONTH 
+    AND booking_agent_id IS NOT NULL GROUP BY booking_agent_ID) as temp NATURAL JOIN BookingAgent
+    ;
+
+DROP VIEW IF EXISTS agent_stats_last_year;
+CREATE VIEW agent_stats_last_year AS
+    SELECT temp.booking_agent_ID, total_commission, total_tickets, email
+    FROM (SELECT booking_agent_ID, SUM(commission) as total_commission, COUNT(*) as total_tickets 
+    FROM spendings WHERE purchase_date > UTC_TIMESTAMP() - INTERVAL 1 MONTH 
+    AND booking_agent_id IS NOT NULL GROUP BY booking_agent_ID) as temp NATURAL JOIN BookingAgent
+    ;
+
 DELIMITER [[
 DROP PROCEDURE IF EXISTS customer_tickets [[
 CREATE PROCEDURE 
