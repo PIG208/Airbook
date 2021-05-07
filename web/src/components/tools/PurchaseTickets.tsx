@@ -30,13 +30,13 @@ export function FlightInfo() {
 
   useEffect(() => {
     async function fetchFlights() {
-      const res = await getFlightByNumber(Number(flightNumber));
+      const res = await getFlightByNumber(Number(flightNumber), true);
       if (res.result !== "error") {
         if (res.data !== undefined && res.data.length > 0) {
           setFlights(res.data);
         } else {
           setFlights(undefined);
-          setErrorMessage("There is no flight with this flight number");
+          setErrorMessage("There is no future flight with this flight number");
         }
       } else {
         setErrorMessage(res.message ?? "Some unknown errors occurred!");

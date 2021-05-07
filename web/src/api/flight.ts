@@ -294,7 +294,8 @@ export function searchFlights(
 }
 
 export async function getFlightByNumber(
-  flightNumber: number
+  flightNumber: number,
+  future: boolean = false
 ): Promise<ResponseProp<FlightProp[]>> {
   if (isNaN(flightNumber) || (!flightNumber && flightNumber !== 0)) {
     return new Promise((resolve) => {
@@ -303,7 +304,7 @@ export async function getFlightByNumber(
   }
   return searchFlights({
     flightNumber: flightNumber,
-    depTimeLower: new Date(),
+    depTimeLower: future ? new Date() : undefined,
   });
 }
 

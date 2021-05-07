@@ -83,6 +83,7 @@ class FilterType(Enum):
     REVENUE = "revenue_compare"
     TOP_DEST = "top_destinations"
     FLIGHT_CUSTOMERS = "flight_customers"
+    CUST_COMMENT = "customer_comment"
     # The following filters are advanced filters that require the filter generator.
     # We need to keep track of the advanced filters in the set ADVANCED_FILTERS.
     ADVANCED_FLIGHT = "advanced_flight"
@@ -97,14 +98,14 @@ SELECT_ALL_FUTURE_FLIGHTS = "SELECT * FROM future_flights;"
 SELECT_CUSTOMER_TICKETS = (
     "call customer_tickets(%(email)s);"  # "email" must matches the key name for session
 )
-SELECT_TOP_CUSTOMERS = '(SELECT * FROM \
+SELECT_TOP_CUSTOMERS = 'SELECT * FROM \
     (SELECT email, sum(commission) as total_commission, count(*) as tickets_bought \
         FROM spendings where purchase_Date > UTC_TIMESTAMP() - INTERVAL 6 MONTH and booking_agent_id = %(agent_id)s \
-            GROUP BY email ORDER BY total_commission DESC)as temp) \
-                UNION ALL SELECT "divide" as email, "" as total_commission, "" as tickets_bought UNION ALL \
-                    (SELECT email, sum(commission) as total_commission, count(*) as tickets_bought \
+            GROUP BY email ORDER BY total_commission DESC) as t1 \
+                UNION ALL SELECT "divide", "", "" UNION ALL \
+                    SELECT * FROM (SELECT email, sum(commission) as total_commission, count(*) as tickets_bought \
                         FROM spendings where purchase_Date > UTC_TIMESTAMP() - INTERVAL 6 MONTH and booking_agent_id = %(agent_id)s \
-                            GROUP BY email ORDER BY tickets_bought DESC)'
+                            GROUP BY email ORDER BY tickets_bought DESC) as t2'
 SELECT_CUSTOMER_FLIGHTS = "call customer_flights(%(email)s);"
 SELECT_AIRLINE_PLANES = "SELECT * FROM Airplane WHERE airline_name = %(airline_name)s"
 # Note, do not pass user provided values to this query
@@ -124,6 +125,8 @@ SELECT_REVENUE_COMPARE = "SELECT * FROM (SELECT * FROM (SELECT COUNT(*) as direc
 SELECT_POPULAR_DESTINATIONS = 'SELECT * FROM (SELECT arr_city, count(*) as visits FROM (SELECT arr_city, Ticket.airline_name FROM Ticket INNER JOIN verbose_flights USING (flight_number, dep_date, dep_time) WHERE Ticket.airline_name=%(airline_name)s AND dep_date > UTC_DATE() - INTERVAL 3 MONTH) AS t GROUP BY arr_city ORDER BY visits LIMIT 3) as t1 \
 UNION ALL SELECT "", "divide" \
 UNION ALL SELECT * FROM (SELECT arr_city, count(*) as visits FROM (SELECT arr_city, Ticket.airline_name FROM Ticket INNER JOIN verbose_flights USING (flight_number, dep_date, dep_time) WHERE Ticket.airline_name=%(airline_name)s AND dep_date > UTC_DATE() - INTERVAL 1 YEAR) AS t GROUP BY arr_city ORDER BY visits LIMIT 3) as t2;'
+GET_CUST_COMMENT = "SELECT * FROM Feedback WHERE (flight_number, dep_date, dep_time, email)=(%(flight_number)s, %(dep_date)s, %(dep_time)s, %(email)s)"
+
 
 FILTER_TO_QUERY_MAP = {
     FilterType.ALL_FUTURE_FLIGHTS: SELECT_ALL_FUTURE_FLIGHTS,
@@ -137,6 +140,7 @@ FILTER_TO_QUERY_MAP = {
     FilterType.REVENUE: SELECT_REVENUE_COMPARE,
     FilterType.TOP_DEST: SELECT_POPULAR_DESTINATIONS,
     FilterType.FLIGHT_CUSTOMERS: SELECT_FLIGHT_CUSTOMERS,
+    FilterType.CUST_COMMENT: GET_CUST_COMMENT,
 }
 
 ADVANCED_FILTERS = {

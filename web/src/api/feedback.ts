@@ -4,7 +4,7 @@ import { getAddFeedbackURL, getSearchURL, ResponseProp } from "./api";
 import { useCredentials } from "./authentication";
 import { FeedbackProp, FlightPrimaryProp } from "./data";
 import { parseFlightPrimary } from "./flight";
-import { handleError } from "./utils";
+import { handleError, handleThen } from "./utils";
 
 const parseFeedbackData = (data: Array<any>): FeedbackProp[] => {
   // Takes an array containing raw feedback data and turn them into an array of FeedbackProp
@@ -73,4 +73,27 @@ export const addFeedbackForFlight = (
       }
       return data;
     }, handleError);
+};
+
+export const getFeedback = (
+  props: FlightPrimaryProp
+): Promise<ResponseProp<FeedbackProp>> => {
+  return axios
+    .post(
+      getSearchURL("customer_comment"),
+      {
+        filter_data: { ...parseFlightPrimary(props) },
+      },
+      useCredentials
+    )
+    .then(handleThen, handleError)
+    .then((data: ResponseProp) => {
+      if (!!data.data) {
+        data.data = JSON.parse(data.data);
+        if (data.data.length > 0) {
+          data.data = parseFeedbackData(data.data)[0];
+        }
+      }
+      return data;
+    });
 };

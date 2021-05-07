@@ -39,6 +39,7 @@ AGENT_FILTERS: Set[FilterType] = {FilterType.TOP_CUSTOMERS}
 CUST_FILTERS: Set[FilterType] = {
     FilterType.CUST_FUTURE_FLIGHTS,
     FilterType.CUST_TICKETS,
+    FilterType.CUST_COMMENT,
 }
 
 USER_TYPES = {

@@ -9,11 +9,16 @@ export default function FormSubmit(props: {
   errorMessage?: string;
   pendingMessage?: string;
   successMessage?: string;
+  disabled?: boolean;
 }) {
   return (
     <div>
       <Form.Group>
-        <Button type="submit" variant="success">
+        <Button
+          type="submit"
+          variant="success"
+          disabled={props.disabled ?? false}
+        >
           {props.buttonMessage}
         </Button>
       </Form.Group>
