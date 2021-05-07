@@ -27,6 +27,7 @@ export const convertTime = (date: Date | undefined) => {
 
 export interface FlightFilterProp {
   filterByEmails?: boolean; // Equivalent to view purchased flights
+  filterByAgentID?: boolean; // Equivalent to view purchased flights
   emails?: string[]; // Staff users only
   isCustomer?: boolean; // Staff users only
   flightNumber?: number;
@@ -125,10 +126,17 @@ export function previousFlights(): Promise<ResponseProp<FlightProp[]>> {
 }
 
 export function custFutureFlights(): Promise<ResponseProp> {
+  let now = new Date();
   return axios
     .post<{ data?: string; result: string; message?: string }>(
-      getSearchURL("customer_future"),
-      {},
+      getSearchURL("advanced_flight"),
+      {
+        filter_data: {
+          filter_by_emails: true,
+          dep_date_lower: convertDate(now),
+          dep_time_lower: convertTime(now),
+        },
+      },
       useCredentials
     )
     .then(...flightDataHandler);
@@ -168,6 +176,7 @@ export function searchFlights(props: FlightFilterProp): Promise<ResponseProp> {
       {
         filter_data: {
           filter_by_emails: props.filterByEmails,
+          filter_by_agent_id: props.filterByAgentID,
           emails: props.emails,
           is_customer: props.isCustomer,
           flight_number: props.flightNumber,

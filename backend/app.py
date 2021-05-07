@@ -380,7 +380,24 @@ def ticket_purchase():
             raise MissingKeyError(err.args[0])
         except ValueError as err:
             raise JsonError("The flight number should be a number!")
-        insert_into(conn, "Ticket", **ticket_data)
+        result = insert_into(conn, "Ticket", **ticket_data)
+        if "booking_agent_id" in ticket_data:
+            insert_into(
+                conn,
+                "Book",
+                ticket_ID=result,
+                booking_agent_id=ticket_data["booking_agent_id"],
+                commission=float(
+                    query(
+                        conn,
+                        "SELECT sold_price FROM Ticket WHERE ticket_id={}".format(
+                            result
+                        ),
+                        FetchMode.ONE,
+                    )[0]
+                )
+                * 0.1,
+            )
         return jsonify(result="success")
     else:
         raise JsonError("Only customers or booking agents can purchase tickets.")

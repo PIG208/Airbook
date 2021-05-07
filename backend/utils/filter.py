@@ -284,28 +284,39 @@ def get_filter_flight(
     emails: FilterSet[str] = None,
     airline_name: Optional[str] = None,
     filter_by_emails: Optional[bool] = False,
+    filter_by_agent_id: Optional[bool] = False,
+    agent_id: Optional[int] = None,
     is_customer: Optional[bool] = True,
     round_trip: Optional[bool] = False,
 ) -> Tuple[str, list]:
     base_query = "SELECT * FROM verbose_flights {where}"
     flight_table = "verbose_flights"
     filter = Filter(base_query)
-    if emails is not None and emails.filter_set is not None:
-        if is_customer:
-            sec_filter = Filter("EXISTS (SELECT * FROM Ticket {where})").add_filter_set(
-                "email", emails
-            )
-        else:
-            sec_filter = Filter(
-                "EXISTS (SELECT * FROM Ticket JOIN BookingAgent ON(Ticket.booking_agent_ID=BookingAgent.booking_agent_ID) {where})"
-            ).add_filter_set("BookingAgent.email", emails)
+    if (
+        emails is not None
+        and emails.filter_set is not None
+        and is_customer
+        and filter_by_emails
+    ):
+        sec_filter = Filter("EXISTS (SELECT * FROM Ticket {where})").add_filter_set(
+            "email", emails
+        )
+    elif filter_by_agent_id and agent_id is not None:
+        sec_filter = Filter(
+            "EXISTS (SELECT * FROM Ticket JOIN BookingAgent ON(Ticket.booking_agent_ID=BookingAgent.booking_agent_ID) {where})"
+        ).add_optional_constraint(
+            "BookingAgent.booking_agent_ID",
+            agent_id,
+        )
+    else:
+        sec_filter = None
+
+    if sec_filter is not None:
         sec_filter.add_static_filter(
             "(Ticket.dep_date, Ticket.dep_time, Ticket.flight_number)=({flight}.dep_date, {flight}.dep_time, {flight}.flight_number)".format(
                 flight=flight_table
             )
         )
-    else:
-        sec_filter = None
     filter.add_optional_constraint(
         "flight_number", flight_number
     ).add_optional_constraint("dep_airport", dep_airport).add_optional_constraint(
@@ -314,8 +325,8 @@ def get_filter_flight(
         "dep_city", dep_city
     ).add_optional_constraint(
         "arr_city", arr_city
-    ).conditonally_add(
-        filter_by_emails, filter.add_sub_filter, sec_filter
+    ).add_sub_filter(
+        sec_filter
     ).add_optional_constraint(
         "airline_name", airline_name
     )
@@ -456,6 +467,8 @@ def get_filter_query(filter: FilterType, **kwargs) -> Tuple[str, Union[list, dic
                 airline_name=kwargs.get("airline_name"),
                 emails=FilterSet(kwargs.get("emails")),
                 filter_by_emails=kwargs.get("filter_by_emails"),
+                filter_by_agent_id=kwargs.get("filter_by_agent_id"),
+                agent_id=kwargs.get("agent_id"),
                 is_customer=kwargs.get("is_customer"),
             )
         else:

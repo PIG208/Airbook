@@ -33,6 +33,12 @@ def do_search(
 
     filter_data = data.get("filter_data", {})
 
+    # Users are not allowed to set these fields
+    if user_type is not DataType.AGENT:
+        filter_data["agent_id"] = None
+    if user_type is not DataType.STAFF:
+        filter_data["username"] = None
+
     if user_type is DataType.CUST:
         filter_data["emails"] = [session["email"]]
         filter_data["is_customer"] = True
@@ -56,5 +62,6 @@ def do_search(
             raise JsonError(
                 "Malformed request! Are you attempting to pass your email address?"
             )
+        raise err
 
     return result
