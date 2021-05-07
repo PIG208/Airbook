@@ -26,6 +26,7 @@ CUSTOMER_WHO_BOUGHT_TICKETS = "SELECT * FROM Customer\
         SELECT * FROM Ticket\
         WHERE Customer.email=Ticket.email\
     );"
+UPDATE_STATUS = "UPDATE Flight SET status=%(status)s WHERE (flight_number, dep_date, dep_time,airline_name)=(%(flight_number)s,%(dep_date)s,%(dep_time)s,%(airline_name)s)"
 TICKET_PRICE = "SELECT base_price * \
     (SELECT IF((SELECT COUNT(*)/\
         (SELECT seat_capacity \
@@ -103,11 +104,16 @@ def form_args_list(args, backticks=False):
     return res
 
 
-def insert_into(conn: Connection, table_name: str, **kwargs: Any) -> Optional[int]:
-    conn.ping(True)
+def get_key_val_lists(**kwargs):
     make_str = ",".join(["%s" for i in range(len(kwargs))])
     keys = form_args_list(kwargs.keys())
     values = form_args_list(kwargs.values())
+    return keys, values, make_str
+
+
+def insert_into(conn: Connection, table_name: str, **kwargs: Any) -> Optional[int]:
+    conn.ping(True)
+    keys, values, make_str = get_key_val_lists(**kwargs)
     result = None
     try:
         with conn.cursor() as cursor:

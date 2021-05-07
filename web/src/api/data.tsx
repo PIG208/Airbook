@@ -1,6 +1,6 @@
 export enum FlightStatus {
-  ONTIME,
-  DELAYED,
+  ONTIME = "ontime",
+  DELAYED = "delayed",
 }
 
 export interface FlightProp {

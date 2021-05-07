@@ -36,6 +36,7 @@ import {
   Search,
   ChatDotsFill,
   CloudPlus,
+  PencilSquare,
 } from "react-bootstrap-icons";
 import { PublicUser } from "../api/authentication";
 import ViewFlights from "../components/tools/ViewFlights";
@@ -50,6 +51,7 @@ import FeedbackDisplay from "../components/tools/FeedbackDisplay";
 import ViewCommission from "../components/tools/ViewCommission";
 import TopCustomers from "../components/tools/TopCustomers";
 import CreateFlight from "../components/tools/CreateFlight";
+import FlightChangeStatus from "../components/tools/FlightChangeStatus";
 
 type DashboardRoute = {
   tool: ITools;
@@ -165,6 +167,16 @@ const routes: DashboardRoute[] = [
       <div>
         <CloudPlus />
         Create Flights
+      </div>
+    ),
+  },
+  {
+    tool: StaffTools.EDIT_FLIGHTS,
+    ToolView: () => <FlightChangeStatus />,
+    sidebar: () => (
+      <div>
+        <PencilSquare />
+        Change Flight Status
       </div>
     ),
   },

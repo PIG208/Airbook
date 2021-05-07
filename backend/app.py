@@ -11,6 +11,7 @@ from backend.utils.query import (
     CHECK_AGENT_LOGIN,
     CHECK_CUST_LOGIN,
     CHECK_STAFF_LOGIN,
+    UPDATE_STATUS,
     STAFF_AIRLINE,
     TICKET_PRICE,
     FetchMode,
@@ -401,6 +402,30 @@ def ticket_purchase():
         return jsonify(result="success")
     else:
         raise JsonError("Only customers or booking agents can purchase tickets.")
+
+
+@app.route("/change_status", methods=["POST"])
+@cross_origin(supports_credentials=True)
+@raise_error
+@require_session(DataType.STAFF)
+def change_status():
+    data = request.get_json()
+    flight_data = {}
+    try:
+        flight_data["flight_number"] = data["flight_number"]
+        flight_data["dep_date"] = data["dep_date"]
+        flight_data["dep_time"] = data["dep_time"]
+        flight_data["status"] = data["status"]
+    except KeyError as err:
+        raise MissingKeyError(err.args[0])
+    try:
+        flight_data["airline_name"] = query(
+            conn, STAFF_AIRLINE, FetchMode.ONE, args=dict(username=session["username"])
+        )[0]
+    except QueryError:
+        raise JsonError("An unknown error occurs when finding your airline name.")
+    result = query(conn, UPDATE_STATUS, args=flight_data)
+    return jsonify(result="success")
 
 
 @app.errorhandler(401)

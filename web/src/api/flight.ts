@@ -1,11 +1,17 @@
 import {
+  getChangeFlightStatusURL,
   getCreateFlightURL,
   getPublicSearchURL,
   getSearchURL,
   ResponseProp,
 } from "./api";
 import axios from "axios";
-import { FlightFormProp, FlightPrimaryProp, FlightProp } from "./data";
+import {
+  FlightFormProp,
+  FlightPrimaryProp,
+  FlightProp,
+  FlightStatus,
+} from "./data";
 import { useCredentials } from "./authentication";
 import { handleError } from "./utils";
 
@@ -229,5 +235,30 @@ export async function createFlight(
       } else {
         return data;
       }
-    });
+    }, handleError);
+}
+
+export async function changeFlightStatus(
+  flight_data: FlightPrimaryProp & { status: FlightStatus }
+): Promise<ResponseProp> {
+  return axios
+    .post(
+      getChangeFlightStatusURL(),
+      {
+        ...parseFlightPrimary(flight_data),
+        status: flight_data.status,
+      },
+      useCredentials
+    )
+    .then((res) => {
+      const data = res.data;
+      if (data.result === "error" || data.result === undefined) {
+        return {
+          result: "error",
+          message: "Some errors occurred from the serverside.",
+        };
+      } else {
+        return data;
+      }
+    }, handleError);
 }

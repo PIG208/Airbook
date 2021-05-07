@@ -3,7 +3,7 @@ import { FormComponentProp } from "../api/form";
 import MyFormInput from "./MyFormInput";
 
 export default function FormSelect(
-  props: FormComponentProp & { options: { value: string; display: string }[] }
+  props: FormComponentProp & { options: { value: any; display: string }[] }
 ) {
   return (
     <MyFormInput
