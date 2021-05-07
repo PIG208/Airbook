@@ -380,8 +380,8 @@ def get_filter_spendings(
     agent_id: Optional[int],
     purchase_date_range: FilterRange[str],
     purchase_time_range: FilterRange[str],
-    group_by_month: bool = False,
-    is_customer: bool = False,
+    group_by_month: Optional[bool] = False,
+    is_customer: Optional[bool] = False,
 ) -> Tuple[str, list]:
     assert isinstance(emails, FilterSet)
     if group_by_month:
@@ -398,7 +398,10 @@ def get_filter_spendings(
         "purchase_time",
     )
     filter.conditonally_add(
-        is_customer, filter.add_filter_set, "email", emails
+        is_customer if is_customer is not None else False,
+        filter.add_filter_set,
+        "email",
+        emails,
     ).add_optional_constraint("booking_agent_id", agent_id)
     return filter.get_formatted()
 

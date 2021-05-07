@@ -44,5 +44,13 @@ def do_search(
         result = query_by_filter(conn, filter_type, **filter_data, **session)
     except QueryKeyError as err:
         raise MissingKeyError(key=err.get_key())
+    except TypeError as err:
+        if (
+            err.args[0]
+            == "query_by_filter() got multiple values for keyword argument 'email'"
+        ):
+            raise JsonError(
+                "Malformed request! Are you attempting to pass your email address?"
+            )
 
     return result

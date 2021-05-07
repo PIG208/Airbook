@@ -5,7 +5,6 @@ from typing import Tuple, Any
 from backend.utils.filter import (
     get_filter_flight,
     get_filter_spendings,
-    FilterGroup,
     FilterRange,
     FilterSet,
     FilterRange,
@@ -15,27 +14,37 @@ from backend.utils.filter import (
 class TestFilter(unittest.TestCase):
     def test_filter_spendings_one_or_empty(self):
         result = get_filter_spendings(
-            FilterSet({"ny2311@nyu.edu"}), FilterRange(), FilterRange()
+            FilterSet({"ny2311@nyu.edu"}),
+            None,
+            FilterRange(),
+            FilterRange(),
+            is_customer=True,
         )
         expected = (
-            "SELECT purchase_date, actual_price FROM spendings WHERE email=%s",
+            "SELECT * FROM spendings WHERE email=%s",
             ["ny2311@nyu.edu"],
         )
         self.assertEqual(expected, result)
 
-        result = get_filter_spendings(FilterSet({}), FilterRange(), FilterRange())
+        result = get_filter_spendings(
+            FilterSet({}), None, FilterRange(), FilterRange(), is_customer=True
+        )
         expected: Tuple[Any, Any] = (
-            "SELECT purchase_date, actual_price FROM spendings ",
+            "SELECT * FROM spendings ",
             [],
         )
         self.assertEqual(expected, result)
 
     def test_filter_spendings_many(self):
         result = get_filter_spendings(
-            FilterSet(["asd", "ddd"]), FilterRange(), FilterRange()
+            FilterSet(["asd", "ddd"]),
+            None,
+            FilterRange(),
+            FilterRange(),
+            is_customer=True,
         )
         expected = (
-            "SELECT purchase_date, actual_price FROM spendings WHERE email IN (%s,%s)",
+            "SELECT * FROM spendings WHERE email IN (%s,%s)",
             ["asd", "ddd"],
         )
         self.assertEqual(expected[0], result[0])
@@ -110,10 +119,7 @@ class TestFilter(unittest.TestCase):
         )
         print(result)
         expected = (
-            "SELECT * FROM verbose_flights WHERE dep_airport=%s \
-                AND arr_airport=%s AND dep_city=%s AND arr_city=%s \
-                    AND (dep_date > %s AND dep_date < %s OR ((dep_date=%s AND dep_time > %s) OR (dep_date=%s AND dep_time < %s))) \
-                        AND (arr_date > %s AND arr_date < %s OR ((arr_date=%s AND arr_time > %s) OR (arr_date=%s AND arr_time < %s)))",
+            "SELECT * FROM verbose_flights WHERE dep_airport=%s AND arr_airport=%s AND dep_city=%s AND arr_city=%s AND (dep_date > %s AND dep_date < %s OR ((dep_date=%s AND dep_date < %s AND dep_time > %s) OR ((dep_date=%s AND dep_date > %s AND dep_time < %s) OR (dep_date=%s AND dep_date=%s AND dep_time > %s AND dep_time < %s)))) AND (arr_date > %s AND arr_date < %s OR ((arr_date=%s AND arr_date < %s AND arr_time > %s) OR ((arr_date=%s AND arr_date > %s AND arr_time < %s) OR (arr_date=%s AND arr_date=%s AND arr_time > %s AND arr_time < %s))))",
             [
                 "JFK",
                 "ASD",
@@ -122,14 +128,26 @@ class TestFilter(unittest.TestCase):
                 "2020-11-22",
                 "2020-11-23",
                 "2020-11-22",
+                "2020-11-23",
                 "06:15:44",
                 "2020-11-23",
+                "2020-11-22",
+                "10:15:44",
+                "2020-11-23",
+                "2020-11-22",
+                "06:15:44",
                 "10:15:44",
                 "2020-11-22",
                 "2020-11-23",
                 "2020-11-22",
+                "2020-11-23",
                 "06:15:44",
                 "2020-11-23",
+                "2020-11-22",
+                "10:15:44",
+                "2020-11-23",
+                "2020-11-22",
+                "06:15:44",
                 "10:15:44",
             ],
         )

@@ -12,43 +12,52 @@ class TestSearch(flask_unittest.ClientTestCase):
     def setUp(self, client):
         self.future_flights = [
             [
+                "MSC",
+                "JFK",
+                22,
+                "China Eastern",
                 2323,
                 "2021-05-28",
                 "15:31:14",
-                "JFK",
                 "2021-05-29",
                 "12:40:14",
-                "MSC",
                 "45.00",
                 "delayed",
-                22,
-                "China Eastern",
+                120,
+                "New York City",
+                "Secchi",
             ],
             [
+                "JFK",
+                "MSC",
+                20,
+                "China Eastern",
                 7777,
                 "2021-05-28",
                 "15:31:14",
-                "MSC",
                 "2021-05-29",
                 "12:40:14",
-                "JFK",
                 "1000.00",
                 "ontime",
-                20,
-                "China Eastern",
+                60,
+                "Secchi",
+                "New York City",
             ],
             [
+                "JFK",
+                "MSC",
+                20,
+                "China Eastern",
                 7777,
                 "2022-05-28",
                 "15:31:14",
-                "MSC",
                 "2022-05-29",
                 "12:40:14",
-                "JFK",
                 "1000.00",
                 "ontime",
-                20,
-                "China Eastern",
+                60,
+                "Secchi",
+                "New York City",
             ],
         ]
 
@@ -84,7 +93,23 @@ class TestSearch(flask_unittest.ClientTestCase):
                 "2021-03-28",
                 "13:33:44",
                 None,
-            ]
+            ],
+            [
+                6,
+                "speiaz123@nyu.edu",
+                "45.00",
+                "debt",
+                "1812938912",
+                "tesasd",
+                "2024-04-23",
+                "2021-05-07",
+                "8:46:19",
+                "China Eastern",
+                2323,
+                "2021-05-28",
+                "15:31:14",
+                None,
+            ],
         ]
         self.assertEqual(expected, json.loads(response.json["data"]))
 
@@ -117,20 +142,20 @@ class TestSearch(flask_unittest.ClientTestCase):
         )
         assert response.json["result"] == "success"
 
-        response = client.post("/search/advanced_spendings", json=dict(filter_data={}))
-        self.assertEqual(
-            dict(
-                result="error", message='Missing required key "emails"!', key="emails"
-            ),
-            response.json,
-        )
+        # response = client.post("/search/advanced_spendings", json=dict(filter_data={}))
+        # self.assertEqual(
+        #   dict(
+        #        result="error", message='Missing required key "emails"!', key="emails"
+        #    ),
+        #    response.json,
+        # )
 
     def test_search_access_control(self, client):
         response = client.post("/search/customer_future")
         self.assertEqual(
             dict(
                 result="error",
-                message="Looks like you are trying to access something that requires login.",
+                message="Please login to access this page!",
             ),
             response.json,
         )
@@ -235,18 +260,37 @@ class TestSearch(flask_unittest.ClientTestCase):
 
         expected = [
             [
+                "JFK",
+                "PVG",
+                5,
+                "Evergreen",
                 12345,
                 "2021-03-28",
                 "13:33:44",
-                "PVG",
                 "2021-03-28",
                 "23:43:44",
-                "JFK",
                 "40.00",
                 "ontime",
-                5,
-                "Evergreen",
-            ]
+                200,
+                "Shanghai",
+                "New York City",
+            ],
+            [
+                "MSC",
+                "JFK",
+                22,
+                "China Eastern",
+                2323,
+                "2021-05-28",
+                "15:31:14",
+                "2021-05-29",
+                "12:40:14",
+                "45.00",
+                "delayed",
+                120,
+                "New York City",
+                "Secchi",
+            ],
         ]
 
         response = client.post(
@@ -260,17 +304,20 @@ class TestSearch(flask_unittest.ClientTestCase):
 
         expected = [
             [
+                "JFK",
+                "PVG",
+                5,
+                "Evergreen",
                 12345,
                 "2021-03-28",
                 "13:33:44",
-                "PVG",
                 "2021-03-28",
                 "23:43:44",
-                "JFK",
                 "40.00",
                 "ontime",
-                5,
-                "Evergreen",
+                200,
+                "Shanghai",
+                "New York City",
             ]
         ]
 
@@ -297,16 +344,44 @@ class TestSearch(flask_unittest.ClientTestCase):
 
         response = client.post("/search/advanced_spendings", json=dict(filter_data={}))
         expected = [
-            ["2021-03-24", "40.00"],
-            ["2021-04-24", "104.50"],
-            ["2021-12-24", "2025.00"],
+            [
+                "ny2311@nyu.edu",
+                None,
+                2,
+                "40.00",
+                "40.00",
+                "0.00",
+                "2021-03-24",
+                "19:20:15",
+            ],
+            [
+                "ny2311@nyu.edu",
+                1,
+                3,
+                "100.00",
+                "104.50",
+                "4.50",
+                "2021-04-24",
+                "12:20:15",
+            ],
+            [
+                "ny2311@nyu.edu",
+                1,
+                4,
+                "2000.00",
+                "2025.00",
+                "25.00",
+                "2021-12-24",
+                "5:20:15",
+            ],
         ]
         self.assertEqual("success", response.json["result"])
         self.assertEqual(expected, json.loads(response.json["data"]))
 
         response = client.post(
-            "/search/advanced_spendings", json=dict(filter_data=dict(group="YEAR"))
+            "/search/advanced_spendings",
+            json=dict(filter_data=dict(group_by_month=True)),
         )
-        expected = [[2021, "2169.50"]]
+        expected = [["2021-3", "40.00"], ["2021-4", "104.50"], ["2021-12", "2025.00"]]
         self.assertEqual("success", response.json["result"])
         self.assertEqual(expected, json.loads(response.json["data"]))
