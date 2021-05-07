@@ -34,9 +34,16 @@ import {
   People,
   Wallet,
   Search,
-  ChatDotsFill,
+  ChatDots,
   CloudPlus,
   PencilSquare,
+  ArrowUpRight,
+  CalendarPlus,
+  PersonBadge,
+  PersonLinesFill,
+  Bullseye,
+  BarChart,
+  PieChart,
 } from "react-bootstrap-icons";
 import { PublicUser } from "../api/authentication";
 import ViewFlights from "../components/tools/ViewFlights";
@@ -141,31 +148,11 @@ const routes: DashboardRoute[] = [
     ),
   },
   {
-    tool: StaffTools.VIEW_REPORT,
-    ToolView: () => <Home />,
-    sidebar: () => (
-      <div>
-        <Receipt />
-        View Report
-      </div>
-    ),
-  },
-  {
-    tool: StaffTools.VIEW_RATINGS,
-    ToolView: () => <FeedbackDisplay />,
-    sidebar: () => (
-      <div>
-        <ChatDotsFill />
-        View Ratings
-      </div>
-    ),
-  },
-  {
     tool: StaffTools.CREATE_FLIGHTS,
     ToolView: () => <CreateFlight />,
     sidebar: () => (
       <div>
-        <CloudPlus />
+        <CalendarPlus />
         Create Flights
       </div>
     ),
@@ -177,6 +164,86 @@ const routes: DashboardRoute[] = [
       <div>
         <PencilSquare />
         Change Flight Status
+      </div>
+    ),
+  },
+  {
+    tool: StaffTools.ADD_AIRPORT,
+    ToolView: () => <Home />,
+    sidebar: () => (
+      <div>
+        <ArrowUpRight />
+        Add Airport
+      </div>
+    ),
+  },
+  {
+    tool: StaffTools.ADD_AIRPLANE,
+    ToolView: () => <FlightChangeStatus />,
+    sidebar: () => (
+      <div>
+        <CloudPlus />
+        Add Airplane
+      </div>
+    ),
+  },
+  {
+    tool: StaffTools.VIEW_RATINGS,
+    ToolView: () => <FeedbackDisplay />,
+    sidebar: () => (
+      <div>
+        <ChatDots />
+        View Ratings
+      </div>
+    ),
+  },
+  {
+    tool: StaffTools.VIEW_AGENTS,
+    ToolView: () => <FlightChangeStatus />,
+    sidebar: () => (
+      <div>
+        <PersonLinesFill />
+        View Top Agents
+      </div>
+    ),
+  },
+  {
+    tool: StaffTools.VIEW_CUST,
+    ToolView: () => <FlightChangeStatus />,
+    sidebar: () => (
+      <div>
+        <PersonBadge />
+        View Frequent Customers
+      </div>
+    ),
+  },
+  {
+    tool: StaffTools.VIEW_REPORT,
+    ToolView: () => <FlightChangeStatus />,
+    sidebar: () => (
+      <div>
+        <BarChart />
+        View Report
+      </div>
+    ),
+  },
+  {
+    tool: StaffTools.VIEW_REVENUE,
+    ToolView: () => <FlightChangeStatus />,
+    sidebar: () => (
+      <div>
+        <PieChart />
+        View Revenue
+      </div>
+    ),
+  },
+  {
+    tool: StaffTools.VIEW_TOP_DEST,
+    ToolView: () => <FlightChangeStatus />,
+    sidebar: () => (
+      <div>
+        <Bullseye />
+        View Top Destinations
       </div>
     ),
   },
