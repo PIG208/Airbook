@@ -1,4 +1,5 @@
 import {
+  getAddAirportURL,
   getChangeFlightStatusURL,
   getCreateFlightURL,
   getPublicSearchURL,
@@ -7,6 +8,7 @@ import {
 } from "./api";
 import axios from "axios";
 import {
+  AirportProp,
   FlightFormProp,
   FlightPrimaryProp,
   FlightProp,
@@ -255,7 +257,32 @@ export async function changeFlightStatus(
       if (data.result === "error" || data.result === undefined) {
         return {
           result: "error",
-          message: "Some errors occurred from the serverside.",
+          message: data.message ?? "Some errors occurred from the serverside.",
+        };
+      } else {
+        return data;
+      }
+    }, handleError);
+}
+
+export async function addAirport(
+  airport_data: AirportProp
+): Promise<ResponseProp> {
+  return axios
+    .post(
+      getAddAirportURL(),
+      {
+        airport_name: airport_data.airportName,
+        city: airport_data.city,
+      },
+      useCredentials
+    )
+    .then((res) => {
+      const data = res.data;
+      if (data.result === "error" || data.result === undefined) {
+        return {
+          result: "error",
+          message: data.message ?? "Some errors occurred from the serverside.",
         };
       } else {
         return data;

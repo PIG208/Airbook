@@ -21,3 +21,4 @@ export const getTicketPurchaseURL = () => `${host}/ticket_purchase`;
 export const getAddFeedbackURL = () => `${host}/add_feedback`;
 export const getCreateFlightURL = () => `${host}/create_flight`;
 export const getChangeFlightStatusURL = () => `${host}/change_status`;
+export const getAddAirportURL = () => `${host}/add_airport`;

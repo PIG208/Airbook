@@ -95,3 +95,8 @@ export interface FeedbackProp {
   rate: number;
   comment: string;
 }
+
+export interface AirportProp {
+  airportName: string; //<20
+  city: string; //<30
+}

@@ -26,7 +26,6 @@ import { ReactComponent as Plane } from "../assets/paper-plane.svg";
 import {
   List,
   House,
-  Receipt,
   BoxArrowRight,
   Handbag,
   ChatRightText,
@@ -37,13 +36,13 @@ import {
   ChatDots,
   CloudPlus,
   PencilSquare,
-  ArrowUpRight,
   CalendarPlus,
   PersonBadge,
   PersonLinesFill,
   Bullseye,
   BarChart,
   PieChart,
+  ArrowUpRightSquare,
 } from "react-bootstrap-icons";
 import { PublicUser } from "../api/authentication";
 import ViewFlights from "../components/tools/ViewFlights";
@@ -59,6 +58,7 @@ import ViewCommission from "../components/tools/ViewCommission";
 import TopCustomers from "../components/tools/TopCustomers";
 import CreateFlight from "../components/tools/CreateFlight";
 import FlightChangeStatus from "../components/tools/FlightChangeStatus";
+import AddAirport from "../components/tools/AddAirport";
 
 type DashboardRoute = {
   tool: ITools;
@@ -169,10 +169,10 @@ const routes: DashboardRoute[] = [
   },
   {
     tool: StaffTools.ADD_AIRPORT,
-    ToolView: () => <Home />,
+    ToolView: () => <AddAirport />,
     sidebar: () => (
       <div>
-        <ArrowUpRight />
+        <ArrowUpRightSquare />
         Add Airport
       </div>
     ),

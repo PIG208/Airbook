@@ -428,6 +428,25 @@ def change_status():
     return jsonify(result="success")
 
 
+@app.route("/add_airport", methods=["POST"])
+@cross_origin(supports_credentials=True)
+@raise_error
+@require_session(DataType.STAFF)
+def add_airport():
+    data = request.get_json()
+    airport_data = {}
+    try:
+        airport_data["airport_name"] = data["airport_name"]
+        airport_data["city"] = data["city"]
+    except KeyError as err:
+        raise MissingKeyError(err.args[0])
+    try:
+        insert_into(conn, "Airport", **airport_data)
+    except QueryDuplicateError as err:
+        raise JsonError("The airport already exists!")
+    return jsonify(result="success")
+
+
 @app.errorhandler(401)
 def forbidden(error):
     return jsonify(
