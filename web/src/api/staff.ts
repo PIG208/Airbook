@@ -30,6 +30,16 @@ export interface RevenueProp {
   indirect: number;
 }
 
+export interface TopDestinationProp {
+  city: string;
+  visits: number;
+}
+
+export interface TopDestinationResult {
+  lastThreeMonths: TopDestinationProp[];
+  lastYear: TopDestinationProp[];
+}
+
 const parseFrequentCustomerData = (
   frequentCustomerData: Array<any>
 ): FrequentCustomerProp[] => {
@@ -86,6 +96,31 @@ const parseTopAgentsData = (topAgentData: Array<any>): TopAgentsResults => {
   );
 };
 
+const parseTopDestinationsData = (
+  topDestinationsData: Array<any>
+): TopDestinationResult => {
+  let doneMonth = false;
+  return topDestinationsData.reduce(
+    (accumulator: TopDestinationResult, current: any) => {
+      if (current[1] === "divide") {
+        doneMonth = true;
+        return accumulator;
+      }
+      const temp = {
+        city: current[0],
+        visits: current[1],
+      } as TopDestinationProp;
+      if (doneMonth) {
+        accumulator.lastYear.push(temp);
+      } else {
+        accumulator.lastThreeMonths.push(temp);
+      }
+      return accumulator;
+    },
+    { lastThreeMonths: [], lastYear: [] }
+  ) as TopDestinationResult;
+};
+
 export async function getBookingAgents(): Promise<
   ResponseProp<TopAgentsResults>
 > {
@@ -134,6 +169,19 @@ export async function getRevenue(): Promise<ResponseProp<RevenueProp[]>> {
           indirect: value[1],
         } as RevenueProp;
       });
+      return data;
+    });
+}
+
+export async function getTopDestinations(): Promise<
+  ResponseProp<TopDestinationResult>
+> {
+  return axios
+    .post(getSearchURL("top_destinations"), {}, useCredentials)
+    .then(handleThen, handleError)
+    .then((data: ResponseProp) => {
+      data.data = JSON.parse(data.data);
+      data.data = parseTopDestinationsData(data.data);
       return data;
     });
 }

@@ -64,6 +64,7 @@ import TopAgents from "../components/tools/TopAgents";
 import FrequentCustomers from "../components/tools/FrequentCustomers";
 import ViewReports from "../components/tools/ViewReports";
 import ViewRevenue from "../components/tools/ViewRevenue";
+import TopDestinations from "../components/tools/TopDestinations";
 
 type DashboardRoute = {
   tool: ITools;
@@ -244,7 +245,7 @@ const routes: DashboardRoute[] = [
   },
   {
     tool: StaffTools.VIEW_TOP_DEST,
-    ToolView: () => <FlightChangeStatus />,
+    ToolView: () => <TopDestinations />,
     sidebar: () => (
       <div>
         <Bullseye />

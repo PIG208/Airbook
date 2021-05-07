@@ -81,6 +81,7 @@ class FilterType(Enum):
     TOP_AGENTS = "top_agents"
     FREQ_CUST = "frequent_cust"
     REVENUE = "revenue_compare"
+    TOP_DEST = "top_destinations"
     # The following filters are advanced filters that require the filter generator.
     # We need to keep track of the advanced filters in the set ADVANCED_FILTERS.
     ADVANCED_FLIGHT = "advanced_flight"
@@ -118,6 +119,9 @@ SELECT_REVENUE_COMPARE = "SELECT * FROM (SELECT * FROM (SELECT COUNT(*) as direc
          UNION ALL \
              SELECT * FROM (SELECT * FROM (SELECT COUNT(*) as direct FROM Ticket WHERE airline_name=%(airline_name)s AND booking_agent_id IS NULL AND purchase_date > UTC_DATE() - INTERVAL 1 YEAR) as t1 \
              NATURAL JOIN (SELECT COUNT(*) as in_direct FROM Ticket WHERE airline_name=%(airline_name)s  AND booking_agent_id IS NOT NULL AND purchase_date > UTC_DATE() - INTERVAL 1 YEAR) as t2) as t4"
+SELECT_POPULAR_DESTINATIONS = 'SELECT * FROM (SELECT arr_city, count(*) as visits FROM (SELECT arr_city, Ticket.airline_name FROM Ticket INNER JOIN verbose_flights USING (flight_number, dep_date, dep_time) WHERE Ticket.airline_name=%(airline_name)s AND dep_date > UTC_DATE() - INTERVAL 3 MONTH) AS t GROUP BY arr_city ORDER BY visits LIMIT 5) as t1 \
+UNION ALL SELECT "", "divide" \
+UNION ALL SELECT * FROM (SELECT arr_city, count(*) as visits FROM (SELECT arr_city, Ticket.airline_name FROM Ticket INNER JOIN verbose_flights USING (flight_number, dep_date, dep_time) WHERE Ticket.airline_name=%(airline_name)s AND dep_date > UTC_DATE() - INTERVAL 1 YEAR) AS t GROUP BY arr_city ORDER BY visits LIMIT 5) as t2;'
 
 FILTER_TO_QUERY_MAP = {
     FilterType.ALL_FUTURE_FLIGHTS: SELECT_ALL_FUTURE_FLIGHTS,
@@ -129,6 +133,7 @@ FILTER_TO_QUERY_MAP = {
     FilterType.TOP_AGENTS: SELECT_TOP_AGENTS,
     FilterType.FREQ_CUST: SELECT_MOST_FREQUENT_CUST,
     FilterType.REVENUE: SELECT_REVENUE_COMPARE,
+    FilterType.TOP_DEST: SELECT_POPULAR_DESTINATIONS,
 }
 
 ADVANCED_FILTERS = {
