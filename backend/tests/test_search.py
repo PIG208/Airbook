@@ -345,6 +345,7 @@ class TestSearch(flask_unittest.ClientTestCase):
                 "4.50",
                 "2021-04-24",
                 "12:20:15",
+                "China Eastern",
             ],
             [
                 "ny2311@nyu.edu",

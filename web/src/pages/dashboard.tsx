@@ -63,6 +63,7 @@ import AddAirplane from "../components/tools/AddAirplane";
 import TopAgents from "../components/tools/TopAgents";
 import FrequentCustomers from "../components/tools/FrequentCustomers";
 import ViewReports from "../components/tools/ViewReports";
+import ViewRevenue from "../components/tools/ViewRevenue";
 
 type DashboardRoute = {
   tool: ITools;
@@ -233,7 +234,7 @@ const routes: DashboardRoute[] = [
   },
   {
     tool: StaffTools.VIEW_REVENUE,
-    ToolView: () => <FlightChangeStatus />,
+    ToolView: () => <ViewRevenue />,
     sidebar: () => (
       <div>
         <PieChart />

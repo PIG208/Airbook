@@ -80,6 +80,7 @@ class FilterType(Enum):
     AIRLINE_PLANES = "airline_planes"
     TOP_AGENTS = "top_agents"
     FREQ_CUST = "frequent_cust"
+    REVENUE = "revenue_compare"
     # The following filters are advanced filters that require the filter generator.
     # We need to keep track of the advanced filters in the set ADVANCED_FILTERS.
     ADVANCED_FLIGHT = "advanced_flight"
@@ -112,6 +113,11 @@ UNION ALL SELECT * FROM (SELECT * FROM agent_stats_last_year ORDER BY total_tick
 UNION ALL SELECT * FROM (SELECT "divide" as booking_agent_id, "" as total_commission, "" as tickets_total, "" as email) as temp6 \
 UNION ALL SELECT * FROM (SELECT * FROM agent_stats_last_month ORDER BY total_tickets DESC LIMIT 5) as temp7'
 SELECT_MOST_FREQUENT_CUST = "SELECT temp.*, name FROM (SELECT email, COUNT(*) as total_visits FROM Ticket WHERE purchase_date > UTC_TIMESTAMP() - INTERVAL 1 YEAR AND dep_date < NOW() GROUP BY email ORDER BY total_visits DESC) AS temp NATURAL JOIN Customer;"
+SELECT_REVENUE_COMPARE = "SELECT * FROM (SELECT * FROM (SELECT COUNT(*) as direct FROM Ticket WHERE airline_name=%(airline_name)s AND booking_agent_id IS NULL AND purchase_date > UTC_DATE() - INTERVAL 1 MONTH) as t1 \
+    NATURAL JOIN (SELECT COUNT(*) as in_direct FROM Ticket WHERE airline_name=%(airline_name)s  AND booking_agent_id IS NOT NULL AND purchase_date > UTC_DATE() - INTERVAL 1 MONTH) as t2) as t3 \
+         UNION ALL \
+             SELECT * FROM (SELECT * FROM (SELECT COUNT(*) as direct FROM Ticket WHERE airline_name=%(airline_name)s AND booking_agent_id IS NULL AND purchase_date > UTC_DATE() - INTERVAL 1 YEAR) as t1 \
+             NATURAL JOIN (SELECT COUNT(*) as in_direct FROM Ticket WHERE airline_name=%(airline_name)s  AND booking_agent_id IS NOT NULL AND purchase_date > UTC_DATE() - INTERVAL 1 YEAR) as t2) as t4"
 
 FILTER_TO_QUERY_MAP = {
     FilterType.ALL_FUTURE_FLIGHTS: SELECT_ALL_FUTURE_FLIGHTS,
@@ -122,6 +128,7 @@ FILTER_TO_QUERY_MAP = {
     FilterType.AIRLINE_PLANES: SELECT_AIRLINE_PLANES,
     FilterType.TOP_AGENTS: SELECT_TOP_AGENTS,
     FilterType.FREQ_CUST: SELECT_MOST_FREQUENT_CUST,
+    FilterType.REVENUE: SELECT_REVENUE_COMPARE,
 }
 
 ADVANCED_FILTERS = {

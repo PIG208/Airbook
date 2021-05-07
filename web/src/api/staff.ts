@@ -25,6 +25,11 @@ export interface FrequentCustomerProp {
   name: string;
 }
 
+export interface RevenueProp {
+  direct: number;
+  indirect: number;
+}
+
 const parseFrequentCustomerData = (
   frequentCustomerData: Array<any>
 ): FrequentCustomerProp[] => {
@@ -115,4 +120,20 @@ export async function getCustomerFlights(
     filterByEmails: true,
     depTimeUpper: new Date(), //We only want the previous flights
   });
+}
+
+export async function getRevenue(): Promise<ResponseProp<RevenueProp[]>> {
+  return axios
+    .post(getSearchURL("revenue_compare"), {}, useCredentials)
+    .then(handleThen, handleError)
+    .then((data: ResponseProp) => {
+      data.data = JSON.parse(data.data);
+      data.data = data.data.map((value: any) => {
+        return {
+          direct: value[0],
+          indirect: value[1],
+        } as RevenueProp;
+      });
+      return data;
+    });
 }
