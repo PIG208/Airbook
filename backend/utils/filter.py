@@ -282,6 +282,7 @@ def get_filter_flight(
     arr_airport: Optional[str] = None,
     arr_city: Optional[str] = None,
     emails: FilterSet[str] = None,
+    airline_name: Optional[str] = None,
     filter_by_emails: Optional[bool] = False,
     is_customer: Optional[bool] = True,
     round_trip: Optional[bool] = False,
@@ -315,6 +316,8 @@ def get_filter_flight(
         "arr_city", arr_city
     ).conditonally_add(
         filter_by_emails, filter.add_sub_filter, sec_filter
+    ).add_optional_constraint(
+        "airline_name", airline_name
     )
     add_date_time_range(filter, dep_date_range, dep_time_range, "dep_date", "dep_time")
     add_date_time_range(filter, arr_date_range, arr_time_range, "arr_date", "arr_time")
@@ -450,6 +453,7 @@ def get_filter_query(filter: FilterType, **kwargs) -> Tuple[str, Union[list, dic
                 dep_city=kwargs.get("dep_city"),
                 arr_airport=kwargs.get("arr_airport"),
                 arr_city=kwargs.get("arr_city"),
+                airline_name=kwargs.get("airline_name"),
                 emails=FilterSet(kwargs.get("emails")),
                 filter_by_emails=kwargs.get("filter_by_emails"),
                 is_customer=kwargs.get("is_customer"),

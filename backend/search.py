@@ -1,6 +1,6 @@
 from typing import Dict, Any
 from backend.utils.filter import FilterType, FilterSet
-from backend.utils.query import DataType, query, FetchMode
+from backend.utils.query import DataType, query, FetchMode, STAFF_AIRLINE
 from backend.utils.error import JsonError, MissingKeyError, QueryKeyError
 from backend.utils.authentication import have_access_to_filter, PublicFilters
 from backend.utils.filter import query_by_filter
@@ -39,6 +39,10 @@ def do_search(
     elif user_type is DataType.AGENT:
         filter_data["emails"] = [session["agent_email"]]
         filter_data["is_customer"] = False
+    elif user_type is DataType.STAFF:
+        filter_data["airline_name"] = query(
+            conn, STAFF_AIRLINE, FetchMode.ONE, args=dict(username=session["username"])
+        )[0]
 
     try:
         result = query_by_filter(conn, filter_type, **filter_data, **session)
