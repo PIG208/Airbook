@@ -5,15 +5,12 @@ import {
   ControllerRenderProps,
   FieldValues,
   UseFormStateReturn,
-  Validate,
 } from "react-hook-form";
 import { FormComponentProp } from "../api/form";
 import FormErrorMessage from "./FormErrorMessage";
 
 export default function MyFormInput(
   props: FormComponentProp & {
-    validate?: Validate<any> | Record<string, Validate<any>> | undefined;
-  } & {
     controlProps?: any;
     altRender?: ({
       field,
@@ -34,11 +31,10 @@ export default function MyFormInput(
       <Controller
         name={props.name}
         control={props.control}
-        defaultValue={""}
+        defaultValue={props.defaultValue ?? ""}
         rules={{
           validate: {
-            ...props.validate,
-            requiredll: (v) => {
+            required: (v) => {
               return (
                 !props.required ||
                 (props.disabled ?? false) ||
@@ -46,6 +42,7 @@ export default function MyFormInput(
                 (props.errorMessage ?? "The field is invalid")
               );
             },
+            ...props.validate,
           },
         }}
         render={

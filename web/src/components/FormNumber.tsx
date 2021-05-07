@@ -2,11 +2,7 @@ import { Validate } from "react-hook-form";
 import { FormComponentProp } from "../api/form";
 import MyFormInput from "./MyFormInput";
 
-export default function FormNumber(
-  props: FormComponentProp & {
-    validate?: Validate<any> | Record<string, Validate<any>> | undefined;
-  }
-) {
+export default function FormNumber(props: FormComponentProp) {
   return (
     <MyFormInput
       {...props}
