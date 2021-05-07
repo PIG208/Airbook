@@ -103,6 +103,6 @@ export interface AirportProp {
 
 export interface AirplaneProp {
   planeID: number;
-  airlineMame: string;
+  airlineName: string;
   seatCapacity: number;
 }

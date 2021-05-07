@@ -74,7 +74,7 @@ export const parseFlightFormProp = (props: FlightFormProp) => {
   };
 };
 
-const parseFlightData = (flightData: Array<any>) => {
+const parseFlightData = (flightData: Array<any>): FlightProp[] => {
   return flightData.reduce((accumulator, current) => {
     let temp = {
       flightNumber: current[4],
@@ -95,6 +95,18 @@ const parseFlightData = (flightData: Array<any>) => {
     accumulator.push(temp);
     return accumulator;
   }, []) as FlightProp[];
+};
+
+const parseAirplaneData = (airplaneData: Array<any>): AirplaneProp[] => {
+  return airplaneData.reduce((accumulator, current) => {
+    let temp = {
+      airlineName: current[0],
+      planeID: current[1],
+      seatCapacity: current[2],
+    } as AirplaneProp;
+    accumulator.push(temp);
+    return accumulator;
+  }, []);
 };
 
 const flightDataHandler = [
@@ -275,4 +287,15 @@ export async function addAirplane(
       useCredentials
     )
     .then(handleThen, handleError);
+}
+
+export async function fetchAirplanes(): Promise<ResponseProp<AirplaneProp[]>> {
+  return axios
+    .post(getSearchURL("airline_planes"), {}, useCredentials)
+    .then(handleThen, handleError)
+    .then((data: ResponseProp) => {
+      data.data = JSON.parse(data.data);
+      data.data = parseAirplaneData(data.data);
+      return data;
+    });
 }

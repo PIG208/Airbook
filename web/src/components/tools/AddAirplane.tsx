@@ -1,12 +1,15 @@
-import { useState } from "react";
-import { Form } from "react-bootstrap";
+import { useEffect, useState } from "react";
+import { Card, Form, ListGroup } from "react-bootstrap";
 import { useForm } from "react-hook-form";
+import { ResponseProp } from "../../api/api";
 import { AirplaneProp } from "../../api/data";
-import { addAirplane } from "../../api/flight";
+import { addAirplane, fetchAirplanes } from "../../api/flight";
+import useIncrement from "../../api/use-increment";
 import { handleError } from "../../api/utils";
 import FormNumber from "../FormNumber";
 import FormSubmit from "../FormSubmit";
 import { useMessage } from "../SuccessMessage";
+import { Item } from "./Home";
 
 export default function AddAirplane() {
   const {
@@ -14,9 +17,29 @@ export default function AddAirplane() {
     control,
     formState: { errors, submitCount },
   } = useForm<AirplaneProp>();
+  const [error, setError] = useState("");
+  const { count, increment } = useIncrement();
   const [pending, setPending] = useState(false);
   const { message, showTimeout } = useMessage("Success");
-  const [error, setError] = useState("");
+  const [airplanes, setAirplanes] = useState<AirplaneProp[]>([]);
+
+  useEffect(() => {
+    updateAirplanes();
+  }, []);
+
+  const updateAirplanes = () => {
+    increment();
+    const current = count;
+    fetchAirplanes().then((data: ResponseProp<AirplaneProp[]>) => {
+      if (current !== count) {
+        return;
+      }
+      if (data.result === "error") {
+        setError(data.message ?? "Some unknown errors occurred");
+      }
+      setAirplanes(data.data ?? []);
+    });
+  };
 
   const handleAddAirplane = (data: AirplaneProp) => {
     setPending(true);
@@ -32,6 +55,7 @@ export default function AddAirplane() {
         } else {
           setError("");
           showTimeout();
+          updateAirplanes();
         }
       }, handleError)
       .finally(() => {
@@ -77,6 +101,20 @@ export default function AddAirplane() {
           errorMessage={error}
         />
       </Form>
+      <div className="card-flex-container">
+        {airplanes.map((value, index) => {
+          return (
+            <Card key={index}>
+              <Card.Header>Airplane</Card.Header>
+              <ListGroup>
+                <Item tag="Plane ID" value={value.planeID} />
+                <Item tag="Seat Capacity" value={value.seatCapacity} />
+                <Item tag="Airline Name" value={value.airlineName} />
+              </ListGroup>
+            </Card>
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -77,6 +77,7 @@ class FilterType(Enum):
     CUST_TICKETS = "customer_tickets"
     FLIGHT_COMMENTS = "flight_comments"
     TOP_CUSTOMERS = "top_customers"
+    AIRLINE_PLANES = "airline_planes"
     # The following filters are advanced filters that require the filter generator.
     # We need to keep track of the advanced filters in the set ADVANCED_FILTERS.
     ADVANCED_FLIGHT = "advanced_flight"
@@ -99,6 +100,7 @@ SELECT_TOP_CUSTOMERS = '(SELECT * FROM \
                         FROM spendings where purchase_Date > UTC_TIMESTAMP() - INTERVAL 6 MONTH and booking_agent_id = %(agent_id)s \
                             GROUP BY email ORDER BY tickets_bought DESC)'
 SELECT_CUSTOMER_FLIGHTS = "call customer_flights(%(email)s);"
+SELECT_AIRLINE_PLANES = "SELECT * FROM Airplane WHERE airline_name = %(airline_name)s"
 
 FILTER_TO_QUERY_MAP = {
     FilterType.ALL_FUTURE_FLIGHTS: SELECT_ALL_FUTURE_FLIGHTS,
@@ -106,6 +108,7 @@ FILTER_TO_QUERY_MAP = {
     FilterType.CUST_TICKETS: SELECT_CUSTOMER_TICKETS,
     FilterType.FLIGHT_COMMENTS: SELECT_FLIGHT_COMMENTS,
     FilterType.TOP_CUSTOMERS: SELECT_TOP_CUSTOMERS,
+    FilterType.AIRLINE_PLANES: SELECT_AIRLINE_PLANES
 }
 
 ADVANCED_FILTERS = {

@@ -1,3 +1,5 @@
+import { ResponseProp } from "./api";
+
 export type WithChildren<Type = {}> = Type & { children?: React.ReactNode };
 export type IFormProps<T> = { onSubmit: (data: T) => void };
 export const parseISODate = (value: string) =>
@@ -11,7 +13,7 @@ export const handleError = (err: any) => {
     message: "Network error occurred while fetching data.",
   };
 };
-export const handleThen = (res: any) => {
+export const handleThen = (res: any): ResponseProp => {
   const data = res.data;
   if (data.result === "error" || data.result === undefined) {
     return {

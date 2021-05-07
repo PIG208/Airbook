@@ -24,7 +24,7 @@ ProtectedFilters = {
     FilterType.ADVANCED_SPENDINGS,
 }
 
-STAFF_FILTERS: Set[FilterType] = {FilterType.FLIGHT_COMMENTS}
+STAFF_FILTERS: Set[FilterType] = {FilterType.FLIGHT_COMMENTS, FilterType.AIRLINE_PLANES}
 
 AGENT_FILTERS: Set[FilterType] = {FilterType.TOP_CUSTOMERS}
 
