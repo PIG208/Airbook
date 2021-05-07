@@ -45,6 +45,8 @@ export interface FlightFilterProp {
   depTimeUpper?: Date;
   arrTimeLower?: Date;
   arrTimeUpper?: Date;
+  returnTimeLower?: Date;
+  returnTimeUpper?: Date;
   depAirport?: string;
   depCity?: string;
   arrAirport?: string;
@@ -197,6 +199,68 @@ export function searchFlightsPublic(
     .then(...flightDataHandler);
 }
 
+export function searchFlightsReturnPublic(
+  props: FlightFilterProp
+): Promise<ResponseProp<FlightProp[]>> {
+  console.log(props);
+  if (!props.returnTimeUpper && !props.returnTimeLower) {
+    return new Promise(() => {
+      return {
+        result: "error",
+        message: "Round trips need to have return datetime!",
+      };
+    });
+  }
+  if (!props.arrCity || !props.depCity) {
+    return new Promise(() => {
+      return {
+        result: "error",
+        message: "Round trips need to have arrival city and depature city!",
+      };
+    });
+  }
+  return searchFlightsPublic(
+    Object.assign({}, props, {
+      depTimeLower: props.returnTimeLower,
+      depTimeUpper: props.returnTimeUpper,
+      depCity: props.arrCity,
+      arrCity: props.depCity,
+    } as FlightFilterProp)
+  );
+}
+
+export function searchFlightsReturn(
+  props: FlightFilterProp
+): Promise<ResponseProp<FlightProp[]>> {
+  if (
+    props.returnTimeUpper === undefined &&
+    props.returnTimeLower === undefined
+  ) {
+    return new Promise(() => {
+      return {
+        result: "error",
+        message: "Round trips need to have return datetime!",
+      };
+    });
+  }
+  if (props.arrCity === undefined || props.depCity === undefined) {
+    return new Promise(() => {
+      return {
+        result: "error",
+        message: "Round trips need to have arrival city and depature city!",
+      };
+    });
+  }
+  return searchFlights(
+    Object.assign({}, props, {
+      depTimeLower: props.returnTimeLower,
+      depTimeUpper: props.returnTimeUpper,
+      depCity: props.arrCity,
+      arrCity: props.depCity,
+    } as FlightFilterProp)
+  );
+}
+
 export function searchFlights(
   props: FlightFilterProp
 ): Promise<ResponseProp<FlightProp[]>> {
@@ -237,7 +301,10 @@ export async function getFlightByNumber(
       resolve({ result: "error", message: "Invalid flight number" });
     });
   }
-  return searchFlights({ flightNumber: flightNumber });
+  return searchFlights({
+    flightNumber: flightNumber,
+    depTimeLower: new Date(),
+  });
 }
 
 export async function getFlightCustomers(

@@ -5,6 +5,8 @@ import {
   FlightFilterProp,
   searchFlights,
   searchFlightsPublic,
+  searchFlightsReturn,
+  searchFlightsReturnPublic,
 } from "../../api/flight";
 import { FlightProp } from "../../api/data";
 import FlightTable from "./FlightTable";
@@ -21,6 +23,7 @@ export default function LookupFlights() {
     formState: { errors },
   } = useForm<FlightFilterProp>();
   const [flights, setFlights] = useState<FlightProp[]>([]);
+  const [returns, setReturns] = useState<FlightProp[]>([]);
   const [pending, setPending] = useState(false);
   const [lookupError, setLookupError] = useState("");
   const { count, increment } = useIncrement();
@@ -29,10 +32,24 @@ export default function LookupFlights() {
   const handleSearch = (props: FlightFilterProp) => {
     setPending(true);
     setFlights([]);
+    setReturns([]);
     increment();
     const currentCount = count;
     if (auth.userProp.userType === UserType.PUBLIC) {
       setTimeout(() => {
+        if (!!props.returnTimeLower || !!props.returnTimeUpper) {
+          searchFlightsReturnPublic(props).then((res) => {
+            if (currentCount === count) {
+              console.log("Aborted on stale search.");
+            }
+            if (res.data !== undefined && res.result !== "error") {
+              setReturns(res.data);
+              setLookupError("");
+            } else {
+              setLookupError(res.message ?? "Some errors occurred!");
+            }
+          });
+        }
         searchFlightsPublic(props)
           .then((res) => {
             if (currentCount === count) {
@@ -54,6 +71,19 @@ export default function LookupFlights() {
       }, 200);
     } else {
       setTimeout(() => {
+        if (!!props.returnTimeLower || !!props.returnTimeUpper) {
+          searchFlightsReturn(props).then((res) => {
+            if (currentCount === count) {
+              console.log("Aborted on stale search.");
+            }
+            if (res.data !== undefined && res.result !== "error") {
+              setReturns(res.data);
+              setLookupError("");
+            } else {
+              setLookupError(res.message ?? "Some errors occurred!");
+            }
+          });
+        }
         searchFlights(props)
           .then((res) => {
             if (currentCount === count) {
@@ -179,9 +209,21 @@ export default function LookupFlights() {
           lowerError={errors.arrTimeLower}
           upperError={errors.arrTimeUpper}
         />
+        <RangePicker
+          control={control}
+          lowerDisplay="Return Date Lower Bound"
+          lowerName="returnTimeLower"
+          upperDisplay="Return Date Upper Bound"
+          upperName="returnTimeUpper"
+          lowerError={errors.returnTimeLower}
+          upperError={errors.returnTimeUpper}
+        />
         <FormSubmit buttonMessage="Search" errorMessage={lookupError} />
       </Form>
+      <h5 style={{ color: "green" }}>One-way</h5>
       <FlightTable flights={flights} pending={pending} />
+      <h5 style={{ color: "green" }}>Round Trips</h5>
+      <FlightTable flights={returns} pending={pending} />
     </div>
   );
 }
