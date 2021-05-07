@@ -68,7 +68,7 @@ export default function ViewCommission() {
           {numTicket > 0 ? (
             <span>
               Your average commission is{" "}
-              <strong>${commissionTotal / numTicket}</strong> and{" "}
+              <strong>${(commissionTotal / numTicket).toFixed(2)}</strong> and{" "}
               {numTicket === 1 ? (
                 <span>
                   <strong>{numTicket}</strong> ticket was sold{" "}

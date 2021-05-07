@@ -101,7 +101,7 @@ export default function FeedbackDisplay() {
             <span>
               Average Rating:{" "}
               <strong style={{ color: "green" }}>
-                {totalRating / feedbacks.length}
+                {(totalRating / feedbacks.length).toFixed(2)}
               </strong>
             </span>
           )}
