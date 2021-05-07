@@ -349,7 +349,6 @@ export default function RegisterForm(props: IFormProps<UserProp>) {
         buttonMessage="Register"
         pending={pending}
         pendingMessage="Registering..."
-        successMessage="Success!"
         errorMessage={registerError}
       />
     </Form>

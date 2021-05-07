@@ -4,22 +4,28 @@ import HintMessage from "./HintMessage";
 import SuccessMessage from "./SuccessMessage";
 
 export default function FormSubmit(props: {
-  pending: boolean;
+  pending?: boolean;
   buttonMessage: string;
-  errorMessage: string;
-  pendingMessage: string;
-  successMessage: string;
+  errorMessage?: string;
+  pendingMessage?: string;
+  successMessage?: string;
 }) {
   return (
     <div>
-      <Form.Row>
+      <Form.Group>
         <Button type="submit" variant="success">
           {props.buttonMessage}
         </Button>
-      </Form.Row>
-      <AlertMessage message={props.errorMessage} />
-      <HintMessage control={props.pending} message={props.pendingMessage} />
-      <SuccessMessage message={props.successMessage} />
+      </Form.Group>
+      {props.errorMessage !== undefined && (
+        <AlertMessage message={props.errorMessage} />
+      )}
+      {props.pendingMessage !== undefined && props.pending !== undefined && (
+        <HintMessage control={props.pending} message={props.pendingMessage} />
+      )}
+      {props.successMessage !== undefined && (
+        <SuccessMessage message={props.successMessage} />
+      )}
     </div>
   );
 }

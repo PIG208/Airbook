@@ -179,13 +179,7 @@ export default function LookupFlights() {
           lowerError={errors.arrTimeLower}
           upperError={errors.arrTimeUpper}
         />
-        <FormSubmit
-          buttonMessage="Login"
-          pending={pending}
-          pendingMessage="Logging you in..."
-          successMessage="Success!"
-          errorMessage={lookupError}
-        />
+        <FormSubmit buttonMessage="Search" errorMessage={lookupError} />
       </Form>
       <FlightTable flights={flights} pending={pending} />
     </div>

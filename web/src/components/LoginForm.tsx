@@ -207,7 +207,6 @@ export default function LoginForm(props: IFormProps<UserProp>) {
         buttonMessage="Login"
         pending={pending}
         pendingMessage="Logging you in..."
-        successMessage="Success!"
         errorMessage={loginError}
       />
     </Form>

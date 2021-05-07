@@ -146,7 +146,7 @@ export default function CreateFlight() {
             buttonMessage="Create Flight"
             pending={pending}
             pendingMessage="Creating the new flight..."
-            successMessage="Success!"
+            successMessage={message}
             errorMessage={errorMessage}
           />
         </Form>

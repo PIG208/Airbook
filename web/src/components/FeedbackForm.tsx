@@ -7,6 +7,7 @@ import ReactStars from "react-rating-stars-component";
 import { IFormProps } from "../api/utils";
 import { addFeedbackForFlight } from "../api/feedback";
 import FormSubmit from "./FormSubmit";
+import { useMessage } from "./SuccessMessage";
 
 export type FeedbackFormProp = { rating: string; comment: string };
 
@@ -17,6 +18,7 @@ export default function FeedbackForm(
   const [feedbackError, setFeedbackError] = useState("");
   const [pending, setPending] = useState(false);
   const { count, increment } = useIncrement();
+  const { message, showTimeout } = useMessage("Success");
 
   const handleComment = (data: FeedbackFormProp) => {
     increment();
@@ -31,6 +33,7 @@ export default function FeedbackForm(
           res.message ?? "Some error occurred from the serverside."
         );
       } else {
+        showTimeout();
         props.onSubmit(data);
         setFeedbackError("");
       }
@@ -64,7 +67,7 @@ export default function FeedbackForm(
         buttonMessage="Submit"
         pending={pending}
         pendingMessage="Sending your feedback..."
-        successMessage="Success!"
+        successMessage={message}
         errorMessage={feedbackError}
       />
     </Form>

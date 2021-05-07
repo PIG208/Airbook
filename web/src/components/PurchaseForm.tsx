@@ -252,7 +252,7 @@ export default function PurchaseForm(
         buttonMessage="Purchase"
         pending={pending}
         pendingMessage="Handling transaction..."
-        successMessage="Success!"
+        successMessage={message}
         errorMessage={purchaseError}
       />
     </Form>
