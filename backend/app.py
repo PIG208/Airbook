@@ -1,5 +1,6 @@
 from typing import Any, Dict
 from os import urandom
+import re
 from datetime import datetime
 from flask import Flask, request, jsonify, make_response, session, send_file
 from flask_cors import CORS, cross_origin  # type: ignore
@@ -275,6 +276,11 @@ convert = lambda date_str, time_str: datetime.fromisoformat(
 )
 
 
+time_value_err_pattern = re.compile(
+    r"Incorrect time value: '(.+)' for column '(.+)' at row 1"
+)
+
+
 @app.route("/create_flight", methods=["POST"])
 @cross_origin(supports_credentials=True)
 @raise_error
@@ -282,6 +288,7 @@ convert = lambda date_str, time_str: datetime.fromisoformat(
 def create_flight():
     data = request.get_json()
     flight_data: Dict[str, Any] = {}
+    result = None
     try:
         flight_data["flight_number"] = data["flight_number"]
         flight_data["dep_date"] = data["dep_date"]
@@ -322,6 +329,18 @@ def create_flight():
                 print(flight_data)
                 print(err.get_error_message())
                 raise JsonError("The plane ID is invalid!")
+        if err.get_error_code() == 1292:
+            match = time_value_err_pattern.match(err.get_error_message())
+            if match is not None:
+                raise JsonError(
+                    "The time value {} for {} is invalid!".format(
+                        match.group(1), match.group(2)
+                    )
+                )
+        print(err)
+        raise JsonError(
+            "Failed to create the new flight! Please contact the maintainer."
+        )
     if result is not None:
         return jsonify(result="success")
     else:

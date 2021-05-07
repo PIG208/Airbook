@@ -1,6 +1,11 @@
 import re
 
-from pymysql.err import IntegrityError, ProgrammingError, InternalError
+from pymysql.err import (
+    IntegrityError,
+    ProgrammingError,
+    InternalError,
+    OperationalError,
+)
 from pymysql.connections import Connection
 from typing import Dict, Any, Optional, Union
 from enum import Enum, auto
@@ -117,6 +122,8 @@ def insert_into(conn: Connection, table_name: str, **kwargs: Any) -> Optional[in
         else:
             raise QueryError(*err.args)
     except ProgrammingError as err:
+        raise QueryError(*err.args)
+    except OperationalError as err:
         raise QueryError(*err.args)
     conn.commit()
     if result is not None:
