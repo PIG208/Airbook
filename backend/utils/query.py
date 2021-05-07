@@ -35,6 +35,7 @@ CHECK_AGENT_LOGIN = "SELECT * FROM BookingAgent\
     WHERE (booking_agent_ID, email) = (%(booking_agent_id)s, %(email)s);"
 CHECK_STAFF_LOGIN = "SELECT * FROM AirlineStaff\
     WHERE username=%(username)s;"
+STAFF_AIRLINE = "SELECT airline_name FROM AirlineStaff WHERE username=%(username)s;"
 
 
 class FetchMode(Enum):

@@ -10,6 +10,7 @@ from backend.utils.query import (
     CHECK_AGENT_LOGIN,
     CHECK_CUST_LOGIN,
     CHECK_STAFF_LOGIN,
+    STAFF_AIRLINE,
     TICKET_PRICE,
     FetchMode,
 )
@@ -21,6 +22,7 @@ from backend.utils.error import (
     raise_error,
     JsonError,
     MissingKeyError,
+    QueryError,
     QueryKeyError,
     QueryDuplicateError,
     ExistingRegisterError,
@@ -141,7 +143,7 @@ def search_public(filter: str):
 @app.route("/search/<filter>", methods=["POST"])
 @cross_origin(supports_credentials=True)
 @raise_error
-@require_session
+@require_session()
 def search(filter: str):
     data = request.get_json()
     result = json.dumps(
@@ -178,7 +180,7 @@ def login(login_type: str):
 @app.route("/add_feedback", methods=["POST"])
 @cross_origin(supports_credentials=True)
 @raise_error
-@require_session
+@require_session()
 def add_feedback():
     data = request.get_json()
     if "email" not in session or session["user_type"] != DataType.CUST.value:
@@ -204,7 +206,7 @@ def add_feedback():
 @app.route("/session-fetch", methods=["POST"])
 @cross_origin(supports_credentials=True)
 @raise_error
-@require_session
+@require_session()
 def session_fetch():
     data = request.get_json()
     user_data_raw = None
@@ -251,7 +253,7 @@ def session_fetch():
 @app.route("/logout", methods=["POST"])
 @cross_origin(supports_credentials=True)
 @raise_error
-@require_session
+@require_session()
 def logout():
     session.clear()
     return jsonify(result="success")
@@ -268,10 +270,68 @@ def ticket_price():
         raise JsonError("No ticket data is found")
 
 
+convert = lambda date_str, time_str: datetime.fromisoformat(
+    "{}T{}".format(date_str, time_str)
+)
+
+
+@app.route("/create_flight", methods=["POST"])
+@cross_origin(supports_credentials=True)
+@raise_error
+@require_session(DataType.STAFF)
+def create_flight():
+    data = request.get_json()
+    flight_data: Dict[str, Any] = {}
+    try:
+        flight_data["flight_number"] = data["flight_number"]
+        flight_data["dep_date"] = data["dep_date"]
+        flight_data["dep_time"] = data["dep_time"]
+        flight_data["arr_date"] = data["arr_date"]
+        flight_data["arr_time"] = data["arr_time"]
+        flight_data["dep_airport"] = data["dep_airport"]
+        flight_data["arr_airport"] = data["arr_airport"]
+        flight_data["plane_ID"] = data["plane_ID"]
+        flight_data["status"] = data["status"]
+        flight_data["base_price"] = data["base_price"]
+    except KeyError as err:
+        raise MissingKeyError(err.args[0])
+    try:
+        if convert(flight_data["dep_date"], flight_data["dep_time"]) >= convert(
+            flight_data["arr_date"], flight_data["dep_time"]
+        ):
+            raise JsonError("The arrival time needs to be after the arrival time!")
+    except ValueError as err:
+        raise JsonError("The date format is in valid: {}".format(err.args[0]))
+    try:
+        flight_data["airline_name"] = query(
+            conn, STAFF_AIRLINE, FetchMode.ONE, args=dict(username=session["username"])
+        )[0]
+    except QueryError:
+        raise JsonError("An unknown error occurs when finding your airline name.")
+
+    try:
+        result = insert_into(conn, "Flight", **flight_data)
+    except QueryDuplicateError as err:
+        raise JsonError(
+            "The flight with the same flight number and departure datetime already exists!"
+        )
+    except QueryError as err:
+        if err.get_error_code() == 1452:
+            # Foreign key constraint
+            if "plane_ID" in err.get_error_message():
+                print(flight_data)
+                print(err.get_error_message())
+                raise JsonError("The plane ID is invalid!")
+    if result is not None:
+        return jsonify(result="success")
+    else:
+        raise JsonError("Failed due to an unknown error.")
+
+
 @app.route("/ticket_purchase", methods=["POST"])
 @cross_origin(supports_credentials=True)
 @raise_error
-@require_session
+@require_session()
 def ticket_purchase():
     data = request.get_json()
     if session["user_type"] in (DataType.CUST.value, DataType.AGENT.value):

@@ -100,16 +100,23 @@ def check_login(conn: Connection, login_type: DataType, **kwargs: str):
     return result
 
 
-def require_session(func):
-    """
-    With the decorator, the Flask view function only proceeds when the proper credential is provided
-    """
+def require_session(user_type: Optional[DataType] = None):
+    def decorator(func):
+        """
+        With the decorator, the Flask view function only proceeds when the proper credential is provided
+        """
 
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        if "user_type" not in session or session["user_type"] == "public":
-            raise JsonError("Please login to access this page!")
-            # abort(401)
-        return func(*args, **kwargs)
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if (
+                "user_type" not in session
+                or session["user_type"] == "public"
+                or (user_type is not None and session["user_type"] != user_type.value)
+            ):
+                raise JsonError("Please login to access this page!")
+                # abort(401)
+            return func(*args, **kwargs)
 
-    return wrapper
+        return wrapper
+
+    return decorator

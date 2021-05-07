@@ -29,7 +29,11 @@ class ExistingRegisterError(JsonError):
 
 
 class QueryError(AirbookError):
-    pass
+    def get_error_code(self):
+        return self.args[0]
+
+    def get_error_message(self):
+        return self.args[1]
 
 
 class QueryDuplicateError(QueryError):
