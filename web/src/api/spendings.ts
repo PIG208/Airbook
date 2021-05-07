@@ -6,6 +6,7 @@ import { convertDate, convertTime } from "./flight";
 import { handleError } from "./utils";
 
 export interface SpendingsFilterProp {
+  takeCount?: boolean;
   purchaseDatetimeLower?: Date;
   purchaseDatetimeUpper?: Date;
 }
@@ -23,6 +24,7 @@ export interface TopResult {
 
 const parseSpendingsFilter = (spendingsData: SpendingsFilterProp) => {
   return {
+    take_count: spendingsData.takeCount,
     purchase_date_lower: convertDate(spendingsData.purchaseDatetimeLower),
     purchase_date_upper: convertDate(spendingsData.purchaseDatetimeUpper),
     purchase_time_lower: convertTime(spendingsData.purchaseDatetimeLower),
@@ -81,6 +83,7 @@ export const getSpendingsByMonth = (
     const lower = new Date();
     lower.setMonth(lower.getMonth() - 6);
     props.purchaseDatetimeLower = lower;
+    props.purchaseDatetimeUpper = new Date();
   }
   return axios
     .post(
@@ -104,6 +107,7 @@ export const getSpendingsByMonth = (
           const temp = {
             groupDate: current[0],
             spendingsSum: current[1],
+            ticketCount: current[2],
           } as SpendingsGroupProp;
           accumulator.push(temp);
           return accumulator;

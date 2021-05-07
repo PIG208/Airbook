@@ -33,24 +33,26 @@ def do_search(
 
     filter_data = data.get("filter_data", {})
 
-    # Users are not allowed to set these fields
+    # Some users are not allowed to set these fields
+    if user_type is not DataType.CUST:
+        filter_data["is_customer"] = False
     if user_type is not DataType.AGENT:
         filter_data["agent_id"] = None
     if user_type is not DataType.STAFF:
         filter_data["username"] = None
+        filter_data["is_staff"] = False
 
     if user_type is DataType.CUST:
         filter_data["emails"] = [session["email"]]
         filter_data["is_customer"] = True
     elif user_type is DataType.AGENT:
         filter_data["emails"] = [session["agent_email"]]
-        filter_data["is_customer"] = False
     elif user_type is DataType.STAFF:
         filter_data["airline_name"] = query(
             conn, STAFF_AIRLINE, FetchMode.ONE, args=dict(username=session["username"])
         )[0]
         # The staff member needs to be able to filter by customer emails, and thus we add this to them
-        filter_data["is_customer"] = True
+        filter_data["is_staff"] = True
 
     try:
         result = query_by_filter(conn, filter_type, **filter_data, **session)

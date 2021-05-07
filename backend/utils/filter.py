@@ -302,7 +302,8 @@ def get_filter_flight(
     filter_by_emails: Optional[bool] = False,
     filter_by_agent_id: Optional[bool] = False,
     agent_id: Optional[int] = None,
-    is_customer: Optional[bool] = True,
+    is_customer: bool = False,
+    is_staff: bool = False,
     round_trip: Optional[bool] = False,
 ) -> Tuple[str, list]:
     base_query = "SELECT * FROM verbose_flights {where}"
@@ -311,7 +312,7 @@ def get_filter_flight(
     if (
         emails is not None
         and emails.filter_set is not None
-        and is_customer
+        and (is_customer or is_staff)
         and filter_by_emails
     ):
         sec_filter = Filter("EXISTS (SELECT * FROM Ticket {where})").add_filter_set(
@@ -410,13 +411,18 @@ def get_filter_spendings(
     agent_id: Optional[int],
     purchase_date_range: FilterRange[str],
     purchase_time_range: FilterRange[str],
+    airline_name: Optional[str] = None,
     group_by_month: Optional[bool] = False,
-    is_customer: Optional[bool] = False,
+    take_count: Optional[bool] = False,
+    is_customer: bool = False,
+    is_staff: bool = False,
 ) -> Tuple[str, list]:
     assert isinstance(emails, FilterSet)
-    if group_by_month:
+    if group_by_month or (take_count and is_staff):
         filter = Filter(
-            "SELECT concat(year(purchase_date),'-', month(purchase_date)) as spendings_year_month, sum(actual_price) from spendings {where} GROUP BY spendings_year_month ORDER BY purchase_date"
+            "SELECT concat(year(purchase_date),'-', month(purchase_date)) as spendings_year_month, sum(actual_price){} from spendings {{where}} GROUP BY spendings_year_month ORDER BY purchase_date".format(
+                ", count(*)" if take_count else ""
+            )
         )
     else:
         filter = Filter("SELECT * FROM spendings {where}")
@@ -428,11 +434,13 @@ def get_filter_spendings(
         "purchase_time",
     )
     filter.conditonally_add(
-        is_customer if is_customer is not None else False,
+        is_customer or is_staff,
         filter.add_filter_set,
         "email",
         emails,
-    ).add_optional_constraint("booking_agent_id", agent_id)
+    ).add_optional_constraint("booking_agent_id", agent_id).add_optional_constraint(
+        "airline_name", airline_name
+    )
     return filter.get_formatted()
 
 
@@ -458,8 +466,11 @@ def get_filter_query(filter: FilterType, **kwargs) -> Tuple[str, Union[list, dic
                 purchase_time_range=FilterRange(
                     kwargs.get("purchase_time_lower"), kwargs.get("purchase_time_upper")
                 ),
+                airline_name=kwargs.get("airline_name"),
                 group_by_month=kwargs.get("group_by_month"),
-                is_customer=kwargs.get("is_customer"),
+                take_count=kwargs.get("take_count"),
+                is_customer=kwargs["is_customer"],
+                is_staff=kwargs["is_staff"],
             )
         elif filter is FilterType.ADVANCED_FLIGHT:
             return get_filter_flight(
@@ -485,7 +496,8 @@ def get_filter_query(filter: FilterType, **kwargs) -> Tuple[str, Union[list, dic
                 filter_by_emails=kwargs.get("filter_by_emails"),
                 filter_by_agent_id=kwargs.get("filter_by_agent_id"),
                 agent_id=kwargs.get("agent_id"),
-                is_customer=kwargs.get("is_customer"),
+                is_customer=kwargs["is_customer"],
+                is_staff=kwargs["is_staff"],
             )
         else:
             raise ValueError("The filter {filter} is invalid.".format(filter=filter))

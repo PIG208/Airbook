@@ -78,6 +78,7 @@ export interface SpendingsProp {
 export interface SpendingsGroupProp {
   groupDate: string;
   spendingsSum: number;
+  ticketCount?: number;
 }
 
 export interface FlightPrimaryProp {

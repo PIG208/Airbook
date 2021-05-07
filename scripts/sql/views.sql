@@ -3,7 +3,7 @@ USE airbook;
 
 DROP VIEW IF EXISTS spendings;
 CREATE VIEW spendings AS
-    SELECT email, Book.booking_agent_id, Ticket.ticket_id, sold_price, sold_price + IFNULL(commission, 0) as actual_price, IFNULL(commission,0) as commission, purchase_date, purchase_time FROM Customer 
+    SELECT email, Book.booking_agent_id, Ticket.ticket_id, sold_price, sold_price + IFNULL(commission, 0) as actual_price, IFNULL(commission,0) as commission, purchase_date, purchase_time, airline_name FROM Customer 
     NATURAL JOIN Ticket NATURAL LEFT OUTER JOIN Book
     ;
 
