@@ -36,39 +36,40 @@ class TestQuery(unittest.TestCase):
         result = insert_into(
             self.conn,
             DataType.AGENT.get_table(),
-            email="asdasd@asd.com",
+            email="asdasd@asd.com1",
             password=self.hashed_password,
             salt=self.salt,
         )
-        self.assertEqual(self.conn.insert_id(), 2)
+        self.assertEqual(result, 2)
 
         result = insert_into(
             self.conn,
             DataType.AGENT.get_table(),
-            email="asdsasd@asd.com",
+            email="asdsasd@asd.com2",
             password=self.hashed_password,
             salt=self.salt,
         )
-        self.assertEqual(self.conn.insert_id(), 3)
+        self.assertEqual(result, 3)
 
         insert_into(
             self.conn,
             DataType.CUST.get_table(),
-            email="asdsasd@asd.com",
+            email="asdsasd@asd.com3",
             name="test",
             password=self.hashed_password,
             salt=self.salt,
         )
+
         result = query(
             self.conn,
             BASIC_SELECT.format(
                 table=DataType.CUST.get_table(),
-                predicates='WHERE email="asdsasd@asd.com"',
+                predicates="",
             ),
             FetchMode.ONE,
         )
         expected = (
-            "asdsasd@asd.com",
+            "asdsasd@asd.com3",
             "test",
             "a4b615e9e91c8f444965e4fdefa62b88e3d69eab56323baa687d01f58266",
             "e3c20862d1859ff9db1882882ffc99d4",
@@ -88,7 +89,7 @@ class TestQuery(unittest.TestCase):
         insert_into(
             self.conn,
             DataType.CUST.get_table(),
-            email="asdsasd@asdk.com",
+            email="asdsasd@asdkas.com",
             name="test",
             password=self.hashed_password,
             salt=self.salt,
@@ -97,13 +98,10 @@ class TestQuery(unittest.TestCase):
             insert_into(
                 self.conn,
                 DataType.CUST.get_table(),
-                email="asdsasd@asdk.com",
+                email="asdsasd@asdkas.com",
                 name="test",
                 password=self.hashed_password,
                 salt=self.salt,
             )
-        expected = (
-            1062,
-            "Duplicate entry 'asdsasd@asdk.com' for key 'Customer.PRIMARY'",
-        )
+        expected = ("PRIMARY", "asdsasd@asdkas.com")
         self.assertEqual(err.exception.args, expected)

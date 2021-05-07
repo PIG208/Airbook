@@ -78,40 +78,22 @@ class TestSearch(flask_unittest.ClientTestCase):
         response = client.post("/search/customer_tickets")
         self.assertEqual("success", response.json["result"])
         expected = [
-            [
-                1,
-                "speiaz123@nyu.edu",
-                "40.00",
-                "credit",
-                "2323555502015234",
-                "Sepia Hi",
-                "2027-04-23",
-                "2021-03-22",
-                "15:30:22",
-                "Evergreen",
-                12345,
-                "2021-03-28",
-                "13:33:44",
-                None,
-            ],
-            [
-                6,
-                "speiaz123@nyu.edu",
-                "45.00",
-                "debt",
-                "1812938912",
-                "tesasd",
-                "2024-04-23",
-                "2021-05-07",
-                "8:46:19",
-                "China Eastern",
-                2323,
-                "2021-05-28",
-                "15:31:14",
-                None,
-            ],
+            1,
+            "speiaz123@nyu.edu",
+            "40.00",
+            "credit",
+            "2323555502015234",
+            "Sepia Hi",
+            "2027-04-23",
+            "2021-03-22",
+            "15:30:22",
+            "Evergreen",
+            12345,
+            "2021-03-28",
+            "13:33:44",
+            None,
         ]
-        self.assertEqual(expected, json.loads(response.json["data"]))
+        self.assertEqual(expected, json.loads(response.json["data"])[0])
 
     def test_search_errors(self, client):
         response = client.post("/search-public/asd")
