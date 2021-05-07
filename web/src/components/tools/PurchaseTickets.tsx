@@ -85,7 +85,7 @@ export function FlightInfo() {
           </Button>
         </Form.Group>
       </Form>
-      <div className="ticketContainer">
+      <div className="card-flex-container">
         {flights !== undefined &&
           flights.map((value, index) => {
             return (
