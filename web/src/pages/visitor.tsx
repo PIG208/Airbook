@@ -5,7 +5,7 @@ import Portico from "../components/Portico";
 import LoginForm from "../components/LoginForm";
 import RegisterForm from "../components/RegisterForm";
 import { Image, ToggleButton, ToggleButtonGroup } from "react-bootstrap";
-import { useHistory, Link, Redirect } from "react-router-dom";
+import { useHistory, Link, Redirect, useLocation } from "react-router-dom";
 import { useAuth } from "../api/use-auth";
 import { UserType } from "../api/authentication";
 
@@ -17,7 +17,10 @@ enum Option {
 export default function Visitor() {
   const [option, setOption] = useState<Option>(Option.LOGIN);
   let history = useHistory();
+  let location = useLocation();
   let auth = useAuth();
+
+  let { from } = (location.state as any) || { from: "/dashboard/Home" };
 
   const handleToggle = (val: Option) => {
     setOption(val);
@@ -35,7 +38,7 @@ export default function Visitor() {
   }, []);
 
   const handleSubmit = () => {
-    history.push("/dashboard/");
+    history.push(from);
   };
 
   return (
@@ -65,9 +68,7 @@ export default function Visitor() {
             Register
           </ToggleButton>
         </ToggleButtonGroup>
-        {auth.userProp.userType !== UserType.PUBLIC && (
-          <Redirect to="/dashboard/Home" />
-        )}
+        {auth.userProp.userType !== UserType.PUBLIC && <Redirect to={from} />}
         <div>
           <Link to="/dashboard/Home">Visit the site as a visitor.</Link>
         </div>
