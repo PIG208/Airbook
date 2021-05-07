@@ -20,7 +20,7 @@ export default function ViewRevenue() {
           {
             label: "Revenue Comparison",
             data: [spendingsData[0].direct, spendingsData[0].indirect],
-            backgroundColor: "rgba(120, 150, 200)",
+            backgroundColor: ["rgba(120, 150, 200)", "rgba(120, 200, 150)"],
           },
         ],
       },
@@ -30,7 +30,7 @@ export default function ViewRevenue() {
           {
             label: "Revenue Comparison",
             data: [spendingsData[1].direct, spendingsData[1].indirect],
-            backgroundColor: "rgba(150, 120, 200)",
+            backgroundColor: ["rgba(150, 120, 200)", "rgba(120, 150, 250)"],
           },
         ],
       },
