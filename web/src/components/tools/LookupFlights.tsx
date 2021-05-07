@@ -38,7 +38,7 @@ export default function LookupFlights() {
             if (currentCount === count) {
               console.log("Aborted on stale search.");
             }
-            if (res.result !== "error") {
+            if (res.data !== undefined && res.result !== "error") {
               setFlights(res.data);
               setLookupError("");
             } else {
@@ -59,7 +59,7 @@ export default function LookupFlights() {
             if (currentCount === count) {
               console.log("Aborted on stale search.");
             }
-            if (res.result !== "error") {
+            if (res.data !== undefined && res.result !== "error") {
               setFlights(res.data);
               setLookupError("");
             } else {

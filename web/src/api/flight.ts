@@ -110,7 +110,7 @@ const parseAirplaneData = (airplaneData: Array<any>): AirplaneProp[] => {
 };
 
 const flightDataHandler = [
-  (res: any) => {
+  (res: any): ResponseProp<FlightProp[]> => {
     const data = res.data;
     if (data.result === "error") {
       return data;
@@ -127,7 +127,7 @@ const flightDataHandler = [
   handleError,
 ];
 
-export function futureFlights(): Promise<ResponseProp> {
+export function futureFlights(): Promise<ResponseProp<FlightProp[]>> {
   return axios
     .post<{ data?: string; result: string; message?: string }>(
       getPublicSearchURL("all_future")
@@ -147,7 +147,7 @@ export function previousFlights(): Promise<ResponseProp<FlightProp[]>> {
     .then(...flightDataHandler);
 }
 
-export function custFutureFlights(): Promise<ResponseProp> {
+export function custFutureFlights(): Promise<ResponseProp<FlightProp[]>> {
   let now = new Date();
   return axios
     .post<{ data?: string; result: string; message?: string }>(
@@ -166,7 +166,7 @@ export function custFutureFlights(): Promise<ResponseProp> {
 
 export function searchFlightsPublic(
   props: FlightFilterProp
-): Promise<ResponseProp> {
+): Promise<ResponseProp<FlightProp[]>> {
   return axios
     .post(getPublicSearchURL("advanced_flight"), {
       filter_data: {
@@ -191,7 +191,9 @@ export function searchFlightsPublic(
     .then(...flightDataHandler);
 }
 
-export function searchFlights(props: FlightFilterProp): Promise<ResponseProp> {
+export function searchFlights(
+  props: FlightFilterProp
+): Promise<ResponseProp<FlightProp[]>> {
   return axios
     .post(
       getSearchURL("advanced_flight"),
@@ -223,7 +225,7 @@ export function searchFlights(props: FlightFilterProp): Promise<ResponseProp> {
 
 export async function getFlightByNumber(
   flightNumber: number
-): Promise<ResponseProp> {
+): Promise<ResponseProp<FlightProp[]>> {
   if (isNaN(flightNumber) || (!flightNumber && flightNumber !== 0)) {
     return new Promise((resolve) => {
       resolve({ result: "error", message: "Invalid flight number" });

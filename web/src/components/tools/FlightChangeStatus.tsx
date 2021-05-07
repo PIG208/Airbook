@@ -70,7 +70,7 @@ function FlightInfo() {
     async function fetchFlights() {
       const res = await getFlightByNumber(Number(flightNumber));
       if (res.result !== "error") {
-        if (res.data.length > 0) {
+        if (res.data !== undefined && res.data.length > 0) {
           setFlights(res.data);
         } else {
           setFlights(undefined);
