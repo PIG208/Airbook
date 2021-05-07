@@ -1,6 +1,8 @@
 import axios from "axios";
 import { getSearchURL, ResponseProp } from "./api";
 import { useCredentials } from "./authentication";
+import { FlightProp } from "./data";
+import { searchFlights } from "./flight";
 import { handleError, handleThen } from "./utils";
 
 export interface TopAgentsResults {
@@ -16,6 +18,29 @@ export interface TopAgentsProp {
   totalCommssion: number;
   totalTickets: number;
 }
+
+export interface FrequentCustomerProp {
+  email: string;
+  totalVisits: number;
+  name: string;
+}
+
+const parseFrequentCustomerData = (
+  frequentCustomerData: Array<any>
+): FrequentCustomerProp[] => {
+  return frequentCustomerData.reduce(
+    (accumulator: FrequentCustomerProp[], current: Array<any>) => {
+      const temp = {
+        email: current[0],
+        totalVisits: current[1],
+        name: current[2],
+      } as FrequentCustomerProp;
+      accumulator.push(temp);
+      return accumulator;
+    },
+    []
+  );
+};
 
 const parseTopAgentsData = (topAgentData: Array<any>): TopAgentsResults => {
   let category = 0;
@@ -56,7 +81,9 @@ const parseTopAgentsData = (topAgentData: Array<any>): TopAgentsResults => {
   );
 };
 
-export function getBookingAgents(): Promise<ResponseProp<TopAgentsResults>> {
+export async function getBookingAgents(): Promise<
+  ResponseProp<TopAgentsResults>
+> {
   return axios
     .post(getSearchURL("top_agents"), {}, useCredentials)
     .then(handleThen, handleError)
@@ -65,4 +92,27 @@ export function getBookingAgents(): Promise<ResponseProp<TopAgentsResults>> {
       data.data = parseTopAgentsData(data.data);
       return data;
     });
+}
+
+export async function getFrequentCustomers(): Promise<
+  ResponseProp<FrequentCustomerProp[]>
+> {
+  return axios
+    .post(getSearchURL("frequent_cust"), {}, useCredentials)
+    .then(handleThen, handleError)
+    .then((data: ResponseProp) => {
+      data.data = JSON.parse(data.data);
+      data.data = parseFrequentCustomerData(data.data);
+      return data;
+    });
+}
+
+export async function getCustomerFlights(
+  email: string
+): Promise<ResponseProp<FlightProp[]>> {
+  return searchFlights({
+    emails: [email],
+    filterByEmails: true,
+    depTimeUpper: new Date(), //We only want the previous flights
+  });
 }

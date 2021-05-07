@@ -12,6 +12,7 @@ CREATE VIEW verbose_flights AS
     SELECT * FROM Flight NATURAL JOIN Airplane 
     NATURAL JOIN (SELECT airport_name AS dep_airport,city as dep_city FROM Airport) AS A1 
     NATURAL JOIN (SELECT airport_name AS arr_airport,city as arr_city FROM Airport) AS A2
+    ORDER BY dep_date, dep_time
     ;
 
 DROP VIEW IF EXISTS future_flights;

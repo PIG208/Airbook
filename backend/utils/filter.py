@@ -79,6 +79,7 @@ class FilterType(Enum):
     TOP_CUSTOMERS = "top_customers"
     AIRLINE_PLANES = "airline_planes"
     TOP_AGENTS = "top_agents"
+    FREQ_CUST = "frequent_cust"
     # The following filters are advanced filters that require the filter generator.
     # We need to keep track of the advanced filters in the set ADVANCED_FILTERS.
     ADVANCED_FLIGHT = "advanced_flight"
@@ -110,7 +111,7 @@ UNION ALL SELECT * FROM (SELECT "divide" as booking_agent_id, "" as total_commis
 UNION ALL SELECT * FROM (SELECT * FROM agent_stats_last_year ORDER BY total_tickets DESC LIMIT 5) as temp5 \
 UNION ALL SELECT * FROM (SELECT "divide" as booking_agent_id, "" as total_commission, "" as tickets_total, "" as email) as temp6 \
 UNION ALL SELECT * FROM (SELECT * FROM agent_stats_last_month ORDER BY total_tickets DESC LIMIT 5) as temp7'
-SELECT_MOST_FREQUENT_CUST = "SELECT email,total_visits, name FROM (SELECT email, COUNT(*) as total_visits FROM Ticket WHERE purchase_date > UTC_TIMESTAMP() - INTERVAL 1 YEAR GROUP BY email) AS temp NATURAL JOIN Customer"
+SELECT_MOST_FREQUENT_CUST = "SELECT temp.*, name FROM (SELECT email, COUNT(*) as total_visits FROM Ticket WHERE purchase_date > UTC_TIMESTAMP() - INTERVAL 1 YEAR AND dep_date < NOW() GROUP BY email ORDER BY total_visits DESC) AS temp NATURAL JOIN Customer;"
 
 FILTER_TO_QUERY_MAP = {
     FilterType.ALL_FUTURE_FLIGHTS: SELECT_ALL_FUTURE_FLIGHTS,
@@ -120,6 +121,7 @@ FILTER_TO_QUERY_MAP = {
     FilterType.TOP_CUSTOMERS: SELECT_TOP_CUSTOMERS,
     FilterType.AIRLINE_PLANES: SELECT_AIRLINE_PLANES,
     FilterType.TOP_AGENTS: SELECT_TOP_AGENTS,
+    FilterType.FREQ_CUST: SELECT_MOST_FREQUENT_CUST,
 }
 
 ADVANCED_FILTERS = {

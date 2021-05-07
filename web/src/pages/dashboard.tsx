@@ -61,6 +61,7 @@ import FlightChangeStatus from "../components/tools/FlightChangeStatus";
 import AddAirport from "../components/tools/AddAirport";
 import AddAirplane from "../components/tools/AddAirplane";
 import TopAgents from "../components/tools/TopAgents";
+import FrequentCustomers from "../components/tools/FrequentCustomers";
 
 type DashboardRoute = {
   tool: ITools;
@@ -211,7 +212,7 @@ const routes: DashboardRoute[] = [
   },
   {
     tool: StaffTools.VIEW_CUST,
-    ToolView: () => <FlightChangeStatus />,
+    ToolView: () => <FrequentCustomers />,
     sidebar: () => (
       <div>
         <PersonBadge />

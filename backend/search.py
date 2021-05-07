@@ -49,6 +49,8 @@ def do_search(
         filter_data["airline_name"] = query(
             conn, STAFF_AIRLINE, FetchMode.ONE, args=dict(username=session["username"])
         )[0]
+        # The staff member needs to be able to filter by customer emails, and thus we add this to them
+        filter_data["is_customer"] = True
 
     try:
         result = query_by_filter(conn, filter_type, **filter_data, **session)

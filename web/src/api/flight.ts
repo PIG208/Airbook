@@ -110,7 +110,8 @@ const parseAirplaneData = (airplaneData: Array<any>): AirplaneProp[] => {
 };
 
 const flightDataHandler = [
-  (res: any): ResponseProp<FlightProp[]> => {
+  (res: any): ResponseProp<FlightProp[]> & { message: string } => {
+    // A message is required for the handler
     const data = res.data;
     if (data.result === "error") {
       return data;
@@ -119,6 +120,7 @@ const flightDataHandler = [
     if (flightData !== undefined) {
       return {
         result: "success",
+        message: "",
         data: parseFlightData(flightData),
       };
     }
