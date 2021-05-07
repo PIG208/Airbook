@@ -200,7 +200,7 @@ def add_feedback():
         raise MissingKeyError(err.args[0])
     result = query(
         conn,
-        "SELECT * FROM Ticket WHERE (flight_number, dep_date, dep_time, email)=(%(flight_number)s, %(dep_date)s, %(dep_time)s, %(email)s)",
+        "SELECT * FROM Ticket WHERE (flight_number, dep_date, dep_time, email)=(%(flight_number)s, %(dep_date)s, %(dep_time)s, %(email)s) AND dep_date < UTC_DATE() OR (dep_date = UTC_DATE() AND dep_time < UTC_TIME())",
         args=feedback_data,
     )
     if result == 0:
@@ -312,7 +312,7 @@ def create_flight():
         raise MissingKeyError(err.args[0])
     try:
         if convert(flight_data["dep_date"], flight_data["dep_time"]) >= convert(
-            flight_data["arr_date"], flight_data["dep_time"]
+            flight_data["arr_date"], flight_data["arr_time"]
         ):
             raise JsonError("The arrival time needs to be after the arrival time!")
     except ValueError as err:
@@ -388,6 +388,15 @@ def ticket_purchase():
             raise MissingKeyError(err.args[0])
         except ValueError as err:
             raise JsonError("The flight number should be a number!")
+
+        result = query(
+            conn,
+            "SELECT * FROM Flight WHERE (flight_number, dep_date, dep_time)=(%(flight_number)s, %(dep_date)s, %(dep_time)s) AND dep_date > UTC_DATE() OR (dep_date = UTC_DATE() AND dep_time > UTC_TIME())",
+            args=ticket_data,
+        )
+        if len(result) == 0:
+            raise JsonError("Cannot purchase a ticket for a flight in the past!")
+
         result = insert_into(conn, "Ticket", **ticket_data)
         if "booking_agent_id" in ticket_data:
             insert_into(

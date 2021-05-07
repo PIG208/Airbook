@@ -159,7 +159,6 @@ def query(
         except InternalError as err:
             print(sql)
             print(err.args[0])
-            print(err.args[1])
 
         if fetch_mode is FetchMode.ONE:
             return cursor.fetchone()
