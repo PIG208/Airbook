@@ -1,8 +1,29 @@
-import { getPublicSearchURL, getSearchURL, ResponseProp } from "./api";
+import {
+  getCreateFlightURL,
+  getPublicSearchURL,
+  getSearchURL,
+  ResponseProp,
+} from "./api";
 import axios from "axios";
-import { FlightPrimaryProp, FlightProp } from "./data";
+import { FlightFormProp, FlightPrimaryProp, FlightProp } from "./data";
 import { useCredentials } from "./authentication";
 import { handleError } from "./utils";
+
+export const convertDate = (date: Date | undefined) => {
+  if (!date) {
+    return undefined;
+  } else {
+    return date.toISOString().slice(0, 10);
+  }
+};
+
+export const convertTime = (date: Date | undefined) => {
+  if (!date) {
+    return undefined;
+  } else {
+    return date.toISOString().slice(11, -5);
+  }
+};
 
 export interface FlightFilterProp {
   filterByEmails?: boolean; // Equivalent to view purchased flights
@@ -24,6 +45,21 @@ export const parseFlightPrimary = (props: FlightPrimaryProp) => {
     flight_number: props.flightNumber,
     dep_date: props.depDate,
     dep_time: props.depTime,
+  };
+};
+
+export const parseFlightFormProp = (props: FlightFormProp) => {
+  return {
+    flight_number: props.flightNumber,
+    dep_date: convertDate(props.depDatetime),
+    dep_time: convertTime(props.depDatetime),
+    arr_date: convertDate(props.arrDatetime),
+    arr_time: convertTime(props.arrDatetime),
+    dep_airport: props.depAirport,
+    arr_airport: props.arrAirport,
+    plane_ID: props.planeID,
+    status: props.status,
+    base_price: props.basePrice,
   };
 };
 
@@ -98,22 +134,6 @@ export function custFutureFlights(): Promise<ResponseProp> {
     .then(...flightDataHandler);
 }
 
-export const convertDate = (date: Date | undefined) => {
-  if (!date) {
-    return undefined;
-  } else {
-    return date.toISOString().slice(0, 10);
-  }
-};
-
-export const convertTime = (date: Date | undefined) => {
-  if (!date) {
-    return undefined;
-  } else {
-    return date.toISOString().slice(11, -5);
-  }
-};
-
 export function searchFlightsPublic(
   props: FlightFilterProp
 ): Promise<ResponseProp> {
@@ -179,4 +199,26 @@ export async function getFlightByNumber(
     });
   }
   return searchFlights({ flightNumber: flightNumber });
+}
+
+export async function createFlight(
+  flight_data: FlightFormProp
+): Promise<ResponseProp> {
+  return axios
+    .post(
+      getCreateFlightURL(),
+      parseFlightFormProp(flight_data),
+      useCredentials
+    )
+    .then((res) => {
+      const data = res.data;
+      if (data.result === undefined) {
+        return {
+          result: "error",
+          message: "Some errors occurred from the serverside.",
+        };
+      } else {
+        return data;
+      }
+    });
 }

@@ -20,6 +20,17 @@ export interface FlightProp {
   planeID: number;
 }
 
+export interface FlightFormProp {
+  flightNumber: number;
+  depDatetime: Date;
+  arrDatetime: Date;
+  basePrice: number;
+  status: FlightStatus;
+  arrAirport: string;
+  depAirport: string;
+  planeID: number;
+}
+
 export enum CardType {
   CREDIT = "credit",
   DEBT = "debt",

@@ -35,6 +35,7 @@ import {
   Wallet,
   Search,
   ChatDotsFill,
+  CloudPlus,
 } from "react-bootstrap-icons";
 import { PublicUser } from "../api/authentication";
 import ViewFlights from "../components/tools/ViewFlights";
@@ -48,6 +49,7 @@ import Feedback from "../components/tools/Feedback";
 import FeedbackDisplay from "../components/tools/FeedbackDisplay";
 import ViewCommission from "../components/tools/ViewCommission";
 import TopCustomers from "../components/tools/TopCustomers";
+import CreateFlight from "../components/tools/CreateFlight";
 
 type DashboardRoute = {
   tool: ITools;
@@ -153,6 +155,16 @@ const routes: DashboardRoute[] = [
       <div>
         <ChatDotsFill />
         View Ratings
+      </div>
+    ),
+  },
+  {
+    tool: StaffTools.CREATE_FLIGHTS,
+    ToolView: () => <CreateFlight />,
+    sidebar: () => (
+      <div>
+        <CloudPlus />
+        Create Flights
       </div>
     ),
   },

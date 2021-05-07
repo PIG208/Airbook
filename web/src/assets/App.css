@@ -24,6 +24,10 @@
   margin: 1rem 1rem 1rem 1rem;
 }
 
+.form-container {
+  padding: 1rem 1rem 1rem 1rem;
+}
+
 .hidden {
   display: none;
 }
