@@ -165,7 +165,9 @@ function FlightInfo() {
         <Modal.Body>
           <Form onSubmit={handleSubmit(handleChangeStatusSubmit)}>
             The current status of the flight is:{" "}
-            <strong color="green">{currentFlight?.status ?? "unknown"}</strong>
+            <strong style={{ color: "green" }}>
+              {currentFlight?.status ?? "unknown"}
+            </strong>
             <FormSelect
               name="status"
               displayName="Flight Status"

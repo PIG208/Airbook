@@ -35,7 +35,7 @@ const SuccessMessage = ({ message }: { message?: string }) => {
 
   return (
     <div className={`success-message ${show ? "show" : "hide"}`}>
-      <CheckCircle color="green" />
+      <CheckCircle style={{ color: "green" }} />
       {!!message && <span>{message}</span>}
     </div>
   );

@@ -1,11 +1,12 @@
 import { Form } from "react-bootstrap";
-import { forwardRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { SpendingsFilterProp, getSpendingsByMonth } from "../../api/spendings";
 import AlertMessage from "../AlertMessage";
 import { SpendingsGroupProp } from "../../api/data";
 import { Bar } from "react-chartjs-2";
 import RangePicker from "../RangePicker";
+import NothingHere from "../NothingHere";
 
 export default function ViewReports() {
   const {
@@ -111,7 +112,7 @@ export default function ViewReports() {
             <Bar redraw={false} data={chartData} type="bar" />
           </div>
         ) : (
-          <div>no data</div>
+          <NothingHere />
         )}
       </div>
     </div>

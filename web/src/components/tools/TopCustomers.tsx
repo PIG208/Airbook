@@ -7,6 +7,7 @@ import {
 } from "../../api/spendings";
 import AlertMessage from "../AlertMessage";
 import { Bar } from "react-chartjs-2";
+import NothingHere from "../NothingHere";
 
 export default function ViewCommission() {
   const [errorMessage, setErrorMessage] = useState("");
@@ -91,7 +92,7 @@ export default function ViewCommission() {
               </div>
             </div>
           ) : (
-            "no data"
+            <NothingHere />
           )}
         </Card.Body>
       </Card>

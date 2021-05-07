@@ -10,7 +10,7 @@ import {
   parseISOTime,
 } from "../../api/utils";
 import AlertMessage from "../AlertMessage";
-import { HandThumbsDown, HandThumbsUp } from "react-bootstrap-icons";
+import { HandThumbsDownFill, HandThumbsUpFill } from "react-bootstrap-icons";
 
 export default function FeedbackDisplay() {
   const [show, setShow] = useState(false);
@@ -100,7 +100,9 @@ export default function FeedbackDisplay() {
           {feedbacks.length > 0 && (
             <span>
               Average Rating:{" "}
-              <strong color="green">{totalRating / feedbacks.length}</strong>
+              <strong style={{ color: "green" }}>
+                {totalRating / feedbacks.length}
+              </strong>
             </span>
           )}
 
@@ -108,12 +110,27 @@ export default function FeedbackDisplay() {
             return (
               <ListGroup key={index}>
                 <ListGroupItem>
-                  {value.email} created at {value.createdAt}
-                  <p>
-                    Rating: {value.rate}{" "}
-                    {value.rate >= 3 ? <HandThumbsUp /> : <HandThumbsDown />}
+                  <p style={{ color: "grey" }}>
+                    {value.email} created at {value.createdAt}
                   </p>
-                  <p>{value.comment}</p>
+                  <p>
+                    Rating:{" "}
+                    <strong style={{ color: "green" }}>
+                      {value.rate}{" "}
+                      {value.rate >= 3 ? (
+                        <HandThumbsUpFill />
+                      ) : (
+                        <HandThumbsDownFill />
+                      )}
+                    </strong>
+                  </p>
+                  {value.comment && (
+                    <div>
+                      <hr />
+                      <strong style={{ color: "green" }}>Comment:</strong>
+                      <p>{value.comment}</p>
+                    </div>
+                  )}
                 </ListGroupItem>
               </ListGroup>
             );

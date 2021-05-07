@@ -11,6 +11,12 @@
   max-width: 40vw;
 }
 
+.nothing-here {
+  text-align: center;
+  font-size: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
 .react-datepicker-popper {
   z-index: 3 !important;
 }
