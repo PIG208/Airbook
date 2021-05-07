@@ -240,6 +240,37 @@ export async function getFlightByNumber(
   return searchFlights({ flightNumber: flightNumber });
 }
 
+export async function getFlightCustomers(
+  props: FlightPrimaryProp
+): Promise<ResponseProp<{ email: string; name: string; tickets: number }[]>> {
+  return axios
+    .post(
+      getSearchURL("flight_customers"),
+      { filter_data: { ...parseFlightPrimary(props) } },
+      useCredentials
+    )
+    .then(handleThen, handleError)
+    .then((data: ResponseProp) => {
+      data.data = JSON.parse(data.data);
+      data.data = data.data.reduce(
+        (
+          accumulator: { email: string; name: string; tickets: number }[],
+          current: any
+        ) => {
+          const temp = {
+            email: current[0],
+            name: current[1],
+            tickets: current[2],
+          };
+          accumulator.push(temp);
+          return accumulator;
+        },
+        []
+      );
+      return data;
+    });
+}
+
 export async function createFlight(
   flight_data: FlightFormProp
 ): Promise<ResponseProp> {

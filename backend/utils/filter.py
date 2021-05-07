@@ -82,6 +82,7 @@ class FilterType(Enum):
     FREQ_CUST = "frequent_cust"
     REVENUE = "revenue_compare"
     TOP_DEST = "top_destinations"
+    FLIGHT_CUSTOMERS = "flight_customers"
     # The following filters are advanced filters that require the filter generator.
     # We need to keep track of the advanced filters in the set ADVANCED_FILTERS.
     ADVANCED_FLIGHT = "advanced_flight"
@@ -91,6 +92,7 @@ class FilterType(Enum):
 SELECT_FLIGHT_COMMENTS = "SELECT flight_number, dep_date, dep_time, created_at, email, rating, comment \
     FROM Feedback NATURAL JOIN Flight NATURAL JOIN AirlineStaff \
         WHERE username=%(username)s AND (flight_number, dep_date, dep_time)=(%(flight_number)s, %(dep_date)s, %(dep_time)s);"
+SELECT_FLIGHT_CUSTOMERS = "SELECT email, name, COUNT(*) as tickets FROM Ticket NATURAL JOIN Customer WHERE (flight_number, dep_date, dep_time, airline_name)=(%(flight_number)s, %(dep_date)s, %(dep_time)s, %(airline_name)s) GROUP BY email"
 SELECT_ALL_FUTURE_FLIGHTS = "SELECT * FROM future_flights;"
 SELECT_CUSTOMER_TICKETS = (
     "call customer_tickets(%(email)s);"  # "email" must matches the key name for session
@@ -134,6 +136,7 @@ FILTER_TO_QUERY_MAP = {
     FilterType.FREQ_CUST: SELECT_MOST_FREQUENT_CUST,
     FilterType.REVENUE: SELECT_REVENUE_COMPARE,
     FilterType.TOP_DEST: SELECT_POPULAR_DESTINATIONS,
+    FilterType.FLIGHT_CUSTOMERS: SELECT_FLIGHT_CUSTOMERS,
 }
 
 ADVANCED_FILTERS = {

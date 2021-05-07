@@ -31,6 +31,7 @@ STAFF_FILTERS: Set[FilterType] = {
     FilterType.FREQ_CUST,
     FilterType.REVENUE,
     FilterType.TOP_DEST,
+    FilterType.FLIGHT_CUSTOMERS,
 }
 
 AGENT_FILTERS: Set[FilterType] = {FilterType.TOP_CUSTOMERS}
