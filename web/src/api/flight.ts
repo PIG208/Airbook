@@ -1,4 +1,5 @@
 import {
+  getAddAirplaneURL,
   getAddAirportURL,
   getChangeFlightStatusURL,
   getCreateFlightURL,
@@ -8,6 +9,7 @@ import {
 } from "./api";
 import axios from "axios";
 import {
+  AirplaneProp,
   AirportProp,
   FlightFormProp,
   FlightPrimaryProp,
@@ -15,7 +17,7 @@ import {
   FlightStatus,
 } from "./data";
 import { useCredentials } from "./authentication";
-import { handleError } from "./utils";
+import { handleError, handleThen } from "./utils";
 
 export const convertDate = (date: Date | undefined) => {
   if (!date) {
@@ -227,17 +229,7 @@ export async function createFlight(
       parseFlightFormProp(flight_data),
       useCredentials
     )
-    .then((res) => {
-      const data = res.data;
-      if (data.result === undefined) {
-        return {
-          result: "error",
-          message: "Some errors occurred from the serverside.",
-        };
-      } else {
-        return data;
-      }
-    }, handleError);
+    .then(handleThen, handleError);
 }
 
 export async function changeFlightStatus(
@@ -252,17 +244,7 @@ export async function changeFlightStatus(
       },
       useCredentials
     )
-    .then((res) => {
-      const data = res.data;
-      if (data.result === "error" || data.result === undefined) {
-        return {
-          result: "error",
-          message: data.message ?? "Some errors occurred from the serverside.",
-        };
-      } else {
-        return data;
-      }
-    }, handleError);
+    .then(handleThen, handleError);
 }
 
 export async function addAirport(
@@ -277,15 +259,20 @@ export async function addAirport(
       },
       useCredentials
     )
-    .then((res) => {
-      const data = res.data;
-      if (data.result === "error" || data.result === undefined) {
-        return {
-          result: "error",
-          message: data.message ?? "Some errors occurred from the serverside.",
-        };
-      } else {
-        return data;
-      }
-    }, handleError);
+    .then(handleThen, handleError);
+}
+
+export async function addAirplane(
+  airplane_data: AirplaneProp
+): Promise<ResponseProp> {
+  return axios
+    .post(
+      getAddAirplaneURL(),
+      {
+        plane_ID: airplane_data.planeID,
+        seat_capacity: airplane_data.seatCapacity,
+      },
+      useCredentials
+    )
+    .then(handleThen, handleError);
 }

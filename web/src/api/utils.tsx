@@ -11,3 +11,14 @@ export const handleError = (err: any) => {
     message: "Network error occurred while fetching data.",
   };
 };
+export const handleThen = (res: any) => {
+  const data = res.data;
+  if (data.result === "error" || data.result === undefined) {
+    return {
+      result: "error",
+      message: data.message ?? "Some errors occurred from the serverside.",
+    };
+  } else {
+    return data;
+  }
+};

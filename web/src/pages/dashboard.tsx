@@ -59,6 +59,7 @@ import TopCustomers from "../components/tools/TopCustomers";
 import CreateFlight from "../components/tools/CreateFlight";
 import FlightChangeStatus from "../components/tools/FlightChangeStatus";
 import AddAirport from "../components/tools/AddAirport";
+import AddAirplane from "../components/tools/AddAirplane";
 
 type DashboardRoute = {
   tool: ITools;
@@ -179,7 +180,7 @@ const routes: DashboardRoute[] = [
   },
   {
     tool: StaffTools.ADD_AIRPLANE,
-    ToolView: () => <FlightChangeStatus />,
+    ToolView: () => <AddAirplane />,
     sidebar: () => (
       <div>
         <CloudPlus />

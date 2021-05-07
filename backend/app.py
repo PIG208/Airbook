@@ -447,6 +447,31 @@ def add_airport():
     return jsonify(result="success")
 
 
+@app.route("/add_airplane", methods=["POST"])
+@cross_origin(supports_credentials=True)
+@raise_error
+@require_session(DataType.STAFF)
+def add_airplane():
+    data = request.get_json()
+    airplane_data = {}
+    try:
+        airplane_data["plane_ID"] = data["plane_ID"]
+        airplane_data["seat_capacity"] = data["seat_capacity"]
+    except KeyError as err:
+        raise MissingKeyError(err.args[0])
+    try:
+        airplane_data["airline_name"] = query(
+            conn, STAFF_AIRLINE, FetchMode.ONE, args=dict(username=session["username"])
+        )[0]
+    except QueryError:
+        raise JsonError("An unknown error occurs when finding your airline name.")
+    try:
+        insert_into(conn, "Airplane", **airplane_data)
+    except QueryDuplicateError as err:
+        raise JsonError("The airplane already exists!")
+    return jsonify(result="success")
+
+
 @app.errorhandler(401)
 def forbidden(error):
     return jsonify(

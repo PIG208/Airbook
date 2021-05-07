@@ -100,3 +100,9 @@ export interface AirportProp {
   airportName: string; //<20
   city: string; //<30
 }
+
+export interface AirplaneProp {
+  planeID: number;
+  airlineMame: string;
+  seatCapacity: number;
+}
