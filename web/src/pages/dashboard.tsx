@@ -19,6 +19,7 @@ import {
   Switch,
   Link,
   useHistory,
+  Redirect,
 } from "react-router-dom";
 import { Nav } from "react-bootstrap";
 import { ReactComponent as Plane } from "../assets/paper-plane.svg";
@@ -238,6 +239,9 @@ export default function Dashboard() {
             })}
             <Route path={`/dashboard/:tool`}>
               <ToolNotFound />
+            </Route>
+            <Route path="/dashboard/">
+              <Redirect to="/dashboard/home" />
             </Route>
           </Switch>
         </div>
