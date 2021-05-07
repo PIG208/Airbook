@@ -15,6 +15,8 @@ import { Col } from "react-bootstrap";
 import { IFormProps } from "../api/utils";
 import { useAuth } from "../api/use-auth";
 import MyDatePicker from "./MyDatePicker";
+import FormNumber from "./FormNumber";
+import MyFormInput from "./MyFormInput";
 
 export default function RegisterForm(props: IFormProps<UserProp>) {
   const {
@@ -93,460 +95,207 @@ export default function RegisterForm(props: IFormProps<UserProp>) {
         />
       </Form.Group>
 
-      <ConditionalFormGroup
-        controlId="formEmail"
-        condition={watchRegisterType !== UserType.STAFF}
-      >
-        <Form.Label>Email</Form.Label>
-        <Controller
-          name="email"
-          control={control}
-          defaultValue={""}
-          rules={{
-            validate: {
-              required: (v) => {
-                return (
-                  getValues().registerType === UserType.STAFF ||
-                  !!v ||
-                  "The email is required!"
-                );
-              },
-              pattern: (v) => {
-                return (
-                  getValues().registerType === UserType.STAFF ||
-                  v === undefined ||
-                  /^\S+@\S+$/i.test(v) ||
-                  "Please enter a valid email."
-                );
-              },
-            },
-          }}
-          render={({ field }) => (
-            <Form.Control
-              {...field}
-              placeholder="Your email here"
-              autoComplete="username"
-              isInvalid={errors.email !== undefined}
-            />
-          )}
-        />
-        <FormErrorMessage message={errors.email?.message} />
-      </ConditionalFormGroup>
+      <MyFormInput
+        control={control as any}
+        name="email"
+        displayName="Email"
+        error={errors.email}
+        errorMessage="The email is required"
+        placeholder="Your email here"
+        controlProps={{ autoComplete: "username" }}
+        required={true}
+        validate={{
+          pattern: (v) => {
+            return (
+              getValues().registerType === UserType.STAFF ||
+              v === undefined ||
+              /^\S+@\S+$/i.test(v) ||
+              "Please enter a valid email."
+            );
+          },
+        }}
+        disabled={watchRegisterType === UserType.STAFF}
+      />
 
-      <ConditionalFormGroup
-        controlId="formAirlineName"
-        condition={watchRegisterType === UserType.STAFF}
-      >
-        <Form.Label>Airline Name</Form.Label>
-        <Controller
-          name="airlineName"
-          control={control}
-          defaultValue={""}
-          rules={{
-            validate: {
-              required: (v) => {
-                return (
-                  getValues().registerType !== UserType.STAFF ||
-                  !!v ||
-                  "The airline name is required!"
-                );
-              },
-            },
-          }}
-          render={({ field }) => (
-            <Form.Control
-              {...field}
-              placeholder="Your airline name here"
-              isInvalid={errors.airlineName !== undefined}
-            />
-          )}
-        />
-        <FormErrorMessage message={errors.airlineName?.message} />
-      </ConditionalFormGroup>
+      <MyFormInput
+        control={control as any}
+        name="airlineName"
+        displayName="Airline Name"
+        error={errors.airlineName}
+        errorMessage="The airline name is required"
+        placeholder="The airline you work for here"
+        disabled={watchRegisterType !== UserType.STAFF}
+        required={true}
+      />
 
-      <ConditionalFormGroup
-        controlId="formUsername"
-        condition={watchRegisterType === UserType.STAFF}
-      >
-        <Form.Label>Username</Form.Label>
-        <Controller
-          name="userName"
-          control={control}
-          defaultValue={""}
-          rules={{
-            validate: {
-              required: (v) => {
-                return (
-                  getValues().registerType !== UserType.STAFF ||
-                  !!v ||
-                  "The username is required!"
-                );
-              },
-            },
-          }}
-          render={({ field }) => (
-            <Form.Control
-              {...field}
-              placeholder="Your username here"
-              autoComplete="username"
-              isInvalid={errors.userName !== undefined}
-            />
-          )}
-        />
-        <FormErrorMessage message={errors.userName?.message} />
-      </ConditionalFormGroup>
+      <MyFormInput
+        control={control as any}
+        name="userName"
+        displayName="Username"
+        error={errors.userName}
+        errorMessage="The username is required"
+        placeholder="Your username here"
+        disabled={watchRegisterType !== UserType.STAFF}
+        required={true}
+      />
+
       <Form.Row>
-        <Col>
-          <ConditionalFormGroup
-            controlId="formFirstName"
-            condition={watchRegisterType === UserType.STAFF}
-          >
-            <Form.Label>First Name</Form.Label>
-            <Controller
-              name="firstName"
-              control={control}
-              defaultValue={""}
-              rules={{
-                validate: {
-                  required: (v) => {
-                    return (
-                      getValues().registerType !== UserType.STAFF ||
-                      !!v ||
-                      "The first name is required!"
-                    );
-                  },
-                },
-              }}
-              render={({ field }) => (
-                <Form.Control
-                  {...field}
-                  placeholder="Your first name here"
-                  isInvalid={errors.firstName !== undefined}
-                />
-              )}
-            />
-            <FormErrorMessage message={errors.firstName?.message} />
-          </ConditionalFormGroup>
-        </Col>
+        <MyFormInput
+          control={control as any}
+          name="firstName"
+          displayName="First Name"
+          error={errors.firstName}
+          errorMessage="The first name is required"
+          placeholder="Your first name here"
+          disabled={watchRegisterType !== UserType.STAFF}
+          required={true}
+          as={Col}
+        />
 
-        <Col>
-          <ConditionalFormGroup
-            controlId="formLastName"
-            condition={watchRegisterType === UserType.STAFF}
-          >
-            <Form.Label>Last Name</Form.Label>
-            <Controller
-              name="lastName"
-              control={control}
-              defaultValue={""}
-              rules={{
-                validate: {
-                  required: (v) => {
-                    return (
-                      getValues().registerType !== UserType.STAFF ||
-                      !!v ||
-                      "The last name is required!"
-                    );
-                  },
-                },
-              }}
-              render={({ field }) => (
-                <Form.Control
-                  {...field}
-                  placeholder="Your last name here"
-                  isInvalid={errors.lastName !== undefined}
-                />
-              )}
-            />
-            <FormErrorMessage message={errors.lastName?.message} />
-          </ConditionalFormGroup>
-        </Col>
+        <MyFormInput
+          control={control as any}
+          name="lastName"
+          displayName="Last Name"
+          error={errors.lastName}
+          errorMessage="The last name is required"
+          placeholder="Your last name here"
+          disabled={watchRegisterType !== UserType.STAFF}
+          required={true}
+          as={Col}
+        />
       </Form.Row>
 
-      <ConditionalFormGroup
-        controlId="formName"
-        condition={watchRegisterType === UserType.CUST}
-      >
-        <Form.Label>Name</Form.Label>
-        <Controller
-          name="name"
-          control={control}
-          defaultValue={""}
-          rules={{
-            validate: {
-              required: (v) => {
-                return (
-                  getValues().registerType !== UserType.CUST ||
-                  !!v ||
-                  "The name is required!"
-                );
-              },
-            },
-          }}
-          render={({ field }) => (
-            <Form.Control
-              {...field}
-              placeholder="Your name here"
-              isInvalid={errors.name !== undefined}
-            />
-          )}
-        />
-        <FormErrorMessage message={errors.name?.message} />
-      </ConditionalFormGroup>
+      <MyFormInput
+        control={control as any}
+        name="name"
+        displayName="Name"
+        error={errors.name}
+        errorMessage="The name is required!"
+        placeholder="Your name here"
+        disabled={watchRegisterType !== UserType.CUST}
+        required={true}
+      />
 
-      <ConditionalFormGroup
-        controlId="formPhoneNumber"
-        condition={watchRegisterType === UserType.CUST}
-      >
-        <Form.Label>Phone Number</Form.Label>
-        <Controller
-          name="phoneNumber"
-          control={control}
-          defaultValue={""}
-          rules={{
-            validate: {
-              required: (v) => {
-                return (
-                  getValues().registerType !== UserType.CUST ||
-                  !!v ||
-                  "The phone number is required!"
-                );
-              },
-              numeric: (v) => {
-                return (
-                  getValues().registerType !== UserType.CUST ||
-                  (!isNaN(v) && Number(v) > 0) ||
-                  "The phone number is invalid!"
-                );
-              },
-            },
-          }}
-          render={({ field }) => (
-            <Form.Control
-              {...field}
-              placeholder="Your phone number here"
-              isInvalid={errors.phoneNumber !== undefined}
-            />
-          )}
-        />
-        <FormErrorMessage message={errors.phoneNumber?.message} />
-      </ConditionalFormGroup>
+      <FormNumber
+        control={control as any}
+        name="phoneNumber"
+        displayName="Phone Number"
+        error={errors.phoneNumber}
+        errorMessage="The phone number is invalid!"
+        placeholder="Your phone number here"
+        disabled={watchRegisterType !== UserType.CUST}
+        required={true}
+      />
 
-      <ConditionalFormGroup
-        controlId="passportNumber"
-        condition={watchRegisterType === UserType.CUST}
-      >
-        <Form.Label>Passport Number</Form.Label>
-        <Controller
-          name="passportNumber"
-          control={control}
-          defaultValue={""}
-          rules={{
-            validate: {
-              required: (v) => {
-                return (
-                  getValues().registerType !== UserType.CUST ||
-                  !!v ||
-                  "The passport number is required!"
-                );
-              },
-            },
-          }}
-          render={({ field }) => (
-            <Form.Control
-              {...field}
-              placeholder="Your passport number here"
-              isInvalid={errors.passportNumber !== undefined}
-            />
-          )}
-        />
-        <FormErrorMessage message={errors.passportNumber?.message} />
-      </ConditionalFormGroup>
+      <FormNumber
+        control={control as any}
+        name="passportNumber"
+        displayName="Passport Number"
+        error={errors.passportNumber}
+        errorMessage="The passport number is invalid!"
+        placeholder="Your passport number here"
+        disabled={watchRegisterType !== UserType.CUST}
+        required={true}
+      />
 
-      <ConditionalFormGroup
-        controlId="formPassportExpiration"
-        condition={watchRegisterType === UserType.CUST}
-      >
-        <Form.Label>Passport Expiration Date</Form.Label>
-        <Controller
-          name="passportExpiration"
-          control={control}
-          defaultValue={""}
-          rules={{
-            validate: {
-              required: (v) => {
-                return (
-                  getValues().registerType !== UserType.CUST ||
-                  !!v ||
-                  "The date of birth is required!"
-                );
-              },
-              pattern: (v) => {
-                return (
-                  getValues().registerType !== UserType.CUST ||
-                  !/^(0?[1-9]|[1][0-2])\/(0?[1-9]|[1-2]\d|[3][0-1])\/(19|20)\d\d/.test(
-                    v
-                  ) ||
-                  "The date of birth is invalid!"
-                );
-              },
-            },
-          }}
-          render={({ field: { onChange, value } }) => (
-            <DatePicker
-              selected={value}
-              onChange={onChange}
-              placeholderText="MM/DD/YYYY"
-              wrapperClassName={"form-control"}
-              autoComplete="off"
-              showYearDropdown
-              customInput={
-                <DateCustomInput
-                  isInvalid={errors.passportExpiration !== undefined}
-                />
-              }
-            />
-          )}
-        />
-        <FormErrorMessage message={errors.passportExpiration?.message} />
-      </ConditionalFormGroup>
+      <MyDatePicker
+        control={control as any}
+        name="passportExpiration"
+        displayName="Passport Expiration Date"
+        placeholder="MM/DD/YYYY"
+        dateFormat="MM/dd/yyyy"
+        disabled={watchRegisterType !== UserType.CUST}
+        required={true}
+        error={errors.passportExpiration}
+        errorMessage="The passport expiration is required"
+        pickerProps={{ showYearDropdown: true, autoComplete: "off" }}
+      />
 
-      <ConditionalFormGroup
-        controlId="passportCountry"
-        condition={watchRegisterType === UserType.CUST}
-      >
-        <Form.Label>Passport Country</Form.Label>
-        <Controller
-          name="passportCountry"
-          control={control}
-          defaultValue={""}
-          rules={{
-            validate: {
-              required: (v) => {
-                return (
-                  getValues().registerType !== UserType.CUST ||
-                  !!v ||
-                  "The passport country is required!"
-                );
-              },
-            },
-          }}
-          render={({ field }) => (
-            <Form.Control
-              {...field}
-              placeholder="Your passport country here"
-              isInvalid={errors.passportCountry !== undefined}
-            />
-          )}
-        />
-        <FormErrorMessage message={errors.passportCountry?.message} />
-      </ConditionalFormGroup>
+      <MyFormInput
+        control={control as any}
+        name="passportCountry"
+        displayName="Passport Country"
+        error={errors.passportCountry}
+        errorMessage="The passport country is required!"
+        placeholder="Your passport country here"
+        disabled={watchRegisterType !== UserType.CUST}
+        required={true}
+      />
 
-      <ConditionalFormGroup
-        controlId="formBuildingNumber"
-        condition={watchRegisterType === UserType.CUST}
-      >
-        <Form.Label>Building Number</Form.Label>
-        <Controller
-          name="buildingNumber"
-          control={control}
-          defaultValue={""}
-          rules={{
-            validate: {
-              numeric: (v) => {
-                return (
-                  getValues().registerType !== UserType.CUST ||
-                  v === "" ||
-                  (!isNaN(v) && Number(v) > 0) ||
-                  "The building number is invalid!"
-                );
-              },
-            },
-          }}
-          render={({ field }) => (
-            <Form.Control
-              {...field}
-              placeholder="Your building number here"
-              isInvalid={errors.buildingNumber !== undefined}
-            />
-          )}
-        />
-        <FormErrorMessage message={errors.buildingNumber?.message} />
-      </ConditionalFormGroup>
+      <FormNumber
+        control={control as any}
+        name="buildingNumber"
+        displayName="Building Number"
+        error={errors.buildingNumber}
+        errorMessage="The building number is invalid!"
+        placeholder="Your building number here"
+        disabled={watchRegisterType !== UserType.CUST}
+        required={true}
+      />
 
-      <ConditionalFormGroup
-        controlId="formStreet"
-        condition={watchRegisterType === UserType.CUST}
-      >
-        <Form.Label>Street</Form.Label>
-        <Controller
-          name="street"
-          control={control}
-          defaultValue={""}
-          render={({ field }) => (
-            <Form.Control
-              {...field}
-              placeholder="Your street here"
-              isInvalid={errors.street !== undefined}
-            />
-          )}
-        />
-        <FormErrorMessage message={errors.street?.message} />
-      </ConditionalFormGroup>
+      <MyFormInput
+        control={control as any}
+        name="street"
+        displayName="Street"
+        error={errors.street}
+        errorMessage="The street is invalid!"
+        placeholder="Your street here"
+        validate={{
+          maxLength: (v) => {
+            return (
+              watchRegisterType !== UserType.CUST ||
+              v.length <= 30 ||
+              "The street is too long (>30 characters)"
+            );
+          },
+        }}
+        disabled={watchRegisterType !== UserType.CUST}
+        required={true}
+      />
 
-      <ConditionalFormGroup
-        controlId="formCity"
-        condition={watchRegisterType === UserType.CUST}
-      >
-        <Form.Label>City</Form.Label>
-        <Controller
-          name="city"
-          control={control}
-          defaultValue={""}
-          render={({ field }) => (
-            <Form.Control
-              {...field}
-              placeholder="Your city here"
-              isInvalid={errors.city !== undefined}
-            />
-          )}
-        />
-        <FormErrorMessage message={errors.city?.message} />
-      </ConditionalFormGroup>
+      <MyFormInput
+        control={control as any}
+        name="city"
+        displayName="City"
+        error={errors.city}
+        errorMessage="The city is invalid!"
+        placeholder="Your city here"
+        disabled={watchRegisterType !== UserType.CUST}
+        required={true}
+      />
 
-      <ConditionalFormGroup
-        controlId="formState"
-        condition={watchRegisterType === UserType.CUST}
-      >
-        <Form.Label>State</Form.Label>
-        <Controller
-          name="state"
-          control={control}
-          defaultValue={""}
-          render={({ field }) => (
-            <Form.Control
-              {...field}
-              placeholder="Your state here (2-digit code)"
-              isInvalid={errors.state !== undefined}
-            />
-          )}
-        />
-        <FormErrorMessage message={errors.state?.message} />
-      </ConditionalFormGroup>
+      <MyFormInput
+        control={control as any}
+        name="state"
+        displayName="State"
+        error={errors.state}
+        errorMessage="The state is invalid!"
+        placeholder="Your state here (2-digit code)"
+        validate={{
+          maxLength: (v) => {
+            return (
+              watchRegisterType !== UserType.CUST ||
+              v.length <= 2 ||
+              "The state needs to be a two-digit code!"
+            );
+          },
+        }}
+        disabled={watchRegisterType !== UserType.CUST}
+        required={true}
+      />
 
-      {watchRegisterType !== UserType.AGENT && (
-        <MyDatePicker
-          control={control as any}
-          name="dateOfBirth"
-          displayName="Date of Birth"
-          placeholder="Your date of birth here"
-          dateFormat="MM/dd/yyyy"
-          required={true}
-          error={errors.dateOfBirth}
-          errorMessage="The date of birth is required"
-          pickerProps={{ showYearDropdown: true }}
-        />
-      )}
+      <MyDatePicker
+        control={control as any}
+        name="dateOfBirth"
+        displayName="Date of Birth"
+        placeholder="MM/DD/YYYY"
+        dateFormat="MM/dd/yyyy"
+        disabled={watchRegisterType !== UserType.CUST}
+        required={true}
+        error={errors.dateOfBirth}
+        errorMessage="The date of birth is required"
+        pickerProps={{ showYearDropdown: true }}
+      />
 
       <Form.Group controlId="formPassword">
         <Form.Label>Password</Form.Label>
@@ -606,7 +355,14 @@ export default function RegisterForm(props: IFormProps<UserProp>) {
       </Form.Group>
 
       <Form.Group>
-        <Button variant="primary" type="submit" disabled={pending}>
+        <Button
+          variant="primary"
+          type="submit"
+          onClick={() => {
+            console.log(errors);
+          }}
+          disabled={pending}
+        >
           Submit
         </Button>
       </Form.Group>

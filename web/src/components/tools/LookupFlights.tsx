@@ -159,6 +159,8 @@ export default function LookupFlights() {
           lowerName="depTimeLower"
           upperDisplay="Departure Date Upper Bound"
           upperName="depTimeUpper"
+          lowerError={errors.depTimeLower}
+          upperError={errors.depTimeUpper}
         />
         <RangePicker
           control={control}
@@ -166,6 +168,8 @@ export default function LookupFlights() {
           lowerName="arrTimeLower"
           upperDisplay="Arrival Date Upper Bound"
           upperName="arrTimeUpper"
+          lowerError={errors.arrTimeLower}
+          upperError={errors.arrTimeUpper}
         />
         <Form.Row>
           <Button type="submit">Search</Button>

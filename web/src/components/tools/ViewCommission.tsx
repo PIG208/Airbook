@@ -7,7 +7,12 @@ import { SpendingsProp } from "../../api/data";
 import RangePicker from "../RangePicker";
 
 export default function ViewCommission() {
-  const { handleSubmit, control, watch } = useForm<SpendingsFilterProp>();
+  const {
+    handleSubmit,
+    control,
+    watch,
+    formState: { errors },
+  } = useForm<SpendingsFilterProp>();
   const [errorMessage, setErrorMessage] = useState("");
   const [commissionTotal, setCommissionTotal] = useState(0);
   const [numTicket, setNumTicket] = useState(0);
@@ -55,6 +60,8 @@ export default function ViewCommission() {
               lowerDisplay="Purchased After"
               upperName="purchaseDatetimeUpper"
               upperDisplay="Purchased Before"
+              lowerError={errors.purchaseDatetimeLower}
+              upperError={errors.purchaseDatetimeUpper}
             />
           </Form>
           <h4>Lastest Statistics</h4>

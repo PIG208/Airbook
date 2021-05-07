@@ -8,7 +8,12 @@ import { Bar } from "react-chartjs-2";
 import RangePicker from "../RangePicker";
 
 export default function ViewSpendings() {
-  const { handleSubmit, control, watch } = useForm<SpendingsFilterProp>();
+  const {
+    handleSubmit,
+    control,
+    watch,
+    formState: { errors },
+  } = useForm<SpendingsFilterProp>();
   const [errorMessage, setErrorMessage] = useState("");
   const [spendingsTotal, setSpendingsTotal] = useState(0);
   const [chartData, setChartData] = useState({});
@@ -66,10 +71,6 @@ export default function ViewSpendings() {
     });
   };
 
-  const DateCustomInput = forwardRef((props: any, ref) => {
-    return <Form.Control {...props} ref={ref} />;
-  });
-
   return (
     <div>
       <Form onSubmit={handleSubmit(handleViewSpendings)} autoComplete="off">
@@ -79,6 +80,8 @@ export default function ViewSpendings() {
           lowerDisplay="Purchase Time Lower Bound"
           upperName="purchaseDatetimeUpper"
           upperDisplay="Purchase Time Upper Bound"
+          lowerError={errors.purchaseDatetimeLower}
+          upperError={errors.purchaseDatetimeUpper}
           control={control}
         />
       </Form>
