@@ -281,8 +281,17 @@ export default function RegisterForm(props: IFormProps<UserProp>) {
         displayName="Date of Birth"
         placeholder="MM/DD/YYYY"
         dateFormat="MM/dd/yyyy"
-        disabled={watchRegisterType !== UserType.CUST}
+        disabled={watchRegisterType === UserType.AGENT}
         required={true}
+        validate={{
+          before: (v) => {
+            return (
+              watchRegisterType === UserType.AGENT ||
+              v < new Date() ||
+              "The date of birth needs to a date in the past!"
+            );
+          },
+        }}
         error={errors.dateOfBirth}
         errorMessage="The date of birth is required"
         pickerProps={{ showYearDropdown: true }}

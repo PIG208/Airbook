@@ -13,6 +13,7 @@ import { getFlightPrice, purchase } from "../api/purchase";
 import SuccessMessage, { useMessage } from "./SuccessMessage";
 import useIncrement from "../api/use-increment";
 import FormSubmit from "./FormSubmit";
+import MyDatePicker from "./MyDatePicker";
 
 type UserPurchaseProp = Omit<
   PurchaseProp,
@@ -31,7 +32,6 @@ export default function PurchaseForm(
     handleSubmit,
     control,
     formState: { errors, submitCount },
-    clearErrors,
   } = useForm<UserPurchaseProp>();
   const [purchaseError, setPurchaseError] = useState("");
   const [pending, setPending] = useState(false);
@@ -65,14 +65,8 @@ export default function PurchaseForm(
     }
     return () => {
       setPurchaseError("");
-      clearErrors();
-      setPending(false);
     };
   }, [props, submitCount]);
-
-  const DateCustomInput = forwardRef((props: any, ref) => {
-    return <Form.Control {...props} ref={ref} />;
-  });
 
   const handlePurchase = (data: UserPurchaseProp) => {
     setPending(true);
@@ -213,40 +207,22 @@ export default function PurchaseForm(
         <FormErrorMessage message={errors.nameOnCard?.message} />
       </Form.Group>
 
-      <Form.Group>
-        <Form.Label>Card Expiration Date</Form.Label>
-        <Controller
-          name="expDate"
-          control={control}
-          defaultValue={""}
-          rules={{
-            required: "The card expiration date is required",
-            validate: {
-              pattern: (v) => {
-                return (
-                  !/^(0?[1-9]|[1][0-2])\/(0?[1-9]|[1-2]\d|[3][0-1])\/(19|20)\d\d/.test(
-                    v
-                  ) || "The card expiration date is invalid!"
-                );
-              },
-            },
-          }}
-          render={({ field: { onChange, value } }) => (
-            <DatePicker
-              selected={value}
-              onChange={onChange}
-              placeholderText="MM/DD/YYYY"
-              wrapperClassName={"form-control"}
-              autoComplete="off"
-              showYearDropdown
-              customInput={
-                <DateCustomInput isInvalid={errors.expDate !== undefined} />
-              }
-            />
-          )}
-        />
-        <FormErrorMessage message={errors.expDate?.message} />
-      </Form.Group>
+      <MyDatePicker
+        control={control as any}
+        name="expDate"
+        displayName="Card Expiration Date"
+        error={errors.expDate}
+        errorMessage="The card expiration date is required!"
+        placeholder="MM/DD/YYYY"
+        dateFormat="MM/dd/yyyy"
+        pickerProps={{ showYearDropdown: true, autoComplete: "off" }}
+        required
+        validate={{
+          after: (v) => {
+            return v > new Date() || "The card has expired!";
+          },
+        }}
+      />
 
       <FormSubmit
         buttonMessage="Purchase"
