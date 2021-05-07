@@ -7,7 +7,6 @@ export interface FormComponentProp {
   displayName: string;
   placeholder: string;
   required: boolean;
-  dateFormat?: string;
   error?: FieldError;
   errorMessage?: string;
   disabled?: boolean;

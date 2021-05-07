@@ -8,6 +8,7 @@ import MyFormInput from "./MyFormInput";
 
 export default function MyDatePicker(
   props: FormComponentProp & {
+    dateFormat?: string;
     pickerProps?: Omit<
       ReactDatePickerProps,
       | "onChange"
