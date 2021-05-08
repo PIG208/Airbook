@@ -143,6 +143,8 @@ def query(
     size: int = 1,
     args: Optional[Union[dict, tuple, list]] = None,
 ):
+    print(sql.replace("\n", " ").replace("    ", " "))
+    print(args)
     conn.ping(True)
     # Throws QueryKeyError
     with conn.cursor() as cursor:
