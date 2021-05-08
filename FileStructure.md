@@ -1,0 +1,40 @@
+- /backend
+  - /tests: The unittests for the backend
+    - test_...: Test one or more specific features of the backend.
+  - /utils: The utility modules tgat are utilized by the endpoints.
+    - authentication.py: Handle all the auth related logics, including access control to different endpoints, accessibility to filters, login, etc.
+    - error.py: Define all the custom errors.
+    - filter.py: Hanlde most of the SELECT queries. It divides queries into normal queries which are using formatted strings with string interpolation (to prevent sql injections), and advanced queries, which procedurally generates queries according to the arguments (like a date range or email constraint). All the filters need to be registered here and it has to be included in authentication.py to be accessible.
+    - flight.py: Helper module that get the ticket price.
+    - parsing.py: Parse the registeration payload for later SQL INSERT.
+    - query.py: Wrap the actual SQL queries actions.
+  - app.py: The app that contains all the endpoints of the backend and invoke queries to the database.
+  - search.py: Handle logics related to any filtering actions at `/search` and `/search-public`.
+  - API.md: Partially document the endpoints and their usage.
+- /web: The source folder for all frontend related files.
+  - /public: The public resources for the frontend.
+  - /src: The source code for all the React components and TypeScript files.
+    - /api: The TypeScript files that are responsible for receiving from and sending data to the backend. It also contains a lots of type definitions.
+    - /assets: The static resources including .svg files and stylesheets.
+    - /components: The React components.
+      - /tools: The implementation of most of the usecases.
+      - App.tsx: The root of every locations. It's responsible for frontend routing.
+    - /pages: The major pages of entrypoints.
+      - visitor.tsx: The visitor page that provides options for login and registeration for different types of users.
+      - dashboard.tsx: The dashboard page that contains different features for different types of users.
+    - /tests: Frontend tests (not used)
+  - ...: Other files related to package managing and configurations.
+- /scripts: The automated scripts for provisioning, running, building, and testing the project.
+  - build: Build the minified react static folder.
+  - run: Run the backend.
+  - run-react: Run the react server.
+  - setup: Setup the development environment.
+  - test: Run all the tests.
+  - dbreset: Reset the database.
+  - /sql: Contain useful .sql files to setup the database with some initial data.
+    - data.sql: Insert the test data.
+    - init.sql: Initialize the database and the admin user.
+    - tables.sql: Setup the tables.
+    - queries.sql: Utility queries for reference.
+    - views.sql: The views and procedure for the database.
+- README.md: The README file.
