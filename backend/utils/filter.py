@@ -122,9 +122,9 @@ SELECT_REVENUE_COMPARE = "SELECT * FROM (SELECT * FROM (SELECT COUNT(*) as direc
          UNION ALL \
              SELECT * FROM (SELECT * FROM (SELECT COUNT(*) as direct FROM Ticket WHERE airline_name=%(airline_name)s AND booking_agent_id IS NULL AND purchase_date > UTC_DATE() - INTERVAL 1 YEAR) as t1 \
              NATURAL JOIN (SELECT COUNT(*) as in_direct FROM Ticket WHERE airline_name=%(airline_name)s  AND booking_agent_id IS NOT NULL AND purchase_date > UTC_DATE() - INTERVAL 1 YEAR) as t2) as t4"
-SELECT_POPULAR_DESTINATIONS = 'SELECT * FROM (SELECT arr_city, count(*) as visits FROM (SELECT arr_city, Ticket.airline_name FROM Ticket INNER JOIN verbose_flights USING (flight_number, dep_date, dep_time) WHERE Ticket.airline_name=%(airline_name)s AND dep_date > UTC_DATE() - INTERVAL 3 MONTH) AS t GROUP BY arr_city ORDER BY visits LIMIT 3) as t1 \
+SELECT_POPULAR_DESTINATIONS = 'SELECT * FROM (SELECT arr_city, count(*) as visits FROM (SELECT arr_city, Ticket.airline_name FROM Ticket INNER JOIN verbose_flights USING (flight_number, dep_date, dep_time) WHERE Ticket.airline_name=%(airline_name)s AND dep_date > UTC_DATE() - INTERVAL 3 MONTH) AS t GROUP BY arr_city ORDER BY visits DESC LIMIT 3) as t1 \
 UNION ALL SELECT "", "divide" \
-UNION ALL SELECT * FROM (SELECT arr_city, count(*) as visits FROM (SELECT arr_city, Ticket.airline_name FROM Ticket INNER JOIN verbose_flights USING (flight_number, dep_date, dep_time) WHERE Ticket.airline_name=%(airline_name)s AND dep_date > UTC_DATE() - INTERVAL 1 YEAR) AS t GROUP BY arr_city ORDER BY visits LIMIT 3) as t2;'
+UNION ALL SELECT * FROM (SELECT arr_city, count(*) as visits FROM (SELECT arr_city, Ticket.airline_name FROM Ticket INNER JOIN verbose_flights USING (flight_number, dep_date, dep_time) WHERE Ticket.airline_name=%(airline_name)s AND dep_date > UTC_DATE() - INTERVAL 1 YEAR) AS t GROUP BY arr_city ORDER BY visits DESC LIMIT 3) as t2;'
 GET_CUST_COMMENT = "SELECT * FROM Feedback WHERE (flight_number, dep_date, dep_time, email)=(%(flight_number)s, %(dep_date)s, %(dep_time)s, %(email)s)"
 
 
