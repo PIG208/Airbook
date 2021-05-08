@@ -86,7 +86,6 @@ export default function CreateFlight() {
               pickerProps={{ showTimeSelect: true }}
               validate={{
                 after: (v) => {
-                  console.log(v, getValues().depDatetime);
                   return (
                     getValues().depDatetime < v ||
                     "The arrival datetime needs to be after departure datetime!"

@@ -202,7 +202,6 @@ export function searchFlightsPublic(
 export function searchFlightsReturnPublic(
   props: FlightFilterProp
 ): Promise<ResponseProp<FlightProp[]>> {
-  console.log(props);
   if (!props.returnTimeUpper && !props.returnTimeLower) {
     return new Promise(() => {
       return {

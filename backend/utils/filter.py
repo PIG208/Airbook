@@ -526,5 +526,4 @@ def get_filter_query(filter: FilterType, **kwargs) -> Tuple[str, Union[list, dic
 
 def query_by_filter(conn: Connection, filter: FilterType, **kwargs):
     sql, values = get_filter_query(filter, **kwargs)
-    print(sql, values)
     return query(conn, sql, args=values)

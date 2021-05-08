@@ -117,7 +117,6 @@ class TestFilter(unittest.TestCase):
             arr_airport="ASD",
             arr_city="ASD City",
         )
-        print(result)
         expected = (
             "SELECT * FROM verbose_flights WHERE dep_airport=%s AND arr_airport=%s AND dep_city=%s AND arr_city=%s AND (dep_date > %s AND dep_date < %s OR ((dep_date=%s AND dep_date < %s AND dep_time > %s) OR ((dep_date=%s AND dep_date > %s AND dep_time < %s) OR (dep_date=%s AND dep_date=%s AND dep_time > %s AND dep_time < %s)))) AND (arr_date > %s AND arr_date < %s OR ((arr_date=%s AND arr_date < %s AND arr_time > %s) OR ((arr_date=%s AND arr_date > %s AND arr_time < %s) OR (arr_date=%s AND arr_date=%s AND arr_time > %s AND arr_time < %s))))",
             [

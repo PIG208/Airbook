@@ -334,8 +334,6 @@ def create_flight():
         if err.get_error_code() == 1452:
             # Foreign key constraint
             if "plane_ID" in err.get_error_message():
-                print(flight_data)
-                print(err.get_error_message())
                 raise JsonError("The plane ID is invalid!")
         if err.get_error_code() == 1292:
             match = time_value_err_pattern.match(err.get_error_message())
