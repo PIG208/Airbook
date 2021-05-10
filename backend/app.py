@@ -37,12 +37,15 @@ import pymysql.cursors
 app = Flask(__name__, static_url_path="", static_folder="../web/build")
 CORS(app, with_credentials=True)
 app.secret_key = urandom(16)
-conn = pymysql.connect(
-    host="localhost",
-    user="airbook_admin",
-    password="Airbook_admin_x7fo1a",
-    database="airbook",
-)
+
+
+def connect():
+    return pymysql.connect(
+        host="localhost",
+        user="airbook_admin",
+        password="Airbook_admin_x7fo1a",
+        database="airbook",
+    )
 
 
 # @app.route("/", defaults={"path": ""})
@@ -56,6 +59,7 @@ def home():
 @cross_origin(supports_credentials=True)
 @raise_error
 def register(register_type: str):
+    conn = connect()
     data = request.get_json()
     try:
         user_type = DataType(register_type)
@@ -117,6 +121,8 @@ def register(register_type: str):
         raise MissingKeyError(err.get_key())
     except QueryDuplicateError as err:
         raise ExistingRegisterError(err.key, err.value)
+    finally:
+        conn.close()
 
     session["user_type"] = user_type.value
 
@@ -130,12 +136,14 @@ def register(register_type: str):
 @raise_error
 def search_public(filter: str):
     data = request.get_json()
+    conn = connect()
     result = json.dumps(
         do_search(conn, data, session, filter, True),
         indent=4,
         sort_keys=True,
         default=str,
     )
+    conn.close()
     return jsonify(
         result="success",
         data=result,
@@ -148,12 +156,14 @@ def search_public(filter: str):
 @require_session()
 def search(filter: str):
     data = request.get_json()
+    conn = connect()
     result = json.dumps(
         do_search(conn, data, session, filter, False),
         indent=4,
         sort_keys=True,
         default=str,
     )
+    conn.close()
     return jsonify(
         result="success",
         data=result,
@@ -171,10 +181,12 @@ def login(login_type: str):
             raise ValueError()
     except ValueError:
         raise JsonError("Invalid login method!")
+    conn = connect()
     # If no error is thrown in check_login, our user is OK
     user_data_raw = check_login(conn, user_type, **data)
 
     user_data = handle_login_data(user_type, user_data_raw)
+    conn.close()
 
     return jsonify(result="success", user_data=user_data)
 
@@ -198,6 +210,7 @@ def add_feedback():
         )
     except KeyError as err:
         raise MissingKeyError(err.args[0])
+    conn = connect()
     result = query(
         conn,
         "SELECT * FROM Ticket WHERE (flight_number, dep_date, dep_time, email)=(%(flight_number)s, %(dep_date)s, %(dep_time)s, %(email)s) AND dep_date < UTC_DATE() OR (dep_date = UTC_DATE() AND dep_time < UTC_TIME())",
@@ -209,6 +222,8 @@ def add_feedback():
         insert_into(conn, "Feedback", **feedback_data)
     except QueryDuplicateError:
         raise JsonError("You have already given feedback for this flight!")
+    finally:
+        conn.close()
     return jsonify(result="success")
 
 
@@ -218,6 +233,7 @@ def add_feedback():
 @require_session()
 def session_fetch():
     data = request.get_json()
+    conn = connect()
     user_data_raw = None
     user_type = DataType(session["user_type"])
     try:
@@ -246,6 +262,8 @@ def session_fetch():
             )
     except KeyError as err:
         raise JsonError("The user session is invalid! Please login.")
+    finally:
+        conn.close()
 
     if user_data_raw is not None:
         try:
@@ -272,7 +290,9 @@ def logout():
 @raise_error
 def ticket_price():
     data = request.get_json()
+    conn = connect()
     result = get_ticket_price(conn, data)
+    conn.close()
     if result is not None and len(result) > 0:
         return jsonify(result="success", data=dict(price=float(str(result[0]))))
     else:
@@ -297,6 +317,7 @@ def create_flight():
     data = request.get_json()
     flight_data: Dict[str, Any] = {}
     result = None
+    conn = connect()
     try:
         flight_data["flight_number"] = data["flight_number"]
         flight_data["dep_date"] = data["dep_date"]
@@ -309,19 +330,23 @@ def create_flight():
         flight_data["status"] = data["status"]
         flight_data["base_price"] = data["base_price"]
     except KeyError as err:
+        conn.close()
         raise MissingKeyError(err.args[0])
     try:
         if convert(flight_data["dep_date"], flight_data["dep_time"]) >= convert(
             flight_data["arr_date"], flight_data["arr_time"]
         ):
+            conn.close()
             raise JsonError("The arrival time needs to be after the arrival time!")
     except ValueError as err:
+        conn.close()
         raise JsonError("The date format is in valid: {}".format(err.args[0]))
     try:
         flight_data["airline_name"] = query(
             conn, STAFF_AIRLINE, FetchMode.ONE, args=dict(username=session["username"])
         )[0]
     except QueryError:
+        conn.close()
         raise JsonError("An unknown error occurs when finding your airline name.")
 
     try:
@@ -347,6 +372,8 @@ def create_flight():
         raise JsonError(
             "Failed to create the new flight! Please contact the maintainer."
         )
+    finally:
+        conn.close()
     if result is not None:
         return jsonify(result="success")
     else:
@@ -362,6 +389,7 @@ def ticket_purchase():
     if session["user_type"] in (DataType.CUST.value, DataType.AGENT.value):
         ticket_data = {}
         now = datetime.now()
+        conn = connect()
         try:
             # only the booking agent can set the email
             ticket_data["email"] = (
@@ -383,16 +411,18 @@ def ticket_purchase():
             # ticket_data["purchase_time"] = now.strftime("%H:%M:%S")
             ticket_data["sold_price"] = get_ticket_price(conn, data)
         except KeyError as err:
+            conn.close()
             raise MissingKeyError(err.args[0])
         except ValueError as err:
+            conn.close()
             raise JsonError("The flight number should be a number!")
-
         result = query(
             conn,
             "SELECT * FROM Flight WHERE (flight_number, dep_date, dep_time)=(%(flight_number)s, %(dep_date)s, %(dep_time)s) AND dep_date > UTC_DATE() OR (dep_date = UTC_DATE() AND dep_time > UTC_TIME())",
             args=ticket_data,
         )
         if len(result) == 0:
+            conn.close()
             raise JsonError("Cannot purchase a ticket for a flight in the past!")
 
         result = insert_into(conn, "Ticket", **ticket_data)
@@ -413,6 +443,7 @@ def ticket_purchase():
                 )
                 * 0.1,
             )
+        conn.close()
         return jsonify(result="success")
     else:
         raise JsonError("Only customers or booking agents can purchase tickets.")
@@ -432,13 +463,16 @@ def change_status():
         flight_data["status"] = data["status"]
     except KeyError as err:
         raise MissingKeyError(err.args[0])
+    conn = connect()
     try:
         flight_data["airline_name"] = query(
             conn, STAFF_AIRLINE, FetchMode.ONE, args=dict(username=session["username"])
         )[0]
     except QueryError:
+        conn.close()
         raise JsonError("An unknown error occurs when finding your airline name.")
     result = query(conn, UPDATE_STATUS, args=flight_data)
+    conn.close()
     return jsonify(result="success")
 
 
@@ -454,10 +488,13 @@ def add_airport():
         airport_data["city"] = data["city"]
     except KeyError as err:
         raise MissingKeyError(err.args[0])
+    conn = connect()
     try:
         insert_into(conn, "Airport", **airport_data)
     except QueryDuplicateError as err:
+        conn.close()
         raise JsonError("The airport already exists!")
+    conn.close()
     return jsonify(result="success")
 
 
@@ -473,16 +510,20 @@ def add_airplane():
         airplane_data["seat_capacity"] = data["seat_capacity"]
     except KeyError as err:
         raise MissingKeyError(err.args[0])
+    conn = connect()
     try:
         airplane_data["airline_name"] = query(
             conn, STAFF_AIRLINE, FetchMode.ONE, args=dict(username=session["username"])
         )[0]
     except QueryError:
+        conn.close()
         raise JsonError("An unknown error occurs when finding your airline name.")
     try:
         insert_into(conn, "Airplane", **airplane_data)
     except QueryDuplicateError as err:
         raise JsonError("The airplane already exists!")
+    finally:
+        conn.close()
     return jsonify(result="success")
 
 
