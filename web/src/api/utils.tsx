@@ -5,7 +5,7 @@ export type IFormProps<T> = { onSubmit: (data: T) => void };
 export const parseISODate = (value: string) =>
   new Date(value).toLocaleDateString();
 export const parseISOTime = (value: string) =>
-  new Date(`2020-02-02T${value}Z`).toLocaleTimeString();
+  new Date(`2020-02-02T${value.padStart(8, "0")}Z`).toLocaleTimeString(); //handle special cases like 1:00:00
 export const handleError = (err: any) => {
   console.log(err);
   return {
