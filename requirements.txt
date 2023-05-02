@@ -10,7 +10,7 @@ contextlib2==0.6.0
 cryptography==3.4.7
 distlib==0.3.0
 distro==1.4.0
-Flask==1.1.2
+Flask==2.3.2
 Flask-Cors==3.0.10
 flask-unittest==0.1.1
 html5lib==1.0.1
